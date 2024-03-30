@@ -36,11 +36,14 @@ public:
     virtual int getStateRaw() const;
     bool isPressed(unsigned long time);
     bool isPressed() const;
+    bool isLongPressed(unsigned long time) const;
     bool isReleased() const;
     void setCountMode(int mode);
     unsigned long getCount() const;
     void resetCount();
     void update();
+    static void updateAll(DigitalIn *ptr, ...);
+    static DigitalIn *stop();
 };
 
 #endif  // KADITA_INPUT_MODULE_H

@@ -46,7 +46,7 @@ private:
     WiFiUDP *ntpUDP;
     NTPClient *timeClient;
 
-    float *data;
+    String *data;
     char **address;
     uint8_t dataLen = 0;
     uint8_t addrLen = 0;
@@ -63,12 +63,39 @@ public:
     bool isConnect();
     bool update(void (*onUpdate)(void) = nullptr);
     void clearData();
-    void addData(float newData, const char *newAddressData);
+
+    template<typename T>
+    void addData(T newData, const char *newAddressData) {
+        dataLen++;
+        data = (String *) realloc(data, dataLen * sizeof(String));
+        data[dataLen - 1] = String(newData);
+
+        char **newAddress = (char **) realloc(address, (addrLen + 1) * sizeof(char *));
+        if (newAddress == NULL) return;
+        address = newAddress;
+        address[addrLen] = (char *) malloc(strlen(newAddressData) + 1);
+        if (address[addrLen] == NULL) return;
+        strcpy(address[addrLen], newAddressData);
+        addrLen++;
+    }
+
     int getFreeHeapMemory();
 
-    void sendData(uint32_t __time = 2000, void (*onSendData)(void) = nullptr);
+    void sendDataFloat(void (*onSendData)(void) = nullptr);
+    void sendDataAsyncFloat(uint32_t __time = 2000, void (*onSendData)(void) = nullptr);
+    void sendDataString(void (*onSendData)(void) = nullptr);
+    void sendDataAsyncString(uint32_t __time = 2000, void (*onSendData)(void) = nullptr);
+
+    template<typename T, typename U = const char *>
+    void set(T val, U addr) {
+        if (Firebase.ready()) {
+            Firebase.RTDB.set(fbdo, addr, val);
+        }
+    }
+
     void setFloat(float floatData, const char *addrs);
     void setString(String strData, const char *addrs);
+
     float getData(const char *getAddress);
     String getStrData(const char *getAddress);
     String getStrTime();

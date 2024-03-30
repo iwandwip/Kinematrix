@@ -15,12 +15,24 @@ void BaseSens::getValue(int *output) {
     /*not implemented yet*/
 }
 
-void BaseSens::getValue(char *output) {
+float BaseSens::getValueF() const {
+    return 0;
+}
+
+void BaseSens::setDocument(const char *objName) {
     /*not implemented yet*/
 }
 
-void BaseSens::getValue(String *output) {
+void BaseSens::setDocumentValue(JsonDocument *docBase) {
     /*not implemented yet*/
+}
+
+JsonDocument BaseSens::getDocument() {
+    return JsonDocument();
+}
+
+JsonVariant BaseSens::getVariant(const char *searchName) {
+    return JsonVariant();
 }
 
 void BaseSens::process() {

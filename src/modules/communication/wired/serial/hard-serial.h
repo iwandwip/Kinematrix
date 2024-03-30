@@ -38,8 +38,9 @@ public:
     void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)() = nullptr);
     void receive(void (*onReceive)(String));
     void receiveAsync(uint32_t _time = 500, void (*onReceive)(String) = nullptr);
-    float getData(String data, uint8_t index = 0);
-    String getStrData(String data, uint8_t index = 0);
+    void receiveString(void (*onReceive)(String));
+    float getData(String data, uint8_t index, char separator[]);
+    String getStrData(String data, uint8_t index, char separator[]);
 };
 
 #endif

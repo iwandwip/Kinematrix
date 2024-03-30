@@ -14,7 +14,7 @@ HardSerial::HardSerial() {
 void HardSerial::begin(HardwareSerial *_serialPtr, long baud) {
     serialPtr = _serialPtr;
     serialPtr->begin(baud);
-    serialPtr->println();
+//    serialPtr->println();
 }
 
 void HardSerial::clearData() {
@@ -86,12 +86,19 @@ void HardSerial::receiveAsync(uint32_t _time, void (*onReceive)(String)) {
     }
 }
 
-float HardSerial::getData(String data, uint8_t index) {
-    return parseStr(data, ";", index).toFloat();
+void HardSerial::receiveString(void (*onReceive)(String)) {
+    if (serialPtr->available()) {
+        String dataCb = serialPtr->readStringUntil('\n');
+        onReceive(dataCb);
+    }
 }
 
-String HardSerial::getStrData(String data, uint8_t index) {
-    return parseStr(data, ";", index);
+float HardSerial::getData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index).toFloat();
+}
+
+String HardSerial::getStrData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index);
 }
 
 String HardSerial::parseStr(String data, char separator[], int index) {

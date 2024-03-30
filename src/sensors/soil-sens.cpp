@@ -8,42 +8,48 @@
 #include "soil-sens.h"
 #include "Arduino.h"
 
-SoilMoistureSens::SoilMoistureSens()
-        : sensorClass(nullptr),
-          sensorValue(0.0),
-          sensorPin(A0),
-          sensorTimer(0),
-          sensorCallbackFunc(nullptr) {
-}
-
 SoilMoistureSens::SoilMoistureSens(uint8_t _pin)
-        : sensorClass(nullptr),
-          sensorValue(0.0),
-          sensorPin(_pin),
-          sensorTimer(0),
-          sensorCallbackFunc(nullptr) {
+        : sensorPin(_pin),
+          sensorTimer(0) {
 }
 
 SoilMoistureSens::~SoilMoistureSens() = default;
 
 void SoilMoistureSens::init() {
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "SoilMoistureSens";
+        doc = new JsonDocument;
+    }
     pinMode(sensorPin, INPUT);
+    (*doc)[name] = 0.0;
 }
 
 void SoilMoistureSens::update() {
     if (millis() - sensorTimer >= 500) {
-        sensorValue = analogRead(sensorPin);
-        sensorValue *= (5.0 / 1023.0);
+        int value = analogRead(sensorPin);
+        (*doc)[name] = (int) map(value, 0, 1023, 0, 100);
         sensorTimer = millis();
     }
 }
 
-void SoilMoistureSens::getValue(float *output) {
-    *output = sensorValue;
+void SoilMoistureSens::setDocument(const char *objName) {
+    name = objName;
+}
+
+void SoilMoistureSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
+JsonDocument SoilMoistureSens::getDocument() {
+    return (*doc);
+}
+
+JsonVariant SoilMoistureSens::getVariant(const char *searchName) {
+    return (*doc)[searchName];
 }
 
 float SoilMoistureSens::getValueSoilMoistureSens() const {
-    return sensorValue;
+    return (*doc)[name].as<float>();
 }
 
 void SoilMoistureSens::setPins(uint8_t _pin) {

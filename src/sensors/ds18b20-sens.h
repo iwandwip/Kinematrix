@@ -17,7 +17,9 @@
 class DS18B20Sens : public BaseSens, public DallasTemperature {
 private:
     /*variables*/
-    float sensorValue;
+    JsonDocument doc;
+    const char *name;
+
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
@@ -25,13 +27,17 @@ private:
     using DallasTemperature::DallasTemperature;
 
 public:
-    DS18B20Sens();
     explicit DS18B20Sens(uint8_t _pin);
     explicit DS18B20Sens(OneWire *_wire);
     ~DS18B20Sens();
+
     void init() override;
     void update() override;
-    void getValue(float *output) override;
+
+    void setDocument(const char *objName) override;
+    JsonDocument getDocument() override;
+    JsonVariant getVariant(const char *searchName) override;
+
     float getValueTemperature() const;
     void setPins(uint8_t _pin);
 };

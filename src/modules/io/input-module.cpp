@@ -60,6 +60,13 @@ bool DigitalIn::isPressed() const {
         return false;
 }
 
+bool DigitalIn::isLongPressed(unsigned long time) const {
+    if (lastSteadyState == LOW && (millis() - lastDebounceTime) >= time)
+        return true;
+    else
+        return false;
+}
+
 bool DigitalIn::isReleased() const {
     if (previousSteadyState == LOW && lastSteadyState == HIGH)
         return true;
@@ -104,4 +111,19 @@ void DigitalIn::update() {
                 count++;
         }
     }
+}
+
+void DigitalIn::updateAll(DigitalIn *ptr, ...) {
+    va_list args;
+    va_start(args, ptr);
+    DigitalIn *currentIndex = ptr;
+    while (currentIndex != nullptr) {
+        currentIndex->update();
+        currentIndex = va_arg(args, DigitalIn *);
+    }
+    va_end(args);
+}
+
+DigitalIn *DigitalIn::stop() {
+    return nullptr;
 }

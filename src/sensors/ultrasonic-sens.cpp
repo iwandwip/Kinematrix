@@ -11,21 +11,37 @@
 UltrasonicSens::~UltrasonicSens() = default;
 
 void UltrasonicSens::init() {
-
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "UltrasonicSens";
+        doc = new JsonDocument;
+    }
+    (*doc)[name] = 0;
 }
 
 void UltrasonicSens::update() {
     if (millis() - sensorTimer >= 500) {
-        sensorValue = (float) this->ping_cm();
+        (*doc)[name] = (int) this->ping_cm();
     }
 }
 
-void UltrasonicSens::getValue(float *output) {
-    *output = sensorValue;
+void UltrasonicSens::setDocument(const char *objName) {
+    name = objName;
+}
+
+JsonDocument UltrasonicSens::getDocument() {
+    return (*doc);
+}
+
+void UltrasonicSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
+JsonVariant UltrasonicSens::getVariant(const char *searchName) {
+    return (*doc)[searchName];
 }
 
 float UltrasonicSens::getValueCm() const {
-    return sensorValue;
+    return (*doc)[name].as<float>();
 }
 
 float UltrasonicSens::getValueIn() {

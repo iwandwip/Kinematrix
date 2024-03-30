@@ -8,42 +8,51 @@
 #include "abstract-sens.h"
 #include "Arduino.h"
 
-Abstract::Abstract()
-        : sensorClass(nullptr),
-          sensorValue(0.0),
-          sensorPin(A0),
-          sensorTimer(0),
-          sensorCallbackFunc(nullptr) {
-}
-
-Abstract::Abstract(uint8_t _pin)
-        : sensorClass(nullptr),
-          sensorValue(0.0),
-          sensorPin(_pin),
-          sensorTimer(0),
-          sensorCallbackFunc(nullptr) {
+Abstract::Abstract(bool random_value)
+        : doc(nullptr),
+          name(""),
+          randomValue(random_value),
+          sensorPin(0),
+          sensorTimer(0) {
 }
 
 Abstract::~Abstract() = default;
 
 void Abstract::init() {
-    pinMode(sensorPin, INPUT);
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "Abstract";
+        doc = new JsonDocument;
+    }
+    (*doc)[name] = 0;
 }
 
 void Abstract::update() {
     if (millis() - sensorTimer >= 500) {
-        sensorValue = analogRead(sensorPin);
-        sensorValue *= (5.0 / 1023.0);
+        if (randomValue) {
+            (*doc)[name] = float(random(1 * 10, 1000 * 10)) * 0.1;
+        }
         sensorTimer = millis();
     }
 }
 
-void Abstract::getValue(float *output) {
-    *output = sensorValue;
+void Abstract::setDocument(const char *objName) {
+    name = objName;
+}
+
+void Abstract::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
+JsonDocument Abstract::getDocument() {
+    return (*doc);
+}
+
+JsonVariant Abstract::getVariant(const char *searchName) {
+    return (*doc)[searchName];
 }
 
 float Abstract::getValueAbstract() const {
-    return sensorValue;
+    return (*doc)[name].as<float>();
 }
 
 void Abstract::setPins(uint8_t _pin) {

@@ -116,13 +116,17 @@ bool DigitalOut::getState() const {
     return _state;
 }
 
-void DigitalOut::updateStateAll(DigitalOut *_digital_out_ptr, ...) {
+void DigitalOut::updateAll(DigitalOut *ptr, ...) {
     va_list args;
-    va_start(args, _digital_out_ptr);
-    DigitalOut *currentIndex = _digital_out_ptr;
+    va_start(args, ptr);
+    DigitalOut *currentIndex = ptr;
     while (currentIndex != nullptr) {
-        _digital_out_ptr->update();
+        currentIndex->update();
         currentIndex = va_arg(args, DigitalOut *);
     }
     va_end(args);
+}
+
+DigitalOut *DigitalOut::stop() {
+    return nullptr;
 }

@@ -47,6 +47,7 @@ public:
         dataSend += separator;
     }
 
+    void setTimeOut(uint32_t time);
     void clearData();
     void sendData();
     void sendDataCb(void (*callback)());

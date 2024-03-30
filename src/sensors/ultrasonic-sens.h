@@ -16,8 +16,9 @@
 
 class UltrasonicSens : public BaseSens, public NewPing {
 private:
-    /*variables*/
-    float sensorValue;
+    JsonDocument *doc;
+    const char *name;
+
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
@@ -27,7 +28,12 @@ public:
     ~UltrasonicSens();
     void init() override;
     void update() override;
-    void getValue(float *output) override;
+
+    void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
+    JsonDocument getDocument() override;
+    JsonVariant getVariant(const char *searchName) override;
+
     float getValueCm() const;
     float getValueIn();
     void setPins(uint8_t _pin);

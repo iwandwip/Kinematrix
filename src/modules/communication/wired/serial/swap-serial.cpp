@@ -20,7 +20,11 @@ void SwapSerial::begin(HardwareSerial *_serialPtr,
                        uint8_t txPin) {
     serialPtr = _serialPtr;
     serialPtr->begin(baud, cfg, rxPin, txPin);
-    serialPtr->println();
+//    serialPtr->println();
+}
+
+void SwapSerial::setTimeOut(uint32_t time) {
+    serialPtr->setTimeout(time);
 }
 
 void SwapSerial::clearData() {

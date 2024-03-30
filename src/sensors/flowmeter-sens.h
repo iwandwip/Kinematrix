@@ -53,13 +53,16 @@ public:
      * @param pin  The pin that the flow sensor is connected to (has to be interrupt capable, default: INT0).
      * @param prop The properties of the actual flow sensor being used (default: UncalibratedSensor).
      */
-    FlowMeter(unsigned int pin = 2, FlowSensorProperties prop = UncalibratedSensor, void (*callback)(void) = NULL, uint8_t interruptMode = RISING);
+    FlowMeter(unsigned int pin = 2, FlowSensorProperties prop = UncalibratedSensor, void (*callback)(void) = NULL,
+              uint8_t interruptMode = RISING);
 
     double getCurrentFlowrate();                 //!< Returns the current flow rate since last tick (in l/min).
     double getCurrentVolume();                   //!< Returns the current volume since last tick (in l).
 
-    double getTotalFlowrate();                   //!< Returns the (linear) average flow rate in this flow meter instance (in l/min).
-    double getTotalVolume();                     //!< Returns the total volume flown trough this flow meter instance (in l).
+    double
+    getTotalFlowrate();                   //!< Returns the (linear) average flow rate in this flow meter instance (in l/min).
+    double
+    getTotalVolume();                     //!< Returns the total volume flown trough this flow meter instance (in l).
 
     /**
      * The tick method updates all internal calculations at the end of a measurement period.
@@ -90,27 +93,34 @@ public:
      * @param duration The tick duration (in ms).
      */
     void tick(unsigned long duration = 1000);
-    void count();                                //!< Increments the internal pulse counter. Serves as an interrupt callback routine.
-    void reset();                                //!< Prepares the flow meter for a fresh measurement. Resets all current values, but not the totals.
+    void
+    count();                                //!< Increments the internal pulse counter. Serves as an interrupt callback routine.
+    void
+    reset();                                //!< Prepares the flow meter for a fresh measurement. Resets all current values, but not the totals.
 
     /*
      * setters enabling continued metering across power cycles
      */
-    FlowMeter *setTotalDuration(unsigned long totalDuration); //!< Sets the total (overall) duration (i.e. after power up).
-    FlowMeter *setTotalVolume(double totalVolume);            //!< Sets the total (overall) volume (i.e. after power up).
-    FlowMeter *setTotalCorrection(double totalCorrection);    //!< Sets the total (overall) correction factor (i.e. after power up).
+    FlowMeter *
+    setTotalDuration(unsigned long totalDuration); //!< Sets the total (overall) duration (i.e. after power up).
+    FlowMeter *
+    setTotalVolume(double totalVolume);            //!< Sets the total (overall) volume (i.e. after power up).
+    FlowMeter *setTotalCorrection(
+            double totalCorrection);    //!< Sets the total (overall) correction factor (i.e. after power up).
 
     /*
      * convenience methods and calibration helpers
      */
-    unsigned int getPin();                       //!< Returns the Arduino pin number that the flow sensor is connected to.
+    unsigned int
+    getPin();                       //!< Returns the Arduino pin number that the flow sensor is connected to.
 
     unsigned long getCurrentDuration();          //!< Returns the duration of the current tick (in ms).
     double getCurrentFrequency();                //!< Returns the pulse rate in the current tick (in 1/s).
     double getCurrentError();                    //!< Returns the error resulting from the current measurement (in %).
 
     unsigned long getTotalDuration();            //!< Returns the total run time of this flow meter instance (in ms).
-    double getTotalError();                      //!< Returns the (linear) average error of this flow meter instance (in %).
+    double
+    getTotalError();                      //!< Returns the (linear) average error of this flow meter instance (in %).
 
 protected:
     unsigned int _pin;                           //!< connection pin (has to be interrupt capable!)
@@ -189,38 +199,26 @@ protected:
 
 #include "base/sensor-module.h"
 
-#define FLOW_METER_PERIOD 1000
-
-enum flow_meter_index_t {
-    FLOW_METER_CURRENT_RATE = 0,
-    FLOW_METER_CURRENT_VOLUME = 1,
-    FLOW_METER_TOTAL_RATE = 2,
-    FLOW_METER_TOTAL_VOLUME = 3,
-    FLOW_METER_NUM_VALUE = 4
-};
-
 class FlowmeterSens : public BaseSens {
 private:
     /*variables*/
+    JsonDocument doc;
+    const char *name;
+
     FlowMeter *sensorClass;
-    FlowSensorProperties sensorProperties;
-
-    float sensorValue[FLOW_METER_NUM_VALUE];
-    uint8_t sensorPin;
     uint32_t sensorTimer;
-
-    /*optional object*/
-    void (*sensorCallbackFunc)();
 
 public:
     explicit FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProperties _properties = UncalibratedSensor);
     ~FlowmeterSens();
+
     void init() override;
     void update() override;
     void process() override;
-    void getValue(float *output) override;
-    float getValueFlowMeter(flow_meter_index_t _index = FLOW_METER_CURRENT_RATE) const;
-    void setPins(uint8_t _pin);
+
+    void setDocument(const char *objName) override;
+    JsonDocument getDocument() override;
+    JsonVariant getVariant(const char *searchName) override;
 };
 
 #endif  // FLOWMETER_SENS_H

@@ -9,14 +9,14 @@
 #include "Arduino.h"
 
 HX711Sens::HX711Sens()
-        : sensorValue(0.0),
+        : name(""),
           sensorTimer{0, 0},
           sensorDOUTPin(2),
           sensorSCKPin(3) {
 }
 
 HX711Sens::HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin)
-        : sensorValue(0.0),
+        : name(""),
           sensorTimer{0, 0},
           sensorDOUTPin(_sensorDOUTPin),
           sensorSCKPin(_sensorSCKPin) {
@@ -24,35 +24,31 @@ HX711Sens::HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin)
 
 void HX711Sens::init() {
     this->begin(this->sensorDOUTPin, this->sensorSCKPin);
+    doc[name] = 0;
 }
 
 void HX711Sens::update() {
     if (millis() - sensorTimer[0] >= 500) {
         if (this->is_ready()) {
-            sensorValue = this->get_units();
+            doc[name] = this->get_units();
         }
         sensorTimer[0] = millis();
     }
-
-//    if (millis() - sensorTimer[1] >= 5000) {
-//        this->power_down();
-//        sensorTimer[1] = millis();
-//    }
-//    this->power_up();
 }
 
-void HX711Sens::getValue(float *output) {
-    *output = sensorValue;
+void HX711Sens::setDocument(const char *objName) {
+    name = objName;
 }
 
-void HX711Sens::getValue(int *output) {
-
+JsonDocument HX711Sens::getDocument() {
+    return doc;
 }
 
-void HX711Sens::getValue(char *output) {
+JsonVariant HX711Sens::getVariant(const char *searchName) {
+    return doc[searchName];
 }
 
-float HX711Sens::getCalibrateFactorInit(float weight) {
+__attribute__((unused)) float HX711Sens::getCalibrateFactorInit(float weight) {
     float calibrationFactor = 0.0;
     if (this->is_ready()) {
         this->set_scale();
@@ -69,6 +65,7 @@ float HX711Sens::getCalibrateFactorInit(float weight) {
         Serial.print(reading / weight);
         Serial.println();
         delay(5000);
+        return reading;
     }
     return calibrationFactor;
 }
@@ -96,7 +93,7 @@ float HX711Sens::getUnits(byte time) {
 }
 
 uint32_t HX711Sens::getADC(byte times) {
-    return this->read_average();
+    return this->read_average(times);
 }
 
 float HX711Sens::getCalibrateFactor(float units, float weight) {
@@ -104,8 +101,9 @@ float HX711Sens::getCalibrateFactor(float units, float weight) {
 }
 
 float HX711Sens::getValueWeight(bool isCanZero) const {
-    if (isCanZero) return sensorValue;
-    return sensorValue < 0 ? 0 : sensorValue;
+    float value = doc[name].as<float>();
+    if (isCanZero) return value;
+    return value < 0 ? 0 : value;
 }
 
 void HX711Sens::setPins(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin) {

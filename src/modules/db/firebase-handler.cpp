@@ -51,7 +51,8 @@ bool FirebaseModule::init(FirebaseAuthentication *_authentication) {
 
     Firebase.reconnectNetwork(true);
 
-    fbdo->setBSSLBufferSize(4096 /* Rx buffer size in bytes from 512 to 16384 */, 1024 /* Tx buffer size in bytes from 512 to 16384 */);
+    fbdo->setBSSLBufferSize(4096 /* Rx buffer size in bytes from 512 to 16384 */,
+                            1024 /* Tx buffer size in bytes from 512 to 16384 */);
     fbdo->setResponseSize(2048); // Limit the size of response payload to be collected in FirebaseData
 
     Firebase.begin(config, auth);
@@ -102,31 +103,38 @@ void FirebaseModule::clearData() {
     addrLen = 0;
 }
 
-void FirebaseModule::addData(float newData, const char *newAddressData) {
-    dataLen++;
-    data = (float *) realloc(data, dataLen * sizeof(float));
-    data[dataLen - 1] = newData;
-
-    char **newAddress = (char **) realloc(address, (addrLen + 1) * sizeof(char *));
-    if (newAddress == NULL) return;
-    address = newAddress;
-    address[addrLen] = (char *) malloc(strlen(newAddressData) + 1);
-    if (address[addrLen] == NULL) return;
-    strcpy(address[addrLen], newAddressData);
-    addrLen++;
-}
-
 int FirebaseModule::getFreeHeapMemory() {
     return Firebase.getFreeHeap();
 }
 
-void FirebaseModule::sendData(uint32_t __time, void (*onSendData)(void)) {
+void FirebaseModule::sendDataFloat(void (*onSendData)(void)) {
+    if (data == nullptr) return;
+    for (uint8_t i = 0; i < dataLen; i++) {
+        Firebase.RTDB.setFloatAsync(fbdo, address[i], data[i].toFloat());
+    }
+    if (onSendData != nullptr) onSendData();
+}
+
+void FirebaseModule::sendDataAsyncFloat(uint32_t __time, void (*onSendData)(void)) {
     if (data == nullptr) return;
     if (Firebase.ready() && millis() - sendTime >= __time) {
-        for (uint8_t i = 0; i < dataLen; i++) {
-            Firebase.RTDB.setFloatAsync(fbdo, address[i], data[i]);
-        }
-        onSendData();
+        sendDataFloat(onSendData);
+        sendTime = millis();
+    }
+}
+
+void FirebaseModule::sendDataString(void (*onSendData)(void)) {
+    if (data == nullptr) return;
+    for (uint8_t i = 0; i < dataLen; i++) {
+        Firebase.RTDB.setStringAsync(fbdo, address[i], data[i]);
+    }
+    if (onSendData != nullptr) onSendData();
+}
+
+void FirebaseModule::sendDataAsyncString(uint32_t __time, void (*onSendData)(void)) {
+    if (data == nullptr) return;
+    if (Firebase.ready() && millis() - sendTime >= __time) {
+        sendDataString(onSendData);
         sendTime = millis();
     }
 }
@@ -158,7 +166,8 @@ String FirebaseModule::getStrData(const char *getAddress) {
 }
 
 String FirebaseModule::getStrTime() {
-    return String(timeClient->getDay()) + ";" + String(timeClient->getHours()) + ";" + String(timeClient->getMinutes()) + ";" + String(timeClient->getSeconds());
+    return String(timeClient->getDay()) + ";" + String(timeClient->getHours()) + ";" +
+           String(timeClient->getMinutes()) + ";" + String(timeClient->getSeconds());
 }
 
 void FirebaseModule::waitConnection(uint32_t __tmr) {

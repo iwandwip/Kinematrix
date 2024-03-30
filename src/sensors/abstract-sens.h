@@ -15,22 +15,25 @@
 
 class Abstract : public BaseSens {
 private:
-    /*variables*/
-    void *sensorClass;
-    float sensorValue;
+    JsonDocument *doc;
+    const char *name;
+
+    bool randomValue;
+
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
-    /*optional object*/
-    void (*sensorCallbackFunc)();
-
 public:
-    Abstract();
-    explicit Abstract(uint8_t _pin);
-    ~Abstract();
+    explicit Abstract(bool random_value = false);
+    virtual ~Abstract();
     void init() override;
     void update() override;
-    void getValue(float *output) override;
+
+    void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
+    JsonDocument getDocument() override;
+    JsonVariant getVariant(const char *searchName) override;
+
     float getValueAbstract() const;
     void setPins(uint8_t _pin);
 };

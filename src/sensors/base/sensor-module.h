@@ -11,17 +11,10 @@
 #define SENSOR_MODULE_H
 
 #include "Arduino.h"
-#include "HardwareSerial.h"
-#include "SPI.h"
+#include "ArduinoJson.h"
 
-typedef enum {
-    SENS_RET_RAW_DATA,
-    SENS_RET_FILTERED_DATA,
-    SENS_RET_OFFSET_DATA,
-    SENS_RET_ACT_DATA,
-    SENS_RET_AVG_DATA,
-    SENS_RET_TOTAL_DATA,
-} sens_ret_index_t;
+#include "sensor-debug.h"
+#include "sensor-header.h"
 
 class BaseSens {
 public:
@@ -32,8 +25,13 @@ public:
     /*virtual function*/
     virtual void getValue(float *output);
     virtual void getValue(int *output);
-    virtual void getValue(char *output);
-    virtual void getValue(String *output);
+
+    virtual float getValueF() const;
+
+    virtual void setDocument(const char *objName);
+    virtual void setDocumentValue(JsonDocument *docBase);
+    virtual JsonDocument getDocument();
+    virtual JsonVariant getVariant(const char *searchName);
 
     /*additional function*/
     virtual void process();
@@ -44,22 +42,37 @@ public:
 
 class SensorModule {
 private:
+    JsonDocument *doc;
     BaseSens **base;
     char **name;
     uint8_t len;
     uint8_t lenName;
+    bool ready;
 public:
     SensorModule();
     ~SensorModule();
+
     void init(void (*initializeCallback)() = nullptr);
     void update(void (*updateCallback)() = nullptr);
+    bool isReady(void (*readyCallback)() = nullptr);
 
     void addModule(BaseSens *sensModule);
-    void addModule(BaseSens *sensModule, const char *newName);
+    void addName(const char *newName);
+
+    void addModule(const char *newName, BaseSens *sensModule);
+    void addModule(const char *newName, BaseSens *(*callbackSensModule)());
+
     void removeModule(uint8_t index);
+
+    JsonVariant operator[](const char *searchName);
+    JsonDocument operator()(const char *searchName);
+
     BaseSens &getModule(uint8_t index);
     BaseSens *getModulePtr(uint8_t index);
     BaseSens &getModuleByName(const char *searchName);
+    BaseSens *getModuleByNamePtr(const char *searchName);
+
+    const char *getName(uint8_t index);
     void clearModules();
 
     uint8_t getModuleCount();
@@ -67,6 +80,18 @@ public:
     void swapModules(uint8_t index1, uint8_t index2);
     bool isModulePresent(BaseSens *sensModule);
     bool isModulePresent(uint8_t index);
+
+    template<typename T>
+    T *getModule(const char *searchName) {
+        BaseSens *module = getModuleByNamePtr(searchName);
+        return static_cast<T *>(module);
+    }
+
+    void debug(const char *searchName, bool showHeapMemory = false, bool endl = true);
+    void debug(bool showHeapMemory = false);
+    void debug(uint32_t time, bool showHeapMemory = false);
+    void debugPretty(uint32_t time = 1000);
+    void print(const char *format, ...);
 };
 
 #endif  // SENSOR_MODULE_H

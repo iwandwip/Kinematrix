@@ -17,9 +17,11 @@ FlowMeter::FlowMeter(unsigned int pin, FlowSensorProperties prop, void (*callbac
         _properties(prop),                                                      //!< store sensor properties
         _interruptCallback(callback),
         _interruptMode(interruptMode) {
-    pinMode(this->_pin, INPUT_PULLUP);                                      //!< initialize interrupt pin as input with pullup
+    pinMode(this->_pin,
+            INPUT_PULLUP);                                      //!< initialize interrupt pin as input with pullup
 
-    if (this->_interruptCallback != NULL) {                                 //!< if ISR callback has been provided, attach it
+    if (this->_interruptCallback !=
+        NULL) {                                 //!< if ISR callback has been provided, attach it
         attachInterrupt(this->_pin, this->_interruptCallback, this->_interruptMode);
     }
 
@@ -50,17 +52,22 @@ void FlowMeter::tick(unsigned long duration) {
     interrupts();                                                           //!< done changing interrupt variable(s)
 
     /* normalisation */
-    double seconds = duration / 1000.0f;                                    //!< normalised duration (in s, i.e. per 1000ms)
+    double seconds =
+            duration / 1000.0f;                                    //!< normalised duration (in s, i.e. per 1000ms)
     double frequency = pulses / seconds;                                    //!< normalised frequency (in 1/s)
 
     /* determine current correction factor (from sensor properties) */
-    unsigned int decile = floor(10.0f * frequency / (this->_properties.capacity * this->_properties.kFactor));          //!< decile of current flow relative to sensor capacity
+    unsigned int decile = floor(10.0f * frequency / (this->_properties.capacity *
+                                                     this->_properties.kFactor));          //!< decile of current flow relative to sensor capacity
     unsigned int ceiling = 9;                                                                                          //!< highest possible decile index
-    this->_currentCorrection = this->_properties.kFactor / this->_properties.mFactor[min(decile, ceiling)];             //!< combine constant k-factor and m-factor for decile
+    this->_currentCorrection = this->_properties.kFactor / this->_properties.mFactor[min(decile,
+                                                                                         ceiling)];             //!< combine constant k-factor and m-factor for decile
 
     /* update current calculations: */
-    this->_currentFlowrate = frequency / this->_currentCorrection;          //!< get flow rate (in l/min) from normalised frequency and combined correction factor
-    this->_currentVolume = this->_currentFlowrate / (60.0f / seconds);        //!< get volume (in l) from normalised flow rate and normalised time
+    this->_currentFlowrate = frequency /
+                             this->_currentCorrection;          //!< get flow rate (in l/min) from normalised frequency and combined correction factor
+    this->_currentVolume = this->_currentFlowrate / (60.0f /
+                                                     seconds);        //!< get volume (in l) from normalised flow rate and normalised time
 
     /* update statistics: */
     this->_currentDuration = duration;                                      //!< store current tick duration (convenience, in ms)
@@ -137,27 +144,26 @@ FlowSensorProperties FS400A = {60.0f, 4.8f, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
 
 FlowmeterSens::FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProperties _properties)
-        : sensorClass(nullptr),
-          sensorProperties(_properties),
-          sensorValue{0.0, 0.0, 0.0, 0.0},
-          sensorPin(_pin),
-          sensorTimer(0),
-          sensorCallbackFunc(_callback) {
+        : sensorTimer(0) {
+    sensorClass = new FlowMeter(digitalPinToInterrupt(_pin), _properties, _callback, RISING);
 }
 
 FlowmeterSens::~FlowmeterSens() = default;
 
 void FlowmeterSens::init() {
-    sensorClass = new FlowMeter(digitalPinToInterrupt(sensorPin), sensorProperties, sensorCallbackFunc, RISING);
+    doc[name]["currentRate"] = 0;
+    doc[name]["currentVolume"] = 0;
+    doc[name]["totalRate"] = 0;
+    doc[name]["totalVolume"] = 0;
 }
 
 void FlowmeterSens::update() {
-    if (millis() - sensorTimer >= FLOW_METER_PERIOD) {
-        sensorClass->tick(FLOW_METER_PERIOD);
-        sensorValue[FLOW_METER_CURRENT_RATE] = (float) sensorClass->getCurrentFlowrate();
-        sensorValue[FLOW_METER_CURRENT_VOLUME] = (float) sensorClass->getCurrentVolume();
-        sensorValue[FLOW_METER_TOTAL_RATE] = (float) sensorClass->getTotalFlowrate();
-        sensorValue[FLOW_METER_TOTAL_VOLUME] = (float) sensorClass->getTotalVolume();
+    if (millis() - sensorTimer >= 1000) {
+        sensorClass->tick(1000);
+        doc[name]["currentRate"] = (float) sensorClass->getCurrentFlowrate();
+        doc[name]["currentVolume"] = (float) sensorClass->getCurrentVolume();
+        doc[name]["totalRate"] = (float) sensorClass->getTotalFlowrate();
+        doc[name]["totalVolume"] = (float) sensorClass->getTotalVolume();
         sensorTimer = millis();
     }
 }
@@ -166,17 +172,14 @@ void FlowmeterSens::process() {
     sensorClass->count();
 }
 
-void FlowmeterSens::getValue(float *output) {
-    output[FLOW_METER_CURRENT_RATE] = sensorValue[FLOW_METER_CURRENT_RATE];
-    output[FLOW_METER_CURRENT_VOLUME] = sensorValue[FLOW_METER_CURRENT_VOLUME];
-    output[FLOW_METER_TOTAL_RATE] = sensorValue[FLOW_METER_TOTAL_RATE];
-    output[FLOW_METER_TOTAL_VOLUME] = sensorValue[FLOW_METER_TOTAL_VOLUME];
+void FlowmeterSens::setDocument(const char *objName) {
+    name = objName;
 }
 
-float FlowmeterSens::getValueFlowMeter(flow_meter_index_t _index) const {
-    return sensorValue[_index];
+JsonDocument FlowmeterSens::getDocument() {
+    return doc;
 }
 
-void FlowmeterSens::setPins(uint8_t _pin) {
-    sensorPin = _pin;
+JsonVariant FlowmeterSens::getVariant(const char *searchName) {
+    return doc[searchName];
 }
