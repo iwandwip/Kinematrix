@@ -45,6 +45,10 @@ void HardSerial::sendDataAsyncCb(uint32_t _time, void (*onReceive)()) {
     }
 }
 
+void HardSerial::sendBytes(int next) {
+    serialPtr->write(next);
+}
+
 void HardSerial::receive(void (*onReceive)(String)) {
     if (onReceive == nullptr) return;
     if (serialPtr->available()) {

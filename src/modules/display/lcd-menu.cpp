@@ -198,7 +198,11 @@ MenuProperties *LcdMenu::createMenu(uint8_t menuSize, ...) {
 }
 
 void LcdMenu::freeMenu(MenuProperties *menuProperties) {
+    for (uint8_t i = 0; i < menuProperties->len; ++i) {
+        delete[] menuProperties->text[i];
+    }
     delete[] menuProperties->text;
+    delete[] menuProperties->isHasCb;
     delete menuProperties;
 }
 

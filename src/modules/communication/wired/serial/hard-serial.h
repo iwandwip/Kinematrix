@@ -36,6 +36,7 @@ public:
     void sendDataCb(void (*onReceive)());
     void sendDataAsync(uint32_t _time = 500);
     void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)() = nullptr);
+    void sendBytes(int next);
     void receive(void (*onReceive)(String));
     void receiveAsync(uint32_t _time = 500, void (*onReceive)(String) = nullptr);
     void receiveString(void (*onReceive)(String));

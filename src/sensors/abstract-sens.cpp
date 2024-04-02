@@ -8,10 +8,11 @@
 #include "abstract-sens.h"
 #include "Arduino.h"
 
-Abstract::Abstract(bool random_value)
+Abstract::Abstract(bool random_value, float dummy_value)
         : doc(nullptr),
           name(""),
           randomValue(random_value),
+          dummyValue(dummy_value),
           sensorPin(0),
           sensorTimer(0) {
 }
@@ -30,6 +31,8 @@ void Abstract::update() {
     if (millis() - sensorTimer >= 500) {
         if (randomValue) {
             (*doc)[name] = float(random(1 * 10, 1000 * 10)) * 0.1;
+        } else {
+            (*doc)[name] = dummyValue;
         }
         sensorTimer = millis();
     }

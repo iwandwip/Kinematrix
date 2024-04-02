@@ -19,12 +19,13 @@ private:
     const char *name;
 
     bool randomValue;
+    float dummyValue;
 
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
 public:
-    explicit Abstract(bool random_value = false);
+    explicit Abstract(bool random_value = false, float dummy_value = 0.0);
     virtual ~Abstract();
     void init() override;
     void update() override;

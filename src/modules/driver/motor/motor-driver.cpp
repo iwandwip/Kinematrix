@@ -49,6 +49,10 @@ namespace L298N {
         enable = EN;
         inputLeft = IN1;
         inputRight = IN2;
+
+        pinMode(enable, OUTPUT);
+        pinMode(inputLeft, OUTPUT);
+        pinMode(inputRight, OUTPUT);
     }
 
 #if defined(ESP32)
