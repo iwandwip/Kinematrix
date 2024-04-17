@@ -17,6 +17,9 @@
 #define CURSOR_UP_CHAR  1
 #define CURSOR_BLANK_CHAR  2
 
+const uint8_t MAX_LCD_ROW_LEN = 2;
+const uint8_t MAX_LCD_ROW = 16 - 1;
+
 uint8_t cursorDownChar[8] = {0x00, 0x00, 0x04, 0x04, 0x04, 0x15, 0x0E, 0x04};
 uint8_t cursorUpChar[8] = {0x04, 0x0E, 0x15, 0x04, 0x04, 0x04, 0x00, 0x00};
 uint8_t cursorBlankChar[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -36,9 +39,6 @@ void LcdMenu::onListen(MenuCursor *menuCursor, void (*listenCallback)()) {
 
 void LcdMenu::showMenu(MenuProperties *properties, bool forced) {
     if (strlen(properties->option) != 0 && !forced) return;
-
-    const uint8_t MAX_LCD_ROW_LEN = 2;
-    const uint8_t MAX_LCD_ROW = 16 - 1;
     char buffer[properties->len][MAX_BUFF_LEN];
 
     for (int i = 0; i < properties->len; ++i) {
@@ -46,28 +46,17 @@ void LcdMenu::showMenu(MenuProperties *properties, bool forced) {
         if (properties->index == i) buffer[i][0] = '>';
     }
 
-    LiquidCrystal_I2C::setCursor(0, 0);
-    LiquidCrystal_I2C::print(buffer[properties->select]);
-    LiquidCrystal_I2C::setCursor(0, 1);
-    LiquidCrystal_I2C::print(buffer[properties->select + 1]);
+    if (millis() - lcdPrintTimer >= 250 || forced) {
+        showCursor(properties);
+        LiquidCrystal_I2C::setCursor(0, 0);
+        LiquidCrystal_I2C::print(buffer[properties->select]);
+        showCursor(properties);
 
-    if (cursor_->show) {
-        if (properties->index == 0) {
-            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 0);
-            LiquidCrystal_I2C::printByte(CURSOR_BLANK_CHAR);
-            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 1);
-            LiquidCrystal_I2C::printByte(CURSOR_DOWN_CHAR);
-        } else if (properties->index == properties->len - 1) {
-            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 0);
-            LiquidCrystal_I2C::printByte(CURSOR_UP_CHAR);
-            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 1);
-            LiquidCrystal_I2C::printByte(CURSOR_BLANK_CHAR);
-        } else {
-            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 0);
-            LiquidCrystal_I2C::printByte(CURSOR_UP_CHAR);
-            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 1);
-            LiquidCrystal_I2C::printByte(CURSOR_DOWN_CHAR);
-        }
+        showCursor(properties);
+        LiquidCrystal_I2C::setCursor(0, 1);
+        LiquidCrystal_I2C::print(buffer[properties->select + 1]);
+        showCursor(properties);
+        lcdPrintTimer = millis();
     }
 
     if (forced) return;
@@ -98,6 +87,27 @@ void LcdMenu::showMenu(MenuProperties *properties, bool forced) {
         cursor_->select = 0;
         if (properties->isHasCb[properties->index]) {
             strcpy(properties->option, properties->text[properties->index]);
+        }
+    }
+}
+
+void LcdMenu::showCursor(MenuProperties *properties) {
+    if (cursor_->show) {
+        if (properties->index == 0) {
+            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 0);
+            LiquidCrystal_I2C::printByte(CURSOR_BLANK_CHAR);
+            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 1);
+            LiquidCrystal_I2C::printByte(CURSOR_DOWN_CHAR);
+        } else if (properties->index == properties->len - 1) {
+            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 0);
+            LiquidCrystal_I2C::printByte(CURSOR_UP_CHAR);
+            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 1);
+            LiquidCrystal_I2C::printByte(CURSOR_BLANK_CHAR);
+        } else {
+            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 0);
+            LiquidCrystal_I2C::printByte(CURSOR_UP_CHAR);
+            LiquidCrystal_I2C::setCursor(MAX_LCD_ROW, 1);
+            LiquidCrystal_I2C::printByte(CURSOR_DOWN_CHAR);
         }
     }
 }
@@ -135,6 +145,11 @@ void LcdMenu::backToMenu(MenuProperties *beforeProperties, MenuProperties *after
 }
 
 void LcdMenu::clearMenu(MenuProperties *firstMenu, ...) {
+    cursor_->up = false;
+    cursor_->down = false;
+    cursor_->select = false;
+    cursor_->back = false;
+
     va_list args;
     va_start(args, firstMenu);
     MenuProperties *currentMenu = firstMenu;

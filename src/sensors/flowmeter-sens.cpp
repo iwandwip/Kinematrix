@@ -151,19 +151,23 @@ FlowmeterSens::FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProper
 FlowmeterSens::~FlowmeterSens() = default;
 
 void FlowmeterSens::init() {
-    doc[name]["currentRate"] = 0;
-    doc[name]["currentVolume"] = 0;
-    doc[name]["totalRate"] = 0;
-    doc[name]["totalVolume"] = 0;
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "FlowmeterSens";
+        doc = new JsonDocument;
+    }
+    (*doc)[name]["currentRate"] = 0;
+    (*doc)[name]["currentVolume"] = 0;
+    (*doc)[name]["totalRate"] = 0;
+    (*doc)[name]["totalVolume"] = 0;
 }
 
 void FlowmeterSens::update() {
     if (millis() - sensorTimer >= 1000) {
         sensorClass->tick(1000);
-        doc[name]["currentRate"] = (float) sensorClass->getCurrentFlowrate();
-        doc[name]["currentVolume"] = (float) sensorClass->getCurrentVolume();
-        doc[name]["totalRate"] = (float) sensorClass->getTotalFlowrate();
-        doc[name]["totalVolume"] = (float) sensorClass->getTotalVolume();
+        (*doc)[name]["currentRate"] = (float) sensorClass->getCurrentFlowrate();
+        (*doc)[name]["currentVolume"] = (float) sensorClass->getCurrentVolume();
+        (*doc)[name]["totalRate"] = (float) sensorClass->getTotalFlowrate();
+        (*doc)[name]["totalVolume"] = (float) sensorClass->getTotalVolume();
         sensorTimer = millis();
     }
 }
@@ -176,10 +180,14 @@ void FlowmeterSens::setDocument(const char *objName) {
     name = objName;
 }
 
+void FlowmeterSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
 JsonDocument FlowmeterSens::getDocument() {
-    return doc;
+    return (*doc);
 }
 
 JsonVariant FlowmeterSens::getVariant(const char *searchName) {
-    return doc[searchName];
+    return (*doc)[searchName];
 }

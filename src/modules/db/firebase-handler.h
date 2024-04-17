@@ -38,18 +38,20 @@ typedef struct {
 
 class FirebaseModule {
 private:
-    FirebaseData *fbdo;
-    FirebaseAuth *auth;
-    FirebaseConfig *config;
+    FirebaseData fbdo;
+    FirebaseAuth auth;
+    FirebaseConfig config;
     FirebaseAuthentication *authentication;
 
     WiFiUDP *ntpUDP;
     NTPClient *timeClient;
 
     String *data;
-    char **address;
-    uint8_t dataLen = 0;
-    uint8_t addrLen = 0;
+    String *address;
+    uint8_t dataLen;
+    uint8_t addrLen;
+    uint8_t maxDataLen;
+    uint8_t dataCount;
 
     uint32_t sendTime;
     uint32_t getTime;
@@ -58,33 +60,34 @@ private:
 public:
     FirebaseModule();
     ~FirebaseModule();
-    bool init(FirebaseAuthentication *_authentication);
-    bool connectToWiFi(const char *ssid, const char *pwd);
+
+    bool init(FirebaseAuthentication *_authentication, void (*initCallback)(void) = nullptr);
+    bool initNTP();
+    bool connectToWiFi(const char *ssid, const char *pwd, void (*connectCallback)(void) = nullptr);
     bool isConnect();
+
     bool update(void (*onUpdate)(void) = nullptr);
-    void clearData();
+    void initData(uint8_t totalDataLen);
 
     template<typename T>
     void addData(T newData, const char *newAddressData) {
-        dataLen++;
-        data = (String *) realloc(data, dataLen * sizeof(String));
-        data[dataLen - 1] = String(newData);
+        if (dataLen >= maxDataLen || addrLen >= maxDataLen) return;
 
-        char **newAddress = (char **) realloc(address, (addrLen + 1) * sizeof(char *));
-        if (newAddress == NULL) return;
-        address = newAddress;
-        address[addrLen] = (char *) malloc(strlen(newAddressData) + 1);
-        if (address[addrLen] == NULL) return;
-        strcpy(address[addrLen], newAddressData);
+        data[dataLen] = String(newData);
+        address[addrLen] = String(newAddressData);
+
+        dataLen++;
         addrLen++;
     }
 
     int getFreeHeapMemory();
 
-    void sendDataFloat(void (*onSendData)(void) = nullptr);
-    void sendDataAsyncFloat(uint32_t __time = 2000, void (*onSendData)(void) = nullptr);
-    void sendDataString(void (*onSendData)(void) = nullptr);
-    void sendDataAsyncString(uint32_t __time = 2000, void (*onSendData)(void) = nullptr);
+    void sendDataFloat(void (*onSendData)(String data, String address) = nullptr);
+    void sendDataAsyncFloat(uint32_t __time = 2000, void (*onSendData)(String data, String address) = nullptr);
+    void sendDataAsyncOrderFloat(uint32_t __time = 200, void (*onSendData)(String data, String address) = nullptr);
+    void sendDataString(void (*onSendData)(String data, String address) = nullptr);
+    void sendDataAsyncString(uint32_t __time = 2000, void (*onSendData)(String data, String address) = nullptr);
+    void sendDataAsyncOrderString(uint32_t __time = 200, void (*onSendData)(String data, String address) = nullptr);
 
     template<typename T, typename U = const char *>
     void set(T val, U addr) {

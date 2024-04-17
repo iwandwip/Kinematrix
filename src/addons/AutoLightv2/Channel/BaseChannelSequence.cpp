@@ -8,7 +8,8 @@
 #include "BaseChannel.h"
 
 namespace AutoLight {
-    void BaseChannel::taskSequence0() {
+    void BaseChannel::taskSequence2() {
+//        Serial.println("BaseChannel::taskSequence1() start");
         // blink ////////////////////////////////////////
         {
             for (int i = 0; i < 2; i++) {
@@ -100,9 +101,11 @@ namespace AutoLight {
             off();
             sleep(500);
         }
+//        Serial.println("BaseChannel::taskSequence1() end");
     }
 
-    void BaseChannel::taskSequence1() {
+    void BaseChannel::taskSequence3() {
+//        Serial.println("BaseChannel::taskSequence2() start");
         // fill 2 point ////////////////////////////////////////
         {
             for (int i = 0; i < config_data_ptr_->header.pin_size_ / 2; i += 2) {
@@ -139,9 +142,11 @@ namespace AutoLight {
             off();
             sleep(500);
         }
+//        Serial.println("BaseChannel::taskSequence2() end");
     }
 
-    void BaseChannel::taskSequence2() {
+    void BaseChannel::taskSequence4() {
+//        Serial.println("BaseChannel::taskSequence3() start");
         // fill right ////////////////////////////////////////
         {
             for (int i = config_data_ptr_->header.pin_size_; i > 0; --i) {
@@ -159,9 +164,11 @@ namespace AutoLight {
             off();
             sleep(500);
         }
+//        Serial.println("BaseChannel::taskSequence3() end");
     }
 
-    void BaseChannel::taskSequence3() {
+    void BaseChannel::taskSequence5() {
+//        Serial.println("BaseChannel::taskSequence4() start");
         // fill in ////////////////////////////////////////
         {
             for (int j = 0; j < config_data_ptr_->header.pin_size_ / 2; ++j) {
@@ -198,9 +205,11 @@ namespace AutoLight {
             off();
             sleep(500);
         }
+//        Serial.println("BaseChannel::taskSequence4() end");
     }
 
-    void BaseChannel::taskSequence4() {
+    void BaseChannel::taskSequence6() {
+//        Serial.println("BaseChannel::taskSequence5() start");
         // blink 1 by 1 ////////////////////////////////////////
         {
             for (int i = 0; i < config_data_ptr_->header.pin_size_; ++i) {
@@ -224,9 +233,11 @@ namespace AutoLight {
             off();
             sleep(500);
         }
+//        Serial.println("BaseChannel::taskSequence5() end");
     }
 
-    void BaseChannel::taskSequence5() {
+    void BaseChannel::taskSequence7() {
+//        Serial.println("BaseChannel::taskSequence6() start");
         // blink 2 fill ////////////////////////////////////////
         {
             for (int j = 0; j < config_data_ptr_->header.pin_size_ / 2; ++j) {
@@ -246,9 +257,11 @@ namespace AutoLight {
             off();
             sleep(500);
         }
+//        Serial.println("BaseChannel::taskSequence6() end");
     }
 
-    void BaseChannel::taskSequence6() {
+    void BaseChannel::taskSequence8() {
+//        Serial.println("BaseChannel::taskSequence7() start");
         // snake and snake reverse ////////////////////////////////////////
         {
             off();
@@ -273,9 +286,11 @@ namespace AutoLight {
             }
             sleep(500);
         }
+//        Serial.println("BaseChannel::taskSequence7() end");
     }
 
-    void BaseChannel::taskSequence7() {
+    void BaseChannel::taskSequence9() {
+//        Serial.println("BaseChannel::taskSequence8() start");
         auto setRandomLed = [&](int value) -> void {
             int data[config_data_ptr_->header.pin_size_];
             for (int i = 0; i < config_data_ptr_->header.pin_size_; ++i) {
@@ -296,9 +311,11 @@ namespace AutoLight {
 
         setRandomLed(HIGH);
         setRandomLed(LOW);
+//        Serial.println("BaseChannel::taskSequence8() end");
     }
 
-    void BaseChannel::taskSequence8() {
+    void BaseChannel::taskSequence10() {
+//        Serial.println("BaseChannel::taskSequence9() start");
         if ((config_data_ptr_->header.pin_size_ / 2) % 2 == 1) {
             taskSequence7();
         } else {
@@ -318,146 +335,6 @@ namespace AutoLight {
             setWaveLed(HIGH);
             setWaveLed(LOW);
         }
+//        Serial.println("BaseChannel::taskSequence9() end");
     }
-
-//    void BaseChannel::taskSequence9() {
-//        static const int greenMaxAreaSize = 8;
-//        static int size = config_data_ptr_->header.pin_size_;
-//        static uint8_t *pin = config_data_ptr_->header.pin_ptr_;
-//        static void (BaseChannel::*setPtr)(uint8_t, uint8_t) = &BaseChannel::set;
-//
-//        static TaskHandle task;
-//        static auto taskLed1 = task.createTask(1024, [](void *pvParameter) -> void {
-//            for (;;) {
-//                task.delay(100);
-//            }
-//        });
-
-//        static int greenStart = (size - 8) / 2;
-//        static int greenEnd = greenStart + 8;
-//        Serial.print("[");
-//        for (int i = greenStart; i < greenEnd; ++i) {
-//            Serial.print(pin[i]);
-//            Serial.print(" ");
-//        }
-//        Serial.print("]");
-//
-//        static int blueStart = ((size - 8) / 2) - 1;
-//        static int blueEnd = (blueStart + 8) + 1;
-//        static int blueIndex0 = blueStart - 1;
-//        static int blueIndex1 = blueStart;
-//        static int blueIndex2 = blueEnd;
-//        static int blueIndex3 = blueEnd + 1;
-//        Serial.print("[");
-//        Serial.print(pin[blueIndex0]);
-//        Serial.print(" ");
-//        Serial.print(pin[blueIndex1]);
-//        Serial.print(" ");
-//        Serial.print(pin[blueIndex2]);
-//        Serial.print(" ");
-//        Serial.print(pin[blueIndex3]);
-//        Serial.print(" ");
-//        Serial.print("]");
-//        Serial.println();
-
-//        int zero = 0;
-//        int full = config_data_ptr_->header.pin_size_;
-//        int half = config_data_ptr_->header.pin_size_ / 2;
-//        int quarter = half / 2;
-//        int delayHalf = channel_data_.delay_time_ / 2;
-//
-//        int delay = channel_data_.delay_time_;
-//        bool isEven = (half % 2 == 0);
-//
-//        static bool isReverse = false;
-//        static uint8_t count_1 = 0;
-//
-//        isReverse ^= 1;
-//        if (count_1 >= 4) count_1 = 0;
-//        else count_1 += 1;
-//
-//        Serial.print(count_1);
-//        Serial.println();
-//
-//        int startPinIndex = (count_1 >= 1 && count_1 <= 2) ? zero : zero + 1;
-//        int endPinIndex = (count_1 >= 1 && count_1 <= 2) ? full - 1 : full - 2;
-//        int thirdState = (isReverse);
-//
-//        for (int i = 0; i < quarter - 1; ++i) {
-//            for (int j = 0; j < 2; ++j) {
-//                switch (i) {
-//                    case 0:
-//                    case 1:
-//                        set(config_data_ptr_->header.pin_ptr_[startPinIndex], LOW);
-//                        set(config_data_ptr_->header.pin_ptr_[endPinIndex], LOW);
-//                        break;
-//                    case 2:
-//                    case 3:
-//                        set(config_data_ptr_->header.pin_ptr_[startPinIndex], HIGH);
-//                        set(config_data_ptr_->header.pin_ptr_[endPinIndex], HIGH);
-//                        break;
-//                    case 4:
-//                    case 5:
-//                        set(config_data_ptr_->header.pin_ptr_[startPinIndex], LOW);
-//                        set(config_data_ptr_->header.pin_ptr_[endPinIndex], LOW);
-//                        break;
-//                }
-//
-//                if (thirdState) {
-//                    set(config_data_ptr_->header.pin_ptr_[zero + 2], HIGH);
-//                    set(config_data_ptr_->header.pin_ptr_[full - 3], HIGH);
-//                } else {
-//                    set(config_data_ptr_->header.pin_ptr_[zero + 2], LOW);
-//                    set(config_data_ptr_->header.pin_ptr_[full - 3], LOW);
-//                }
-//
-//                set(config_data_ptr_->header.pin_ptr_[(quarter - 1) + i], HIGH);
-//                set(config_data_ptr_->header.pin_ptr_[(full) - quarter - i], HIGH);
-//                sleep(delayHalf / 2);
-//
-//                set(config_data_ptr_->header.pin_ptr_[(quarter - 1) + i], LOW);
-//                set(config_data_ptr_->header.pin_ptr_[(full) - quarter - i], LOW);
-//                sleep(delayHalf / 2);
-//            }
-//        }
-//
-//        for (int i = 0; i < quarter - 1; ++i) {
-//            for (int j = 0; j < 2; ++j) {
-//                switch (i) {
-//                    case 0:
-//                    case 1:
-//                        set(config_data_ptr_->header.pin_ptr_[startPinIndex], LOW);
-//                        set(config_data_ptr_->header.pin_ptr_[endPinIndex], LOW);
-//                        break;
-//                    case 2:
-//                    case 3:
-//                        set(config_data_ptr_->header.pin_ptr_[startPinIndex], HIGH);
-//                        set(config_data_ptr_->header.pin_ptr_[endPinIndex], HIGH);
-//                        break;
-//                    case 4:
-//                    case 5:
-//                        set(config_data_ptr_->header.pin_ptr_[startPinIndex], LOW);
-//                        set(config_data_ptr_->header.pin_ptr_[endPinIndex], LOW);
-//                        break;
-//                }
-//
-//                if (thirdState) {
-//                    set(config_data_ptr_->header.pin_ptr_[zero + 2], HIGH);
-//                    set(config_data_ptr_->header.pin_ptr_[full - 3], HIGH);
-//                } else {
-//                    set(config_data_ptr_->header.pin_ptr_[zero + 2], LOW);
-//                    set(config_data_ptr_->header.pin_ptr_[full - 3], LOW);
-//                }
-//
-//                set(config_data_ptr_->header.pin_ptr_[(quarter + 3) - i], HIGH);
-//                set(config_data_ptr_->header.pin_ptr_[(half + 2) + i], HIGH);
-//                sleep(delayHalf / 2);
-//
-//                set(config_data_ptr_->header.pin_ptr_[(quarter + 3) - i], LOW);
-//                set(config_data_ptr_->header.pin_ptr_[(half + 2) + i], LOW);
-//                sleep(delayHalf / 2);
-//            }
-//        }
-//    }
-
 }

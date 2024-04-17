@@ -35,11 +35,14 @@ struct MenuProperties {
 class LcdMenu : public LiquidCrystal_I2C {
 private:
     MenuCursor *cursor_;
+    uint32_t lcdPrintTimer;
     using LiquidCrystal_I2C::LiquidCrystal_I2C;
+
 public:
     void initialize();
     void onListen(MenuCursor *menuCursor, void (*listenCallback)());
     void showMenu(MenuProperties *properties, bool forced = false);
+    void showCursor(MenuProperties *properties);
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)() = nullptr);
     void formatMenu(MenuProperties *properties, uint8_t index, const char *format, ...);
     void backToMenu(MenuProperties *beforeProperties, MenuProperties *afterProperties);

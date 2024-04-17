@@ -34,7 +34,10 @@ namespace AutoLight {
     public:
         volatile uint32_t delay_time_;
         volatile uint32_t sequence_index_;
+        volatile uint32_t sequence_index_apps_;
         volatile bool is_reverse_;
+        volatile bool is_mode_changed_;
+        volatile bool is_mode_changed_apps_;
     };
 
     class ExpanderIo {
@@ -60,10 +63,14 @@ namespace AutoLight {
         void setTotalSequence(uint8_t _nums);
         void reverse(bool _is_reverse = false);
 
-        volatile uint8_t getSequenceIndex();
+        volatile uint32_t getSequenceIndex();
+        volatile uint32_t getDelayTime();
+        ChannelData getChannelData();
 
+        void runAutoLight(void (*_callbackRun)(uint32_t sequence) = nullptr);
         void changeMode();
-        void runAutoLight();
+        void changeModeApp(uint32_t num);
+        volatile bool isChangeMode();
 
         void setStateHigh(int index, ...);
         void setStateLow(int index, ...);
@@ -76,12 +83,9 @@ namespace AutoLight {
         void on();
 
         bool isReady();
-
         void debug();
 
         // task sequence for each mode
-        void taskSequence0();
-        void taskSequence1();
         void taskSequence2();
         void taskSequence3();
         void taskSequence4();
@@ -90,12 +94,14 @@ namespace AutoLight {
         void taskSequence7();
         void taskSequence8();
         void taskSequence9();
+        void taskSequence10();
+        void taskSequence11();
 
     private:
         bool addIoExpander(IOExpander *_io_expander);
         bool beginIoExpander();
 
-        void setFunction();
+        void setTaskSequenceFunction();
 
         bool is_using_i2c_config_;
         bool is_initialize_;
@@ -103,8 +109,6 @@ namespace AutoLight {
 
         uint8_t total_task_sequence_;
         uint32_t task_sequence_timer_;
-
-        volatile bool is_mode_changed_;
 
         void (BaseChannel::*temp_mode_)();
         void (BaseChannel::*total_mode_[(MAXNUM_TOTAL_TASK_SEQUENCE)])();

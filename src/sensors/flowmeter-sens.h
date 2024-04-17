@@ -201,8 +201,7 @@ protected:
 
 class FlowmeterSens : public BaseSens {
 private:
-    /*variables*/
-    JsonDocument doc;
+    JsonDocument *doc;
     const char *name;
 
     FlowMeter *sensorClass;
@@ -217,6 +216,7 @@ public:
     void process() override;
 
     void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
 };

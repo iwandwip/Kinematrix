@@ -25,9 +25,9 @@ void HardSerial::sendData() {
     serialPtr->println(dataSend);
 }
 
-void HardSerial::sendDataCb(void (*onReceive)()) {
+void HardSerial::sendDataCb(void (*onReceive)(const String &)) {
     serialPtr->println(dataSend);
-    onReceive();
+    onReceive(dataSend);
 }
 
 void HardSerial::sendDataAsync(uint32_t _time) {
@@ -37,11 +37,11 @@ void HardSerial::sendDataAsync(uint32_t _time) {
     }
 }
 
-void HardSerial::sendDataAsyncCb(uint32_t _time, void (*onReceive)()) {
+void HardSerial::sendDataAsyncCb(uint32_t _time, void (*onReceive)(const String &)) {
     if (millis() - sendTime >= _time) {
         sendTime = millis();
         serialPtr->println(dataSend);
-        onReceive();
+        onReceive(dataSend);
     }
 }
 
@@ -49,7 +49,7 @@ void HardSerial::sendBytes(int next) {
     serialPtr->write(next);
 }
 
-void HardSerial::receive(void (*onReceive)(String)) {
+void HardSerial::receive(void (*onReceive)(const String &)) {
     if (onReceive == nullptr) return;
     if (serialPtr->available()) {
         char rxBuffer[250];
@@ -68,7 +68,7 @@ void HardSerial::receive(void (*onReceive)(String)) {
     }
 }
 
-void HardSerial::receiveAsync(uint32_t _time, void (*onReceive)(String)) {
+void HardSerial::receiveAsync(uint32_t _time, void (*onReceive)(const String &)) {
     if (onReceive == nullptr) return;
     if (serialPtr->available()) {
         char rxBuffer[250];
@@ -90,7 +90,7 @@ void HardSerial::receiveAsync(uint32_t _time, void (*onReceive)(String)) {
     }
 }
 
-void HardSerial::receiveString(void (*onReceive)(String)) {
+void HardSerial::receiveString(void (*onReceive)(const String &)) {
     if (serialPtr->available()) {
         String dataCb = serialPtr->readStringUntil('\n');
         onReceive(dataCb);

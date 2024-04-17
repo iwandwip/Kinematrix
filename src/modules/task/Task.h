@@ -21,6 +21,8 @@ public:
     ~TaskHandle();
 
     void initialize(void (*_callback)() = nullptr);
+    void setInitCoreID(uint8_t coreID);
+
     TaskHandle_t *
     createTask(uint32_t _stack_depth, void (*_task_callback)(void *pvParameter), const char *_task_name = "task");
     void deleteTask(TaskHandle_t _task);

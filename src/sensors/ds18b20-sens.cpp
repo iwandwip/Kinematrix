@@ -24,13 +24,17 @@ DS18B20Sens::~DS18B20Sens() = default;
 
 void DS18B20Sens::init() {
     DallasTemperature::begin();
-    doc[name] = 0;
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "DS18B20Sens";
+        doc = new JsonDocument;
+    }
+    (*doc)[name] = 0;
 }
 
 void DS18B20Sens::update() {
     if (millis() - sensorTimer >= 3000) {
         DallasTemperature::requestTemperatures();
-        doc[name] = DallasTemperature::getTempCByIndex(0);
+        (*doc)[name] = DallasTemperature::getTempCByIndex(0);
         sensorTimer = millis();
     }
 }
@@ -39,16 +43,20 @@ void DS18B20Sens::setDocument(const char *objName) {
     name = objName;
 }
 
+void DS18B20Sens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
 JsonDocument DS18B20Sens::getDocument() {
-    return doc;
+    return (*doc);
 }
 
 JsonVariant DS18B20Sens::getVariant(const char *searchName) {
-    return doc[searchName];
+    return (*doc)[searchName];
 }
 
 float DS18B20Sens::getValueTemperature() const {
-    return doc[name].as<float>();
+    return (*doc)[name].as<float>();
 }
 
 void DS18B20Sens::setPins(uint8_t _pin) {

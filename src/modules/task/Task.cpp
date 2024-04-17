@@ -21,6 +21,10 @@ void TaskHandle::initialize(void (*_callback)()) {
     if (_callback != nullptr) _callback();
 }
 
+void TaskHandle::setInitCoreID(uint8_t coreID) {
+    task_index_ = coreID;
+}
+
 TaskHandle_t *
 TaskHandle::createTask(uint32_t _stack_depth, void (*_task_callback)(void *pvParameter), const char *_task_name) {
     TaskHandle_t *taskHandler = new TaskHandle_t;

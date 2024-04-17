@@ -31,6 +31,7 @@ private:
     HardwareSerial *serialPtr;
     String dataSend;
     uint32_t sendTime;
+    uint32_t receiveTime;
     String parseStr(String data, char separator[], int index);
 
 public:
@@ -46,16 +47,19 @@ public:
         dataSend += String(newData);
         dataSend += separator;
     }
-
     void setTimeOut(uint32_t time);
+
     void clearData();
     void sendData();
-    void sendDataCb(void (*callback)());
+    void sendDataCb(void (*onReceive)(const String &));
     void sendDataAsync(uint32_t _time = 500);
-    void sendDataAsyncCb(uint32_t _time = 500, void (*callback)() = nullptr);
-    void receive(void (*callback)(String));
-    float getData(String data, uint8_t index = 0);
-    String getStrData(String data, uint8_t index = 0);
+    void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)(const String &) = nullptr);
+    void sendBytes(int next);
+    void receive(void (*onReceive)(const String &));
+    void receiveAsync(uint32_t _time = 500, void (*onReceive)(const String &) = nullptr);
+    void receiveString(void (*onReceive)(const String &));
+    float getData(String data, uint8_t index, char separator[]);
+    String getStrData(String data, uint8_t index, char separator[]);
 };
 
 #endif // defined(ESP8266) || defined(ESP32)

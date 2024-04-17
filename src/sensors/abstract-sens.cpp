@@ -8,14 +8,17 @@
 #include "abstract-sens.h"
 #include "Arduino.h"
 
-Abstract::Abstract(bool random_value, float dummy_value)
+Abstract::Abstract(int _enumRandomValue)
         : doc(nullptr),
           name(""),
-          randomValue(random_value),
-          dummyValue(dummy_value),
-          sensorPin(0),
-          sensorTimer(0) {
-}
+          enumRandomValue(_enumRandomValue) {}
+
+Abstract::Abstract(int _enumRandomValue, float _dummyValue1, float _dummyValue2)
+        : doc(nullptr),
+          name(""),
+          enumRandomValue(_enumRandomValue),
+          dummyValue1(_dummyValue1),
+          dummyValue2(_dummyValue2) {}
 
 Abstract::~Abstract() = default;
 
@@ -29,10 +32,19 @@ void Abstract::init() {
 
 void Abstract::update() {
     if (millis() - sensorTimer >= 500) {
-        if (randomValue) {
-            (*doc)[name] = float(random(1 * 10, 1000 * 10)) * 0.1;
-        } else {
-            (*doc)[name] = dummyValue;
+        switch (enumRandomValue) {
+            case 0:
+                (*doc)[name] = float(random(1 * 10, 1000 * 10)) * 0.1;
+                break;
+            case 1:
+                (*doc)[name] = dummyValue1;
+                break;
+            case 2:
+                (*doc)[name] = float(random(0 * 10, (long) dummyValue1 * 10)) * 0.1;
+                break;
+            case 3:
+                (*doc)[name] = float(random((long) dummyValue1 * 10, (long) dummyValue2 * 10)) * 0.1;
+                break;
         }
         sensorTimer = millis();
     }

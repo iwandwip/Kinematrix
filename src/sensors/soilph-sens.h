@@ -15,8 +15,7 @@
 
 class SoilPHSens : public BaseSens {
 private:
-    /*variables*/
-    JsonDocument doc;
+    JsonDocument *doc;
     const char *name;
 
     uint8_t sensorPin;
@@ -30,6 +29,7 @@ public:
     void update() override;
 
     void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
 

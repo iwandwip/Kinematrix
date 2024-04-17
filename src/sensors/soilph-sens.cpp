@@ -17,14 +17,19 @@ SoilPHSens::~SoilPHSens() = default;
 
 void SoilPHSens::init() {
     pinMode(sensorPin, INPUT);
-    doc[name] = 0.0;
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "SoilPHSens";
+        doc = new JsonDocument;
+    }
+    (*doc)[name] = 0;
 }
 
 void SoilPHSens::update() {
     if (millis() - sensorTimer >= 500) {
-        float soilPh = (-0.0693 * (float) analogRead(sensorPin)) + 7.3855;
+        float x = analogRead(sensorPin);
+        double soilPh = -0.0693 * x + 7.3855;
         soilPh = (soilPh < 0) ? 0 : soilPh;
-        doc[name] = soilPh;
+        (*doc)[name] = soilPh;
         sensorTimer = millis();
     }
 }
@@ -33,16 +38,20 @@ void SoilPHSens::setDocument(const char *objName) {
     name = objName;
 }
 
+void SoilPHSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
 JsonDocument SoilPHSens::getDocument() {
-    return doc;
+    return (*doc);
 }
 
 JsonVariant SoilPHSens::getVariant(const char *searchName) {
-    return doc[searchName];
+    return (*doc)[searchName];
 }
 
 float SoilPHSens::getValueSoilPHSens() const {
-    return doc[name].as<float>();
+    return (*doc)[name].as<float>();
 }
 
 void SoilPHSens::setPins(uint8_t _pin) {

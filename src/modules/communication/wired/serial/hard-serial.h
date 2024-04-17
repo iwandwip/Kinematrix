@@ -33,13 +33,13 @@ public:
 
     void clearData();
     void sendData();
-    void sendDataCb(void (*onReceive)());
+    void sendDataCb(void (*onReceive)(const String &));
     void sendDataAsync(uint32_t _time = 500);
-    void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)() = nullptr);
+    void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)(const String &) = nullptr);
     void sendBytes(int next);
-    void receive(void (*onReceive)(String));
-    void receiveAsync(uint32_t _time = 500, void (*onReceive)(String) = nullptr);
-    void receiveString(void (*onReceive)(String));
+    void receive(void (*onReceive)(const String &));
+    void receiveAsync(uint32_t _time = 500, void (*onReceive)(const String &) = nullptr);
+    void receiveString(void (*onReceive)(const String &));
     float getData(String data, uint8_t index, char separator[]);
     String getStrData(String data, uint8_t index, char separator[]);
 };

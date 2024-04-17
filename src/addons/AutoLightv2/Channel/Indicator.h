@@ -19,7 +19,7 @@ namespace AutoLight {
     const int LED_RED_PIN = 14;
     const int LED_GREEN_PIN = 12;
     const int LED_BLUE_PIN = 13;
-    const int BUZZER_PIN = 2;
+    const int BUZZER_PIN = 15; // 2
 
     class OutputData {
     public:

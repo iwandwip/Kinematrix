@@ -18,14 +18,16 @@ private:
     JsonDocument *doc;
     const char *name;
 
-    bool randomValue;
-    float dummyValue;
+    int enumRandomValue;
+    float dummyValue1;
+    float dummyValue2;
 
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
 public:
-    explicit Abstract(bool random_value = false, float dummy_value = 0.0);
+    Abstract(int _enumRandomValue = 0);
+    Abstract(int _enumRandomValue, float _dummyValue1, float _dummyValue2 = 0);
     virtual ~Abstract();
     void init() override;
     void update() override;

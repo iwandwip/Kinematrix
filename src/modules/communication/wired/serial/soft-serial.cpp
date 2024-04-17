@@ -35,9 +35,9 @@ void SoftSerial::sendData() {
     serialPtr->println(dataSend);
 }
 
-void SoftSerial::sendDataCb(void (*onReceive)()) {
+void SoftSerial::sendDataCb(void (*onReceive)(const String &)) {
     serialPtr->println(dataSend);
-    onReceive();
+    onReceive(dataSend);
 }
 
 void SoftSerial::sendDataAsync(uint32_t _time) {
@@ -47,15 +47,19 @@ void SoftSerial::sendDataAsync(uint32_t _time) {
     }
 }
 
-void SoftSerial::sendDataAsyncCb(uint32_t _time, void (*onReceive)()) {
+void SoftSerial::sendDataAsyncCb(uint32_t _time, void (*onReceive)(const String &)) {
     if (millis() - sendTime >= _time) {
         sendTime = millis();
         serialPtr->println(dataSend);
-        onReceive();
+        onReceive(dataSend);
     }
 }
 
-void SoftSerial::receive(void (*onReceive)(String)) {
+void SoftSerial::sendBytes(int next) {
+    serialPtr->write(next);
+}
+
+void SoftSerial::receive(void (*onReceive)(const String &)) {
     if (onReceive == nullptr) return;
     if (serialPtr->available()) {
         char rxBuffer[250];
@@ -74,12 +78,41 @@ void SoftSerial::receive(void (*onReceive)(String)) {
     }
 }
 
-float SoftSerial::getData(String data, uint8_t index) {
-    return parseStr(data, ";", index).toFloat();
+void SoftSerial::receiveAsync(uint32_t _time, void (*onReceive)(const String &)) {
+    if (onReceive == nullptr) return;
+    if (serialPtr->available()) {
+        char rxBuffer[250];
+        uint8_t rxBufferPtr = 0;
+        rxBuffer[rxBufferPtr++] = serialPtr->read();
+        if (millis() - receiveTime >= _time) {
+            receiveTime = millis();
+            while (1) {
+                if (serialPtr->available()) {
+                    rxBuffer[rxBufferPtr++] = serialPtr->read();
+                    if (rxBuffer[rxBufferPtr - 1] == '\n') break;
+                }
+            }
+            rxBuffer[rxBufferPtr] = 0;
+            String dataCb = String(rxBuffer);
+            dataCb.replace("\n", "");
+            onReceive(dataCb);
+        }
+    }
 }
 
-String SoftSerial::getStrData(String data, uint8_t index) {
-    return parseStr(data, ";", index);
+void SoftSerial::receiveString(void (*onReceive)(const String &)) {
+    if (serialPtr->available()) {
+        String dataCb = serialPtr->readStringUntil('\n');
+        onReceive(dataCb);
+    }
+}
+
+float SoftSerial::getData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index).toFloat();
+}
+
+String SoftSerial::getStrData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index);
 }
 
 String SoftSerial::parseStr(String data, char separator[], int index) {

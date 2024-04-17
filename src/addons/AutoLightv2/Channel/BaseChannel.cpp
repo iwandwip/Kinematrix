@@ -10,7 +10,7 @@
 namespace AutoLight {
     BaseChannel::BaseChannel(bool _enable_unit_test)
             : is_unit_test_(_enable_unit_test) {
-        setFunction();
+        setTaskSequenceFunction();
     }
 
     BaseChannel::~BaseChannel() {
@@ -39,7 +39,11 @@ namespace AutoLight {
     }
 
     void BaseChannel::setInitDelay(uint32_t _time) {
-        channel_data_.delay_time_ = _time;
+        if (_time < 30) {
+            channel_data_.delay_time_ = 30;
+        } else {
+            channel_data_.delay_time_ = _time;
+        }
     }
 
     void BaseChannel::setInitSequence(uint8_t _sequence) {
@@ -55,23 +59,54 @@ namespace AutoLight {
         channel_data_.is_reverse_ = _is_reverse;
     }
 
-    volatile uint8_t BaseChannel::getSequenceIndex() {
+    volatile uint32_t BaseChannel::getSequenceIndex() {
         return channel_data_.sequence_index_;
     }
 
-    void BaseChannel::changeMode() {
-        is_mode_changed_ = true;
+    volatile uint32_t BaseChannel::getDelayTime() {
+        return channel_data_.delay_time_;
     }
 
-    void BaseChannel::runAutoLight() {
-        if (is_mode_changed_) {
+    ChannelData BaseChannel::getChannelData() {
+        return channel_data_;
+    }
+
+    void BaseChannel::changeMode() {
+        channel_data_.is_mode_changed_ = true;
+    }
+
+    void BaseChannel::changeModeApp(uint32_t num) {
+        channel_data_.is_mode_changed_apps_ = true;
+        channel_data_.sequence_index_apps_ = num;
+    }
+
+    volatile bool BaseChannel::isChangeMode() {
+        return channel_data_.is_mode_changed_ || channel_data_.is_mode_changed_apps_;
+    }
+
+    void BaseChannel::runAutoLight(void (*_callbackRun)(uint32_t sequence)) {
+        if (isChangeMode()) {
             forceOff();
+
             channel_data_.sequence_index_++;
-            if (channel_data_.sequence_index_ > (total_task_sequence_ - 1) + 2) {
+            if (channel_data_.sequence_index_ > (total_task_sequence_)) {
                 channel_data_.sequence_index_ = 0;
             }
+            if (channel_data_.is_mode_changed_apps_) {
+                if (channel_data_.sequence_index_apps_ > total_task_sequence_) {
+                    channel_data_.sequence_index_apps_ = total_task_sequence_;
+                }
+                channel_data_.sequence_index_ = channel_data_.sequence_index_apps_;
+            }
+            if (_callbackRun != nullptr) {
+                _callbackRun(channel_data_.sequence_index_);
+            }
+
             temp_mode_ = total_mode_[channel_data_.sequence_index_];
-            is_mode_changed_ = false;
+
+            channel_data_.is_mode_changed_ = false;
+            channel_data_.is_mode_changed_apps_ = false;
+
             if (is_unit_test_) {
                 Serial.println("==============================");
                 Serial.println("| START DEBUG BUTTON INTERRUPT");
@@ -84,12 +119,13 @@ namespace AutoLight {
 
                 Serial.print("| total_task_sequence_         : ");
                 Serial.print("| ");
-                Serial.print(total_task_sequence_ + 1);
+                Serial.print(total_task_sequence_);
                 Serial.println();
 
                 Serial.println("| END DEBUG BUTTON INTERRUPT");
                 Serial.println("==============================");
             }
+
         }
         (this->*temp_mode_)();
 
@@ -124,7 +160,7 @@ namespace AutoLight {
     }
 
     void BaseChannel::set(uint8_t _pin, uint8_t _state) {
-        if (is_mode_changed_) return;
+        if (isChangeMode()) return;
         if (is_using_i2c_config_) {
             int index = ceil((_pin + 1) / 8.0) - 1;
             int pins_mod = _pin % 8;
@@ -137,7 +173,7 @@ namespace AutoLight {
     }
 
     void BaseChannel::sleep(uint32_t _time) {
-        if (is_mode_changed_) return;
+        if (isChangeMode()) return;
         delay(_time);
     }
 
@@ -251,19 +287,19 @@ namespace AutoLight {
         return true;
     }
 
-    void BaseChannel::setFunction() {
+    void BaseChannel::setTaskSequenceFunction() {
         total_mode_[0] = &BaseChannel::off;
         total_mode_[1] = &BaseChannel::on;
-        total_mode_[2] = &BaseChannel::taskSequence0;
-        total_mode_[3] = &BaseChannel::taskSequence1;
-        total_mode_[4] = &BaseChannel::taskSequence2;
-        total_mode_[5] = &BaseChannel::taskSequence3;
-        total_mode_[6] = &BaseChannel::taskSequence4;
-        total_mode_[7] = &BaseChannel::taskSequence5;
-        total_mode_[8] = &BaseChannel::taskSequence6;
-        total_mode_[9] = &BaseChannel::taskSequence7;
-        total_mode_[10] = &BaseChannel::taskSequence8;
-        total_mode_[11] = &BaseChannel::taskSequence9;
+        total_mode_[2] = &BaseChannel::taskSequence2;
+        total_mode_[3] = &BaseChannel::taskSequence3;
+        total_mode_[4] = &BaseChannel::taskSequence4;
+        total_mode_[5] = &BaseChannel::taskSequence5;
+        total_mode_[6] = &BaseChannel::taskSequence6;
+        total_mode_[7] = &BaseChannel::taskSequence7;
+        total_mode_[8] = &BaseChannel::taskSequence8;
+        total_mode_[9] = &BaseChannel::taskSequence9;
+        total_mode_[10] = &BaseChannel::taskSequence10;
+        total_mode_[11] = &BaseChannel::taskSequence11;
     }
 
     void BaseChannel::debug() {

@@ -20,7 +20,6 @@ void SwapSerial::begin(HardwareSerial *_serialPtr,
                        uint8_t txPin) {
     serialPtr = _serialPtr;
     serialPtr->begin(baud, cfg, rxPin, txPin);
-//    serialPtr->println();
 }
 
 void SwapSerial::setTimeOut(uint32_t time) {
@@ -35,9 +34,9 @@ void SwapSerial::sendData() {
     serialPtr->println(dataSend);
 }
 
-void SwapSerial::sendDataCb(void (*callback)()) {
+void SwapSerial::sendDataCb(void (*onReceive)(const String &)) {
     serialPtr->println(dataSend);
-    callback();
+    onReceive(dataSend);
 }
 
 void SwapSerial::sendDataAsync(uint32_t _time) {
@@ -47,16 +46,20 @@ void SwapSerial::sendDataAsync(uint32_t _time) {
     }
 }
 
-void SwapSerial::sendDataAsyncCb(uint32_t _time, void (*callback)()) {
+void SwapSerial::sendDataAsyncCb(uint32_t _time, void (*onReceive)(const String &)) {
     if (millis() - sendTime >= _time) {
         sendTime = millis();
         serialPtr->println(dataSend);
-        callback();
+        onReceive(dataSend);
     }
 }
 
-void SwapSerial::receive(void (*callback)(String)) {
-    if (callback == nullptr) return;
+void SwapSerial::sendBytes(int next) {
+    serialPtr->write(next);
+}
+
+void SwapSerial::receive(void (*onReceive)(const String &)) {
+    if (onReceive == nullptr) return;
     if (serialPtr->available()) {
         char rxBuffer[250];
         uint8_t rxBufferPtr = 0;
@@ -70,16 +73,45 @@ void SwapSerial::receive(void (*callback)(String)) {
         rxBuffer[rxBufferPtr] = 0;
         String dataCb = String(rxBuffer);
         dataCb.replace("\n", "");
-        callback(dataCb);
+        onReceive(dataCb);
     }
 }
 
-float SwapSerial::getData(String data, uint8_t index) {
-    return parseStr(data, ";", index).toFloat();
+void SwapSerial::receiveAsync(uint32_t _time, void (*onReceive)(const String &)) {
+    if (onReceive == nullptr) return;
+    if (serialPtr->available()) {
+        char rxBuffer[250];
+        uint8_t rxBufferPtr = 0;
+        rxBuffer[rxBufferPtr++] = serialPtr->read();
+        if (millis() - receiveTime >= _time) {
+            receiveTime = millis();
+            while (1) {
+                if (serialPtr->available()) {
+                    rxBuffer[rxBufferPtr++] = serialPtr->read();
+                    if (rxBuffer[rxBufferPtr - 1] == '\n') break;
+                }
+            }
+            rxBuffer[rxBufferPtr] = 0;
+            String dataCb = String(rxBuffer);
+            dataCb.replace("\n", "");
+            onReceive(dataCb);
+        }
+    }
 }
 
-String SwapSerial::getStrData(String data, uint8_t index) {
-    return parseStr(data, ";", index);
+void SwapSerial::receiveString(void (*onReceive)(const String &)) {
+    if (serialPtr->available()) {
+        String dataCb = serialPtr->readStringUntil('\n');
+        onReceive(dataCb);
+    }
+}
+
+float SwapSerial::getData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index).toFloat();
+}
+
+String SwapSerial::getStrData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index);
 }
 
 String SwapSerial::parseStr(String data, char separator[], int index) {

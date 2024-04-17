@@ -45,6 +45,12 @@ namespace AutoLight {
         ConfigTable table;
     } ConfigData;
 
+    struct Credentials {
+        String ssid;
+        String password;
+        String serial;
+    };
+
     class ConfigI2CMaxData {
     public:
         static const int VERSION = 32;
