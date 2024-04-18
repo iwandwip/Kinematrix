@@ -22,7 +22,8 @@ void RTC_DS3231Sens::init() {
     }
     if (!RTC_DS3231::begin(wirePtr)) {
         Serial.println("Couldn't find RTC");
-        while (1) delay(10);
+        Serial.flush();
+        while (true) delay(10);
     }
 //    if (RTC_DS3231::lostPower()) {
 //        Serial.println("RTC lost power, let's set the time!");
@@ -30,9 +31,9 @@ void RTC_DS3231Sens::init() {
 //    }
     if (dateTime == DateTime()) {
         // RTC_DS3231::adjust(DateTime(F(__DATE__), F(__TIME__)));
-//        Serial.println("RTC init success");
+        Serial.println("| [INFO] RTC init success");
     } else {
-        Serial.println("RTC set time");
+        Serial.println("| [INFO] RTC set time");
         String timestamp = RTC_DS3231::now().timestamp();
         timestamp.replace('T', ' ');
         Serial.println(timestamp);

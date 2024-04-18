@@ -52,7 +52,8 @@ public:
     MenuProperties *end();
     LcdMenu &operator[](uint8_t index);
     void freeCharArray(char *str);
-    MenuProperties *createMenu(uint8_t menuSize, ...);
+    MenuProperties *createMenu(int menuSize, ...);
+    MenuProperties *createEmptyMenu(int menuSize, const char *text = nullptr);
     void freeMenu(MenuProperties *menuProperties);
     void showCursor(bool state);
     MenuCursor getCursor();

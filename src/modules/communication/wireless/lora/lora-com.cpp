@@ -63,47 +63,55 @@ long LoRaModule::getSignalBandwidth() {
     return LoRa.getSignalBandwidth();
 }
 
+void LoRaModule::sleep() {
+    LoRa.sleep();
+}
+
+void LoRaModule::idle() {
+    LoRa.idle();
+}
+
 void LoRaModule::clearData() {
-    data = NONE;
+    dataSend = "";
 }
 
 void LoRaModule::sendData() {
     LoRa.beginPacket();
-    LoRa.print(data);
+    LoRa.print(dataSend);
     LoRa.endPacket();
 }
 
-void LoRaModule::sendDataCb(void (*callback)()) {
+void LoRaModule::sendDataCb(void (*onReceive)(const String &)) {
     LoRa.beginPacket();
-    LoRa.print(data);
-    LoRa.endPacket();  // true = async
-    callback();
+    LoRa.print(dataSend);
+    LoRa.endPacket();
+    onReceive(dataSend);
 }
 
 void LoRaModule::sendDataAsync(uint32_t _time) {
     if (millis() - sendTime >= _time) {
-        LoRa.beginPacket();
-        LoRa.print(data);
-        LoRa.endPacket();  // true = async
-        // LoRa.receive();
-        // Serial.println(data);
         sendTime = millis();
+        LoRa.beginPacket();
+        LoRa.print(dataSend);
+        LoRa.endPacket();
     }
 }
 
-void LoRaModule::sendDataAsyncCb(uint32_t _time, void (*callback)()) {
+void LoRaModule::sendDataAsyncCb(uint32_t _time, void (*onReceive)(const String &)) {
     if (millis() - sendTime >= _time) {
-        LoRa.beginPacket();
-        LoRa.print(data);
-        LoRa.endPacket();  // true = async
-        callback();
-        // LoRa.receive();
-        // Serial.println(data);
         sendTime = millis();
+        LoRa.beginPacket();
+        LoRa.print(dataSend);
+        LoRa.endPacket();
+        onReceive(dataSend);
     }
 }
 
-void LoRaModule::receive(void (*onReceive)(String)) {
+void LoRaModule::sendBytes(int next) {
+    LoRa.write(next);
+}
+
+void LoRaModule::receive(void (*onReceive)(const String &)) {
     if (onReceive == nullptr) return;
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
@@ -115,20 +123,35 @@ void LoRaModule::receive(void (*onReceive)(String)) {
     }
 }
 
-void LoRaModule::sleep() {
-    LoRa.sleep();
+void LoRaModule::receiveAsync(uint32_t _time, void (*onReceive)(const String &)) {
+    if (onReceive == nullptr) return;
+    if (millis() - receiveTime >= _time) {
+        receiveTime = millis();
+        int packetSize = LoRa.parsePacket();
+        if (packetSize) {
+            String data;
+            while (LoRa.available()) {
+                data += (char) LoRa.read();
+            }
+            onReceive(data);
+        }
+    }
 }
 
-void LoRaModule::idle() {
-    LoRa.idle();
+void LoRaModule::receiveString(void (*onReceive)(const String &)) {
+    int packetSize = LoRa.parsePacket();
+    if (packetSize) {
+        String data = LoRa.readStringUntil('\n');
+        onReceive(data);
+    }
 }
 
-float LoRaModule::getData(String data, uint8_t index) {
-    return parseStr(data, ";", index).toFloat();
+float LoRaModule::getData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index).toFloat();
 }
 
-String LoRaModule::getStrData(String data, uint8_t index) {
-    return parseStr(data, ";", index);
+String LoRaModule::getStrData(String data, uint8_t index, char separator[]) {
+    return parseStr(data, separator, index);
 }
 
 String LoRaModule::parseStr(String data, char separator[], int index) {

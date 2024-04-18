@@ -31,6 +31,11 @@ public:
         dataSend += separator;
     }
 
+    template<typename T>
+    void sendString(T newData) {
+        serialPtr->println(newData);
+    }
+
     void clearData();
     void sendData();
     void sendDataCb(void (*onReceive)(const String &));

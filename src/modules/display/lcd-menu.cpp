@@ -185,30 +185,61 @@ void LcdMenu::freeCharArray(char *str) {
     }
 }
 
-MenuProperties *LcdMenu::createMenu(uint8_t menuSize, ...) {
+MenuProperties *LcdMenu::createMenu(int menuSize, ...) {
     va_list args;
     va_start(args, menuSize);
 
     MenuProperties *properties = new MenuProperties;
 
     properties->option[0] = '\0';
-    properties->text = new char *[menuSize];
-    properties->isHasCb = new bool[menuSize];
     properties->len = menuSize;
 
     properties->select = 0;
     properties->index = 0;
     properties->upCount = 0;
 
-    for (uint8_t i = 0; i < menuSize; ++i) {
-        char *menuItem = va_arg(args, char *);
-        properties->text[i] = new char[20];
-        // properties->text[i] = menuItem;
-        strcpy(properties->text[i], menuItem);
-        properties->isHasCb[i] = false;
+    if (menuSize > 0) {
+        properties->text = new char *[menuSize];
+        properties->isHasCb = new bool[menuSize];
+        for (uint8_t i = 0; i < menuSize; ++i) {
+            const char *menuItem = va_arg(args, const char *);
+            properties->text[i] = new char[20];
+            strcpy(properties->text[i], "default");
+            if (menuItem != nullptr) strcpy(properties->text[i], menuItem);
+            properties->isHasCb[i] = false;
+        }
+    } else {
+        properties->text = nullptr;
+        properties->isHasCb = nullptr;
     }
 
     va_end(args);
+    return properties;
+}
+
+MenuProperties *LcdMenu::createEmptyMenu(int menuSize, const char *text) {
+    MenuProperties *properties = new MenuProperties;
+
+    properties->option[0] = '\0';
+    properties->len = menuSize;
+
+    properties->select = 0;
+    properties->index = 0;
+    properties->upCount = 0;
+
+    if (menuSize > 0) {
+        properties->text = new char *[menuSize];
+        properties->isHasCb = new bool[menuSize];
+        for (uint8_t i = 0; i < menuSize; ++i) {
+            properties->text[i] = new char[20];
+            strcpy(properties->text[i], "default");
+            if (text != nullptr) strcpy(properties->text[i], text);
+            properties->isHasCb[i] = false;
+        }
+    } else {
+        properties->text = nullptr;
+        properties->isHasCb = nullptr;
+    }
     return properties;
 }
 
