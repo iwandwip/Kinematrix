@@ -16,8 +16,9 @@
 
 class HX711Sens : public BaseSens, public HX711 {
 private:
-    JsonDocument doc;
+    JsonDocument *doc;
     const char *name;
+
     uint32_t sensorTimer[2];
     uint8_t sensorDOUTPin;
     uint8_t sensorSCKPin;
@@ -28,11 +29,13 @@ public:
     explicit HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin);
     void init() override;
     void update() override;
+
     void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
 
-    __attribute__((unused)) float getCalibrateFactorInit(float weight);
+    float getCalibrateFactorInit(float weight);
     bool isReady();
     void setScaleDelay(long time, float scale = 1.f);
     void setScale(float scale = 1.f);

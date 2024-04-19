@@ -25,7 +25,6 @@ SensorModule::~SensorModule() {
 }
 
 void SensorModule::init(void (*initializeCallback)(void)) {
-    if (initializeCallback != nullptr) initializeCallback();
     if (base == nullptr) return;
     doc = new JsonDocument;
     for (uint8_t i = 0; i < len; i++) {
@@ -33,6 +32,7 @@ void SensorModule::init(void (*initializeCallback)(void)) {
         base[i]->setDocumentValue(doc);
         base[i]->init();
     }
+    if (initializeCallback != nullptr) initializeCallback();
 }
 
 void SensorModule::update(void (*updateCallback)(void)) {

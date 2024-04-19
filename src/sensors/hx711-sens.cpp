@@ -24,13 +24,19 @@ HX711Sens::HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin)
 
 void HX711Sens::init() {
     this->begin(this->sensorDOUTPin, this->sensorSCKPin);
-    doc[name] = 0;
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "HX711Sens";
+        doc = new JsonDocument;
+    }
+    (*doc)[name] = 0;
 }
 
 void HX711Sens::update() {
     if (millis() - sensorTimer[0] >= 500) {
         if (this->is_ready()) {
-            doc[name] = this->get_units();
+            float units = this->get_units();
+            if (units < 0) units = 0.0;
+            (*doc)[name] = units;
         }
         sensorTimer[0] = millis();
     }
@@ -40,15 +46,19 @@ void HX711Sens::setDocument(const char *objName) {
     name = objName;
 }
 
+void HX711Sens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
 JsonDocument HX711Sens::getDocument() {
-    return doc;
+    return (*doc);
 }
 
 JsonVariant HX711Sens::getVariant(const char *searchName) {
-    return doc[searchName];
+    return (*doc)[searchName];
 }
 
-__attribute__((unused)) float HX711Sens::getCalibrateFactorInit(float weight) {
+float HX711Sens::getCalibrateFactorInit(float weight) {
     float calibrationFactor = 0.0;
     if (this->is_ready()) {
         this->set_scale();
@@ -101,7 +111,7 @@ float HX711Sens::getCalibrateFactor(float units, float weight) {
 }
 
 float HX711Sens::getValueWeight(bool isCanZero) const {
-    float value = doc[name].as<float>();
+    float value = (*doc)[name].as<float>();
     if (isCanZero) return value;
     return value < 0 ? 0 : value;
 }
