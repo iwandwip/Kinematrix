@@ -6,7 +6,7 @@ Utilize this library to fulfill your project needs. Within it, there are modules
 
 
 ## Basic Usage
-
+#### Example 1
 ```cpp
 #include "Kinematrix.h"
 #include "index/ultrasonic.h"
@@ -28,7 +28,7 @@ void loop() {
 }
 
 ```
-
+#### Example 2
 ```cpp
 #include "Kinematrix.h"
 #include "index/digital_input.h"
@@ -51,6 +51,15 @@ void loop() {
 ```
 
 ## Package List
+First, add the header
+```cpp
+#include "Kinematrix.h"
+```
+You can include all libraries
+```cpp
+#include "index/all.h"
+```
+or include them one by one
 ```cpp
 // modules
 #include "modules/communication/wired/i2c/i2c-expander.h"
@@ -77,7 +86,6 @@ void loop() {
 #include "modules/time/timer-task.h"
 
 // sensor
-#include "Arduino.h"
 #include "sensors/abstract-sens.h"
 #include "sensors/aht-sens.h"
 #include "sensors/bme280-sens.h"

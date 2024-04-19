@@ -35,7 +35,6 @@
 #include "modules/time/timer-task.h"
 
 // sensor
-#include "Arduino.h"
 #include "sensors/abstract-sens.h"
 #include "sensors/aht-sens.h"
 #include "sensors/bme280-sens.h"
