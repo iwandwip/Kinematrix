@@ -58,7 +58,7 @@ void TaskHandle::setStackDepth(uint32_t _stack_depth) {
 
 #else
 
-#if ENABLE_ARDUINO_RTOS
+#if ENABLE_ARDUINO_RTOS && ENABLE_ARDUINO_KINEMATRIX
 
 TaskHandle::TaskHandle()
         : ux_priority_(1),

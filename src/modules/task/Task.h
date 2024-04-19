@@ -40,7 +40,7 @@ private:
 
 #else
 
-#if ENABLE_ARDUINO_RTOS
+#if ENABLE_ARDUINO_RTOS && ENABLE_ARDUINO_KINEMATRIX
 
 #include "Arduino.h"
 #include "Arduino_FreeRTOS.h"

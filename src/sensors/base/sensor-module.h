@@ -89,7 +89,7 @@ public:
 
     void debug(const char *searchName, bool showHeapMemory = false, bool endl = true);
     void debug(bool showHeapMemory = false);
-    void debug(uint32_t time, bool showHeapMemory = false);
+    void debug(uint32_t time, bool showHeapMemory = false, void (*debugCallback)() = nullptr);
     void debugPretty(uint32_t time = 1000);
     void print(const char *format, ...);
 };

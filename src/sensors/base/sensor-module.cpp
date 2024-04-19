@@ -22,6 +22,10 @@ SensorModule::~SensorModule() {
         base = nullptr;
         len = 0;
     }
+    if (doc != nullptr) {
+        delete doc;
+        doc = nullptr;
+    }
 }
 
 void SensorModule::init(void (*initializeCallback)(void)) {
@@ -157,6 +161,11 @@ void SensorModule::clearModules() {
         name = nullptr;
         lenName = 0;
     }
+
+    if (doc != nullptr) {
+        delete doc;
+        doc = nullptr;
+    }
 }
 
 uint8_t SensorModule::getModuleCount() {
@@ -258,15 +267,20 @@ void SensorModule::debug(bool showHeapMemory) {
     Serial.println();
 }
 
-void SensorModule::debug(uint32_t time, bool showHeapMemory) {
+void SensorModule::debug(uint32_t time, bool showHeapMemory, void (*debugCallback)()) {
+    if (!isReady()) return;
     static uint32_t debugTime = 0;
     if (millis() - debugTime >= time) {
         debug(showHeapMemory);
+        if (debugCallback != nullptr) {
+            debugCallback();
+        }
         debugTime = millis();
     }
 }
 
 void SensorModule::debugPretty(uint32_t time) {
+    if (!isReady()) return;
     static uint32_t debugPrettyTime = 0;
     if (millis() - debugPrettyTime >= time) {
         serializeJsonPretty((*doc), Serial);

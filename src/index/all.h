@@ -53,6 +53,7 @@
 #include "sensors/soil-sens.h"
 #include "sensors/soilph-sens.h"
 #include "sensors/tds-sens.h"
+#include "sensors/turbidity-sens.h"
 #include "sensors/ultrasonic-sens.h"
 #include "sensors/voltage-sens.h"
 

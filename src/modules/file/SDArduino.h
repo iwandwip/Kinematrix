@@ -13,9 +13,16 @@
 #if defined(ESP32)
 #else
 
+#ifndef KINEMATRIX_ENABLE_SD
+#define KINEMATRIX_ENABLE_SD_GUARD 0
+#else
+#define KINEMATRIX_ENABLE_SD_GUARD 1
+#endif
+
+#if KINEMATRIX_ENABLE_SD_GUARD
+
 #include "Arduino.h"
 #include "SD.h"
-
 
 class SDArduino {
 private:
@@ -39,5 +46,6 @@ public:
 
 #endif
 
+#endif
 
 #endif // SD_ARDUINO_H

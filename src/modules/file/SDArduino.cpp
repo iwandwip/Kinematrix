@@ -10,6 +10,8 @@
 #if defined(ESP32)
 #else
 
+#if KINEMATRIX_ENABLE_SD_GUARD
+
 #include "Arduino.h"
 
 SDArduino::SDArduino() {
@@ -223,5 +225,7 @@ String SDArduino::readFilesString(const char *_file_name, bool debug) {
     }
     return result;
 }
+
+#endif
 
 #endif
