@@ -27,6 +27,7 @@ private:
     const char *name;
 
     TwoWire *wirePtr;
+    uint8_t timeCfg;
     DateTime dateTime;
     uint8_t sensorPin;
 
@@ -34,7 +35,9 @@ private:
     using RTC_DS3231::RTC_DS3231;
 
 public:
-    explicit RTC_DS3231Sens(const DateTime &dt = DateTime(), TwoWire *wireInstance = &Wire);
+    explicit RTC_DS3231Sens(uint8_t timeConfig = RTC_DS3231Sens::ALL,
+                            const DateTime &dt = DateTime(),
+                            TwoWire *wireInstance = &Wire);
     ~RTC_DS3231Sens();
     void init() override;
     void update() override;
@@ -43,6 +46,18 @@ public:
     void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
+
+    static uint32_t toUnixTime(const String &timestamp);
+
+    static const uint8_t ALL = 0b11111111;
+    static const uint8_t Y = 0b00000001;
+    static const uint8_t M = 0b00000010;
+    static const uint8_t D = 0b00000100;
+    static const uint8_t d = 0b00001000;
+    static const uint8_t h = 0b00010000;
+    static const uint8_t m = 0b00100000;
+    static const uint8_t s = 0b01000000;
+    static const uint8_t T = 0b10000000;
 };
 
 #endif  // RTC_SENS_H

@@ -8,8 +8,11 @@
 #include "rtc-sens.h"
 #include "Arduino.h"
 
-RTC_DS3231Sens::RTC_DS3231Sens(const DateTime &dt, TwoWire *wireInstance)
-        : wirePtr(wireInstance),
+RTC_DS3231Sens::RTC_DS3231Sens(uint8_t timeConfig,
+                               const DateTime &dt,
+                               TwoWire *wireInstance)
+        : timeCfg(timeConfig),
+          wirePtr(wireInstance),
           dateTime(dt) {
 }
 
@@ -40,33 +43,29 @@ void RTC_DS3231Sens::init() {
         RTC_DS3231::adjust(dateTime);
     }
 
-    (*doc)[name]["y"] = 0;
-    (*doc)[name]["m"] = 0;
-    (*doc)[name]["d"] = 0;
-    (*doc)[name]["day"] = "";
+    if (timeCfg & RTC_DS3231Sens::Y) (*doc)[name]["Y"] = 0;
+    if (timeCfg & RTC_DS3231Sens::M) (*doc)[name]["M"] = 0;
+    if (timeCfg & RTC_DS3231Sens::D) (*doc)[name]["D"] = 0;
+    if (timeCfg & RTC_DS3231Sens::d) (*doc)[name]["d"] = 0;
 
-    (*doc)[name]["h"] = 0;
-    (*doc)[name]["mm"] = 0;
-    (*doc)[name]["s"] = 0;
-    (*doc)[name]["ux"] = 0;
-    (*doc)[name]["ts"] = "";
+    if (timeCfg & RTC_DS3231Sens::h) (*doc)[name]["h"] = 0;
+    if (timeCfg & RTC_DS3231Sens::m) (*doc)[name]["m"] = 0;
+    if (timeCfg & RTC_DS3231Sens::s) (*doc)[name]["s"] = 0;
+    if (timeCfg & RTC_DS3231Sens::T) (*doc)[name]["T"] = 0;
 }
 
 void RTC_DS3231Sens::update() {
     DateTime now = RTC_DS3231::now();
 
-    (*doc)[name]["y"] = now.year();
-    (*doc)[name]["m"] = now.month();
-    (*doc)[name]["d"] = now.day();
-    (*doc)[name]["day"] = daysOfTheWeek[now.dayOfTheWeek()];
+    if (timeCfg & RTC_DS3231Sens::Y) (*doc)[name]["Y"] = now.year();
+    if (timeCfg & RTC_DS3231Sens::M) (*doc)[name]["M"] = now.month();
+    if (timeCfg & RTC_DS3231Sens::D) (*doc)[name]["D"] = now.day();
+    if (timeCfg & RTC_DS3231Sens::d) (*doc)[name]["d"] = daysOfTheWeek[now.dayOfTheWeek()];
 
-    (*doc)[name]["h"] = now.hour();
-    (*doc)[name]["mm"] = now.minute();
-    (*doc)[name]["s"] = now.second();
-    (*doc)[name]["ux"] = now.unixtime();
-    String timestamp = now.timestamp();
-    timestamp.replace('T', ' ');
-    (*doc)[name]["ts"] = timestamp;
+    if (timeCfg & RTC_DS3231Sens::h) (*doc)[name]["h"] = now.hour();
+    if (timeCfg & RTC_DS3231Sens::m) (*doc)[name]["m"] = now.minute();
+    if (timeCfg & RTC_DS3231Sens::s) (*doc)[name]["s"] = now.second();
+    if (timeCfg & RTC_DS3231Sens::T) (*doc)[name]["T"] = now.timestamp();
 }
 
 void RTC_DS3231Sens::setDocument(const char *objName) {
@@ -83,4 +82,8 @@ JsonDocument RTC_DS3231Sens::getDocument() {
 
 JsonVariant RTC_DS3231Sens::getVariant(const char *searchName) {
     return (*doc)[searchName];
+}
+
+uint32_t RTC_DS3231Sens::toUnixTime(const String &timestamp) {
+    return DateTime(timestamp.c_str()).unixtime();
 }
