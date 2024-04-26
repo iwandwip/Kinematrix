@@ -8,6 +8,8 @@
 #include "turbidity-sens.h"
 #include "Arduino.h"
 
+#define SAMPLE 800
+
 TurbiditySens::TurbiditySens(int _sensorPin)
         : doc(nullptr),
           name(""),
@@ -21,12 +23,26 @@ void TurbiditySens::init() {
         name = "TurbiditySens";
         doc = new JsonDocument;
     }
-    (*doc)[name] = 0;
+    (*doc)[name]["volt"] = 0;
+    (*doc)[name]["ntu"] = 0;
 }
 
 void TurbiditySens::update() {
     if (millis() - sensorTimer >= 500) {
-        (*doc)[name] = analogRead(sensorPin);
+        float voltage = 0.0;
+        double ntu = 0.0;
+        for (int i = 0; i < SAMPLE; i++) {
+            voltage += ((float) analogRead(sensorPin) / 1023) * 5;
+        }
+        voltage = voltage / SAMPLE;
+        voltage = roundToDp(voltage, 2);
+        if (voltage < 2.5) {
+            ntu = 3000;
+        } else {
+            ntu = -1120.4 * square(voltage) + 5742.3 * voltage - 4353.8;
+        }
+        (*doc)[name]["volt"] = voltage;
+        (*doc)[name]["ntu"] = ntu;
         sensorTimer = millis();
     }
 }
@@ -45,6 +61,12 @@ JsonDocument TurbiditySens::getDocument() {
 
 JsonVariant TurbiditySens::getVariant(const char *searchName) {
     return (*doc)[searchName];
+}
+
+float TurbiditySens::roundToDp(float input, int decimalPlace) {
+    float multiplier = powf(10.0f, decimalPlace);
+    input = roundf(input * multiplier) / multiplier;
+    return input;
 }
 
 float TurbiditySens::getValueTurbiditySens() const {

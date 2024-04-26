@@ -32,6 +32,7 @@ public:
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
 
+    float roundToDp(float input, int decimalPlace);
     float getValueTurbiditySens() const;
     void setPins(uint8_t _pin);
 };
