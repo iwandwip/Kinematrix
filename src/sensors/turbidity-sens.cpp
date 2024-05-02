@@ -39,7 +39,7 @@ void TurbiditySens::update() {
         if (voltage < 2.5) {
             ntu = 3000;
         } else {
-            ntu = -1120.4 * square(voltage) + 5742.3 * voltage - 4353.8;
+            ntu = -1120.4 * sq(voltage) + 5742.3 * voltage - 4353.8;
         }
         (*doc)[name]["volt"] = voltage;
         (*doc)[name]["ntu"] = ntu;

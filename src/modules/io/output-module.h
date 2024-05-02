@@ -32,9 +32,9 @@ public:
     void on();
     void off();
     void set(bool state);
-    void toggle();
-    void toggleInit(unsigned long delay_time = 100, int num = 1);
-    void toggleAsync(unsigned long delay_time = 100);
+    void toggle(void (*toggleCallback)() = nullptr);
+    void toggleInit(unsigned long delay_time = 100, int num = 1, void (*toggleCallback)() = nullptr);
+    void toggleAsync(unsigned long delay_time = 100, void (*toggleCallback)() = nullptr);
     void onDelay(unsigned long delay_time);
     void offDelay(unsigned long delay_time);
     void update();

@@ -82,9 +82,11 @@ public:
     bool isModulePresent(uint8_t index);
 
     template<typename T>
-    T *getModule(const char *searchName) {
+    T *getModule(const char *searchName, void (*getModuleCb)(T *) = nullptr) {
         BaseSens *module = getModuleByNamePtr(searchName);
-        return static_cast<T *>(module);
+        T *modulePtr = static_cast<T *>(module);
+        if (getModuleCb != nullptr && module != nullptr) getModuleCb(modulePtr);
+        return modulePtr;
     }
 
     void debug(const char *searchName, bool showHeapMemory = false, bool endl = true);

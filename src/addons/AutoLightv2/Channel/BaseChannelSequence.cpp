@@ -308,9 +308,10 @@ namespace AutoLight {
                 sleep(channel_data_.delay_time_);
             }
         };
-
-        setRandomLed(HIGH);
-        setRandomLed(LOW);
+        for (int i = 0; i < 3; ++i) {
+            setRandomLed(HIGH);
+            setRandomLed(LOW);
+        }
 //        Serial.println("BaseChannel::taskSequence8() end");
     }
 
@@ -332,9 +333,24 @@ namespace AutoLight {
                     sleep(channel_data_.delay_time_);
                 }
             };
-            setWaveLed(HIGH);
-            setWaveLed(LOW);
+            for (int i = 0; i < 4; ++i) {
+                setWaveLed(HIGH);
+                setWaveLed(LOW);
+            }
         }
 //        Serial.println("BaseChannel::taskSequence9() end");
+
+    }
+
+    void BaseChannel::taskSequence11() {
+        taskSequence2();
+        taskSequence3();
+        taskSequence4();
+        taskSequence5();
+        taskSequence6();
+        taskSequence7();
+        taskSequence8();
+        taskSequence9();
+        taskSequence10();
     }
 }

@@ -47,6 +47,7 @@ public:
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
 
+    DateTime getDateTime();
     static uint32_t toUnixTime(const String &timestamp);
 
     static const uint8_t ALL = 0b11111111;

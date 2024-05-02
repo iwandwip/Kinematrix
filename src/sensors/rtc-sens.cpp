@@ -84,6 +84,10 @@ JsonVariant RTC_DS3231Sens::getVariant(const char *searchName) {
     return (*doc)[searchName];
 }
 
+DateTime RTC_DS3231Sens::getDateTime() {
+    return RTC_DS3231::now();
+}
+
 uint32_t RTC_DS3231Sens::toUnixTime(const String &timestamp) {
     return DateTime(timestamp.c_str()).unixtime();
 }

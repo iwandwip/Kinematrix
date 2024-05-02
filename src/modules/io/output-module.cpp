@@ -53,12 +53,14 @@ void DigitalOut::set(bool state) {
     }
 }
 
-void DigitalOut::toggle() {
+void DigitalOut::toggle(void (*toggleCallback)()) {
+    if (toggleCallback != nullptr) toggleCallback();
     set(!_state);
 }
 
-void DigitalOut::toggleInit(unsigned long delay_time, int num) {
+void DigitalOut::toggleInit(unsigned long delay_time, int num, void (*toggleCallback)()) {
     for (int i = 0; i < num; i++) {
+        if (toggleCallback != nullptr) toggleCallback();
         on();
         delay(delay_time);
         off();
@@ -66,8 +68,9 @@ void DigitalOut::toggleInit(unsigned long delay_time, int num) {
     }
 }
 
-void DigitalOut::toggleAsync(unsigned long delay_time) {
+void DigitalOut::toggleAsync(unsigned long delay_time, void (*toggleCallback)()) {
     if (millis() - _toggleTime >= delay_time) {
+        if (toggleCallback != nullptr) toggleCallback();
         set(!_state);
         _toggleTime = millis();
     }
