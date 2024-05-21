@@ -15,12 +15,13 @@
 
 #include "sensor-debug.h"
 #include "sensor-header.h"
+#include "../addons/sensor-filter.h"
 
 class BaseSens {
 public:
     /*pure virtual function*/
-    virtual void init() = 0;
-    virtual void update() = 0;
+    virtual bool init() = 0;
+    virtual bool update() = 0;
 
     /*virtual function*/
     virtual void getValue(float *output);
@@ -47,7 +48,8 @@ private:
     char **name;
     uint8_t len;
     uint8_t lenName;
-    bool ready;
+    bool sensorEnable;
+    bool sensorReady;
 public:
     SensorModule();
     ~SensorModule();
@@ -55,6 +57,9 @@ public:
     void init(void (*initializeCallback)() = nullptr);
     void update(void (*updateCallback)() = nullptr);
     bool isReady(void (*readyCallback)() = nullptr);
+
+    void enable();
+    void disable();
 
     void addModule(BaseSens *sensModule);
     void addName(const char *newName);
@@ -94,6 +99,7 @@ public:
     void debug(uint32_t time, bool showHeapMemory = false, void (*debugCallback)() = nullptr);
     void debugPretty(uint32_t time = 1000);
     void print(const char *format, ...);
+    void wait(uint32_t time);
 };
 
 #endif  // SENSOR_MODULE_H

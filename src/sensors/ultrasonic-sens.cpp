@@ -10,18 +10,22 @@
 
 UltrasonicSens::~UltrasonicSens() = default;
 
-void UltrasonicSens::init() {
+bool UltrasonicSens::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "UltrasonicSens";
         doc = new JsonDocument;
     }
     (*doc)[name] = 0;
+    return true;
 }
 
-void UltrasonicSens::update() {
+bool UltrasonicSens::update() {
     if (millis() - sensorTimer >= 500) {
         (*doc)[name] = (int) this->ping_cm();
+        sensorTimer = millis();
+        return true;
     }
+    return false;
 }
 
 void UltrasonicSens::setDocument(const char *objName) {

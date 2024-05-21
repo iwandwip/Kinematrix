@@ -26,12 +26,12 @@ DHTSens::DHTSens(uint8_t _pin, uint8_t _type)
 
 DHTSens::~DHTSens() = default;
 
-void DHTSens::init() {
+bool DHTSens::init() {
     sensorClass = new DHT(sensorPin, sensorType);
     (*sensorClass).begin();
 }
 
-void DHTSens::update() {
+bool DHTSens::update() {
     if (millis() - sensorTimer >= 500) {
         sensorValue[0] = (*sensorClass).readTemperature();
         sensorValue[1] = (*sensorClass).readHumidity();

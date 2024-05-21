@@ -10,7 +10,7 @@
 
 RFID_Mfrc522::~RFID_Mfrc522() = default;
 
-void RFID_Mfrc522::init() {
+bool RFID_Mfrc522::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "RFID_Mfrc522";
         doc = new JsonDocument;
@@ -18,9 +18,10 @@ void RFID_Mfrc522::init() {
     SPI.begin();
     MFRC522::PCD_Init();
     (*doc)[name] = "";
+    return true;
 }
 
-void RFID_Mfrc522::update() {
+bool RFID_Mfrc522::update() {
     String uuid = "";
     if (MFRC522::PICC_IsNewCardPresent() && MFRC522::PICC_ReadCardSerial()) {
         for (byte i = 0; i < MFRC522::uid.size; i++) {
@@ -28,9 +29,11 @@ void RFID_Mfrc522::update() {
         }
         (*doc)[name] = uuid;
         MFRC522::PICC_HaltA();
-        return;
+        MFRC522::PCD_StopCrypto1();
+        return true;
     }
     (*doc)[name] = "";
+    return false;
 }
 
 void RFID_Mfrc522::setDocument(const char *objName) {

@@ -31,8 +31,8 @@ private:
 public:
     explicit INA219Sens(uint8_t addr = INA219_ADDRESS);
     ~INA219Sens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueShuntVoltage_mV() const;
     float getValueBusVoltage_V() const;

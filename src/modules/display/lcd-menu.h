@@ -39,7 +39,7 @@ private:
     using LiquidCrystal_I2C::LiquidCrystal_I2C;
 
 public:
-    void initialize();
+    void initialize(void (*initCallback)() = nullptr);
     void onListen(MenuCursor *menuCursor, void (*listenCallback)());
     void showMenu(MenuProperties *properties, bool forced = false);
     void showCursor(MenuProperties *properties);

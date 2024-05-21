@@ -24,12 +24,13 @@ uint8_t cursorDownChar[8] = {0x00, 0x00, 0x04, 0x04, 0x04, 0x15, 0x0E, 0x04};
 uint8_t cursorUpChar[8] = {0x04, 0x0E, 0x15, 0x04, 0x04, 0x04, 0x00, 0x00};
 uint8_t cursorBlankChar[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-void LcdMenu::initialize() {
+void LcdMenu::initialize(void (*initCallback)()) {
     LiquidCrystal_I2C::init();
     LiquidCrystal_I2C::backlight();
     LiquidCrystal_I2C::createChar(CURSOR_DOWN_CHAR, cursorDownChar);
     LiquidCrystal_I2C::createChar(CURSOR_UP_CHAR, cursorUpChar);
     LiquidCrystal_I2C::createChar(CURSOR_BLANK_CHAR, cursorBlankChar);
+    if (initCallback != nullptr) initCallback();
 }
 
 void LcdMenu::onListen(MenuCursor *menuCursor, void (*listenCallback)()) {
@@ -47,15 +48,15 @@ void LcdMenu::showMenu(MenuProperties *properties, bool forced) {
     }
 
     if (millis() - lcdPrintTimer >= 250 || forced) {
-        showCursor(properties);
+        if (!forced) showCursor(properties);
         LiquidCrystal_I2C::setCursor(0, 0);
         LiquidCrystal_I2C::print(buffer[properties->select]);
-        showCursor(properties);
+        if (!forced) showCursor(properties);
 
-        showCursor(properties);
+        if (!forced) showCursor(properties);
         LiquidCrystal_I2C::setCursor(0, 1);
         LiquidCrystal_I2C::print(buffer[properties->select + 1]);
-        showCursor(properties);
+        if (!forced) showCursor(properties);
         lcdPrintTimer = millis();
     }
 

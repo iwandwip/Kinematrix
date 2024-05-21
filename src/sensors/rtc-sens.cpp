@@ -18,15 +18,13 @@ RTC_DS3231Sens::RTC_DS3231Sens(uint8_t timeConfig,
 
 RTC_DS3231Sens::~RTC_DS3231Sens() = default;
 
-void RTC_DS3231Sens::init() {
+bool RTC_DS3231Sens::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "RTC_DS3231Sens";
         doc = new JsonDocument;
     }
     if (!RTC_DS3231::begin(wirePtr)) {
-        Serial.println("Couldn't find RTC");
-        Serial.flush();
-        while (true) delay(10);
+        return false;
     }
 //    if (RTC_DS3231::lostPower()) {
 //        Serial.println("RTC lost power, let's set the time!");
@@ -34,7 +32,6 @@ void RTC_DS3231Sens::init() {
 //    }
     if (dateTime == DateTime()) {
         // RTC_DS3231::adjust(DateTime(F(__DATE__), F(__TIME__)));
-        Serial.println("| [INFO] RTC init success");
     } else {
         Serial.println("| [INFO] RTC set time");
         String timestamp = RTC_DS3231::now().timestamp();
@@ -52,9 +49,10 @@ void RTC_DS3231Sens::init() {
     if (timeCfg & RTC_DS3231Sens::m) (*doc)[name]["m"] = 0;
     if (timeCfg & RTC_DS3231Sens::s) (*doc)[name]["s"] = 0;
     if (timeCfg & RTC_DS3231Sens::T) (*doc)[name]["T"] = 0;
+    return true;
 }
 
-void RTC_DS3231Sens::update() {
+bool RTC_DS3231Sens::update() {
     DateTime now = RTC_DS3231::now();
 
     if (timeCfg & RTC_DS3231Sens::Y) (*doc)[name]["Y"] = now.year();
@@ -66,6 +64,7 @@ void RTC_DS3231Sens::update() {
     if (timeCfg & RTC_DS3231Sens::m) (*doc)[name]["m"] = now.minute();
     if (timeCfg & RTC_DS3231Sens::s) (*doc)[name]["s"] = now.second();
     if (timeCfg & RTC_DS3231Sens::T) (*doc)[name]["T"] = now.timestamp();
+    return true;
 }
 
 void RTC_DS3231Sens::setDocument(const char *objName) {

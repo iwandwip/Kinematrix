@@ -9,6 +9,8 @@
 #include "sensor-filter.h"
 #include "math.h"
 
+// KalmanFilter::KalmanFilter
+
 KalmanFilter::KalmanFilter(float mea_e, float est_e, float q) {
     _err_measure = mea_e;
     _err_estimate = est_e;
@@ -42,4 +44,38 @@ float KalmanFilter::getKalmanGain() {
 
 float KalmanFilter::getEstimateError() {
     return _err_estimate;
+}
+
+// MovingAverageFilter::MovingAverageFilter
+
+MovingAverageFilter::MovingAverageFilter(int windowSize) {
+    _windowSize = windowSize;
+    _currentIndex = 0;
+    _values = new float[windowSize];
+    _runningSum = 0.0;
+    for (int i = 0; i < windowSize; ++i) {
+        _values[i] = 0.0;
+    }
+}
+
+MovingAverageFilter::~MovingAverageFilter() {
+    delete[] _values;
+}
+
+void MovingAverageFilter::addMeasurement(float value) {
+    _runningSum -= _values[_currentIndex];
+    _runningSum += value;
+    _values[_currentIndex] = value;
+    _currentIndex = (_currentIndex + 1) % _windowSize;
+}
+
+float MovingAverageFilter::getFilteredValue() {
+    return _runningSum / _windowSize;
+}
+
+void MovingAverageFilter::clear() {
+    _runningSum = 0.0;
+    for (int i = 0; i < _windowSize; ++i) {
+        _values[i] = 0.0;
+    }
 }

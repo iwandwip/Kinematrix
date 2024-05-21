@@ -25,8 +25,8 @@ private:
 
 public:
     ~MAX6675Sens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueTemperature() const;
     void setPins(uint8_t _pin);

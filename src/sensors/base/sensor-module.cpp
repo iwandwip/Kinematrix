@@ -13,7 +13,8 @@ SensorModule::SensorModule()
           name(nullptr),
           len(0),
           lenName(0),
-          ready(false) {
+          sensorEnable(false),
+          sensorReady(false) {
 }
 
 SensorModule::~SensorModule() {
@@ -34,23 +35,44 @@ void SensorModule::init(void (*initializeCallback)(void)) {
     for (uint8_t i = 0; i < len; i++) {
         base[i]->setDocument(name[i]);
         base[i]->setDocumentValue(doc);
-        base[i]->init();
+        if (base[i]->init()) {
+            Serial.print("| [NAME]: ");
+            Serial.print(name[i]);
+            Serial.print(" [INFO]: Init Success");
+            Serial.println();
+        } else {
+            disableLoopWDT();
+            Serial.print("| [NAME]: ");
+            Serial.print(name[i]);
+            Serial.print(" [ERROR]: Init Failed");
+            Serial.println();
+            while (1) delay(10);
+        }
     }
+    this->enable();
     if (initializeCallback != nullptr) initializeCallback();
 }
 
 void SensorModule::update(void (*updateCallback)(void)) {
-    if (updateCallback != nullptr) updateCallback();
-    if (base == nullptr) return;
+    if (base == nullptr || !sensorEnable) return;
+    if (updateCallback != nullptr && sensorReady) updateCallback();
     for (uint8_t i = 0; i < len; i++) {
         base[i]->update();
     }
-    if (!ready) ready = true;
+    if (!sensorReady) sensorReady = true;
 }
 
 bool SensorModule::isReady(void (*readyCallback)()) {
     if (readyCallback != nullptr) readyCallback();
-    return ready;
+    return sensorReady;
+}
+
+void SensorModule::enable() {
+    sensorEnable = true;
+}
+
+void SensorModule::disable() {
+    sensorEnable = false;
 }
 
 void SensorModule::addModule(BaseSens *sensModule) {
@@ -295,4 +317,8 @@ void SensorModule::print(const char *format, ...) {
     vsnprintf(buffer, sizeof(buffer), format, args);
     Serial.println(buffer);
     va_end(args);
+}
+
+void SensorModule::wait(uint32_t time) {
+    delay(time);
 }

@@ -17,7 +17,7 @@ AHTSens::AHTSens()
 
 AHTSens::~AHTSens() = default;
 
-void AHTSens::init() {
+bool AHTSens::init() {
     sensorClass = new Adafruit_AHTX0;
     if (!(*sensorClass).begin())
         while (true) {
@@ -26,7 +26,7 @@ void AHTSens::init() {
         }
 }
 
-void AHTSens::update() {
+bool AHTSens::update() {
     if (millis() - sensorTimer >= 500) {
         sensors_event_t dataBuffer[2];
         (*sensorClass).getEvent(&dataBuffer[1], &dataBuffer[0]);

@@ -89,8 +89,8 @@ private:
 public:
     explicit TDSSens(uint8_t _pin, float *_temp, float _vref = 5.0, float _adcRange = 1024.0);
     ~TDSSens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueTDS() const;
     void setPins(uint8_t _pin);

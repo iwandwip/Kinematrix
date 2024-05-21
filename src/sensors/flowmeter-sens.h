@@ -211,8 +211,8 @@ public:
     explicit FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProperties _properties = UncalibratedSensor);
     ~FlowmeterSens();
 
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void process() override;
 
     void setDocument(const char *objName) override;

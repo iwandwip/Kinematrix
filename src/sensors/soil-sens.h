@@ -25,8 +25,8 @@ public:
     explicit SoilMoistureSens(uint8_t _pin);
     ~SoilMoistureSens();
 
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
 
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;

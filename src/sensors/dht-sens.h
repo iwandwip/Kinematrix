@@ -31,8 +31,8 @@ public:
     DHTSens();
     explicit DHTSens(uint8_t _pin, uint8_t _type);
     ~DHTSens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueTemperature() const;
     float getValueHumidity() const;

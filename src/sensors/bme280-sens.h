@@ -34,8 +34,8 @@ public:
     explicit BME280Sens(int8_t _cs);
     explicit BME280Sens(int8_t _cs, int8_t _mosi, int8_t _miso, int8_t _sck);
     ~BME280Sens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueTemperature() const;
     float getValuePressure() const;

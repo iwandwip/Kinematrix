@@ -10,11 +10,11 @@
 
 MAX6675Sens::~MAX6675Sens() = default;
 
-void MAX6675Sens::init() {
+bool MAX6675Sens::init() {
 
 }
 
-void MAX6675Sens::update() {
+bool MAX6675Sens::update() {
     if (millis() - sensorTimer >= 500) {
         sensorValue = (float) this->readCelsius();
     }

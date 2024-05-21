@@ -20,6 +20,8 @@
 #include "modules/communication/wired/spi/dot-matrix.h"
 #include "modules/communication/wireless/lora/lora-com.h"
 
+#include "modules/control/PID.h"
+
 #include "modules/db/firebase-handler.h"
 #include "modules/display/lcd-menu.h"
 #include "modules/driver/motor/motor-driver.h"
@@ -45,12 +47,14 @@
 #include "sensors/hx711-sens.h"
 #include "sensors/ina219-sens.h"
 #include "sensors/ldr-sens.h"
+#include "sensors/max3010x-sens.h"
 #include "sensors/max6675-sens.h"
 #include "sensors/max31865-sens.h"
 #include "sensors/rfid-sens.h"
 #include "sensors/rtc-sens.h"
 #include "sensors/soil-sens.h"
 #include "sensors/soilph-sens.h"
+#include "sensors/tcs3200-sens.h"
 #include "sensors/tds-sens.h"
 #include "sensors/turbidity-sens.h"
 #include "sensors/ultrasonic-sens.h"

@@ -10,7 +10,7 @@
 #ifndef SWAP_SERIAL_COM_H
 #define SWAP_SERIAL_COM_H
 
-/* GPIO TABLE
+/* GPIO TABLE https://mikroavr.com/pin-out-esp32/
  * GPIO	FUNCTION	GPIO	FUNCTION
  * GPIO32	RX/TX	GPIO15	RX/TX
  * GPIO33	RX/TX	GPIO21	RX/TX
@@ -39,14 +39,15 @@ public:
     void begin(HardwareSerial *_serialPtr = &Serial2,
                long baud = 9600,
                SerialConfig cfg = SERIAL_8N1,
-               uint8_t rxPin = 15,
-               uint8_t txPin = 14);
+               uint8_t rxPin = 15, // 16
+               uint8_t txPin = 14); // 17
 
     template<typename T>
     void addData(T newData, const char *separator = ";") {
         dataSend += String(newData);
         dataSend += separator;
     }
+
     void setTimeOut(uint32_t time);
 
     void clearData();

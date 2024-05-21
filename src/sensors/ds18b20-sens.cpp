@@ -22,21 +22,24 @@ DS18B20Sens::DS18B20Sens(OneWire *_wire)
 
 DS18B20Sens::~DS18B20Sens() = default;
 
-void DS18B20Sens::init() {
+bool DS18B20Sens::init() {
     DallasTemperature::begin();
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "DS18B20Sens";
         doc = new JsonDocument;
     }
     (*doc)[name] = 0;
+    return true;
 }
 
-void DS18B20Sens::update() {
+bool DS18B20Sens::update() {
     if (millis() - sensorTimer >= 3000) {
         DallasTemperature::requestTemperatures();
         (*doc)[name] = DallasTemperature::getTempCByIndex(0);
         sensorTimer = millis();
+        return true;
     }
+    return false;
 }
 
 void DS18B20Sens::setDocument(const char *objName) {

@@ -15,19 +15,29 @@ SoilMoistureSens::SoilMoistureSens(uint8_t _pin)
 
 SoilMoistureSens::~SoilMoistureSens() = default;
 
-void SoilMoistureSens::init() {
+bool SoilMoistureSens::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "SoilMoistureSens";
         doc = new JsonDocument;
     }
     pinMode(sensorPin, INPUT);
-    (*doc)[name] = 0.0;
+    (*doc)[name]["raw"] = 0.0;
+    (*doc)[name]["moist"] = 0.0;
+    (*doc)[name]["volt"] = 0.0;
 }
 
-void SoilMoistureSens::update() {
+bool SoilMoistureSens::update() {
     if (millis() - sensorTimer >= 500) {
         int value = analogRead(sensorPin);
-        (*doc)[name] = (int) map(value, 0, 1023, 0, 100);
+#if defined(ESP32)
+        (*doc)[name]["raw"] = value;
+        (*doc)[name]["moist"] = (100 - ((value / 4095.0) * 100));
+        (*doc)[name]["volt"] = (value * 3.3) / 4095.0;
+#else
+        (*doc)[name]["raw"] = value;
+        (*doc)[name]["moist"] = (100 - ((value / 1023.0) * 100));
+        (*doc)[name]["volt"] = (value * 5.0) / 1023.0;
+#endif
         sensorTimer = millis();
     }
 }

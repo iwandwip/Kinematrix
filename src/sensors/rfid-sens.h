@@ -26,8 +26,8 @@ private:
     using MFRC522::MFRC522;
 public:
     ~RFID_Mfrc522();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
 
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;

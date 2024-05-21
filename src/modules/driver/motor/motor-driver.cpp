@@ -71,7 +71,7 @@ namespace L298N {
 #if defined(ESP32)
         ledcWrite(pwmChannel, pwm);
 #else
-        analogWrite(pwmChannel, pwm);
+        analogWrite(enable, pwm);
 #endif
     }
 
@@ -81,7 +81,7 @@ namespace L298N {
 #if defined(ESP32)
         ledcWrite(pwmChannel, pwm);
 #else
-        analogWrite(pwmChannel, pwm);
+        analogWrite(enable, pwm);
 #endif
     }
 
@@ -91,7 +91,7 @@ namespace L298N {
 #if defined(ESP32)
         ledcWrite(pwmChannel, 0);
 #else
-        analogWrite(pwmChannel, 0);
+        analogWrite(enable, 0);
 #endif
     }
 }

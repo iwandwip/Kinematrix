@@ -17,7 +17,7 @@ TurbiditySens::TurbiditySens(int _sensorPin)
 
 TurbiditySens::~TurbiditySens() = default;
 
-void TurbiditySens::init() {
+bool TurbiditySens::init() {
     pinMode(sensorPin, INPUT);
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "TurbiditySens";
@@ -27,7 +27,7 @@ void TurbiditySens::init() {
     (*doc)[name]["ntu"] = 0;
 }
 
-void TurbiditySens::update() {
+bool TurbiditySens::update() {
     if (millis() - sensorTimer >= 500) {
         float voltage = 0.0;
         double ntu = 0.0;

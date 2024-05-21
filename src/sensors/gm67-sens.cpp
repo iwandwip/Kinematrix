@@ -21,24 +21,25 @@ GM67Sens::GM67Sens(HardwareSerial *_serialPtr, long baud, SerialConfig cfg,
 
 GM67Sens::~GM67Sens() = default;
 
-void GM67Sens::init() {
+bool GM67Sens::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "GM67Sens";
         doc = new JsonDocument;
     }
     (*doc)[name] = "";
+    return true;
 }
 
-void GM67Sens::update() {
-    String code = "";
+bool GM67Sens::update() {
 #if defined(ESP32)
     if (serialPtr->available()) {
-        code = serialPtr->readStringUntil('\n');
+        String code = serialPtr->readStringUntil('\r');
         (*doc)[name] = code;
-        return;
+        return true;
     }
 #endif
     (*doc)[name] = "";
+    return false;
 }
 
 void GM67Sens::setDocument(const char *objName) {

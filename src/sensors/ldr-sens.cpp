@@ -26,11 +26,11 @@ LDRSens::LDRSens(uint8_t _pin, uint8_t _vref, uint8_t _resolution)
 
 LDRSens::~LDRSens() = default;
 
-void LDRSens::init() {
+bool LDRSens::init() {
     pinMode(sensorPin, INPUT);
 }
 
-void LDRSens::update() {
+bool LDRSens::update() {
     if (millis() - sensorTimer >= 500) {
         sensorValue = analogRead(sensorPin);
 //        sensorValue *= (float) (sensorVRef / (pow(2, sensorResolution) - 1)); // toVolt

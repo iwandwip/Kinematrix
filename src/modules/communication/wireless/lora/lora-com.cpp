@@ -30,13 +30,24 @@ LoRaModule::LoRaModule() {
 LoRaModule::~LoRaModule() {
 }
 
-int LoRaModule::init(long frequency) {
-    return LoRa.begin(frequency);
+int LoRaModule::init(long frequency, void (*onInit)()) {
+    int success = LoRa.begin(frequency);
+    isLoRaReady = success;
+    if (onInit != nullptr && success) onInit();
+    return success;
 }
 
-int LoRaModule::init(uint8_t ss, uint8_t reset, uint8_t dio0, long frequency) {
+int LoRaModule::init(uint8_t ss, uint8_t reset, uint8_t dio0, long frequency, void (*onInit)()) {
     LoRa.setPins(ss, reset, dio0);
-    return LoRa.begin(frequency);
+    int success = LoRa.begin(frequency);
+    isLoRaReady = success;
+    if (onInit != nullptr && success) onInit();
+    return success;
+}
+
+bool LoRaModule::isReady(void (*onReady)()) {
+    if (onReady != nullptr && isLoRaReady) onReady();
+    return isLoRaReady;
 }
 
 void LoRaModule::end() {

@@ -29,8 +29,8 @@ public:
     VoltageSens();
     explicit VoltageSens(uint8_t _pin, float _res1 = 30000.0, float _res2 = 7500.0, float _ref_voltage = 5.0, float _resolution = 1024.0);
     ~VoltageSens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueVoltage() const;
     void setPins(uint8_t _pin);

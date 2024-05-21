@@ -15,7 +15,7 @@ SoilPHSens::SoilPHSens(uint8_t _pin)
 
 SoilPHSens::~SoilPHSens() = default;
 
-void SoilPHSens::init() {
+bool SoilPHSens::init() {
     pinMode(sensorPin, INPUT);
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "SoilPHSens";
@@ -24,7 +24,7 @@ void SoilPHSens::init() {
     (*doc)[name] = 0;
 }
 
-void SoilPHSens::update() {
+bool SoilPHSens::update() {
     if (millis() - sensorTimer >= 500) {
         float x = analogRead(sensorPin);
         double soilPh = -0.0693 * x + 7.3855;

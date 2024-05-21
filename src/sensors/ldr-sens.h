@@ -25,8 +25,8 @@ public:
     LDRSens();
     explicit LDRSens(uint8_t _pin, uint8_t _vref = 5, uint8_t _resolution = 10);
     ~LDRSens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueAdc() const;
     void setPins(uint8_t _pin);

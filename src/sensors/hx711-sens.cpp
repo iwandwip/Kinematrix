@@ -8,38 +8,40 @@
 #include "hx711-sens.h"
 #include "Arduino.h"
 
-HX711Sens::HX711Sens()
-        : name(""),
-          sensorTimer{0, 0},
-          sensorDOUTPin(2),
-          sensorSCKPin(3) {
-}
-
-HX711Sens::HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin)
+HX711Sens::HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin, float _format)
         : name(""),
           sensorTimer{0, 0},
           sensorDOUTPin(_sensorDOUTPin),
-          sensorSCKPin(_sensorSCKPin) {
+          sensorSCKPin(_sensorSCKPin),
+          format(_format),
+          sensorFilterCb(nullptr) {
 }
 
-void HX711Sens::init() {
+bool HX711Sens::init() {
     this->begin(this->sensorDOUTPin, this->sensorSCKPin);
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "HX711Sens";
         doc = new JsonDocument;
     }
     (*doc)[name] = 0;
+    return true;
 }
 
-void HX711Sens::update() {
+bool HX711Sens::update() {
     if (millis() - sensorTimer[0] >= 500) {
         if (this->is_ready()) {
             float units = this->get_units();
             if (units < 0) units = 0.0;
+            units /= format;
+            if (sensorFilterCb != nullptr) {
+                units = sensorFilterCb(units);
+            }
             (*doc)[name] = units;
+            return true;
         }
         sensorTimer[0] = millis();
     }
+    return false;
 }
 
 void HX711Sens::setDocument(const char *objName) {
@@ -56,6 +58,10 @@ JsonDocument HX711Sens::getDocument() {
 
 JsonVariant HX711Sens::getVariant(const char *searchName) {
     return (*doc)[searchName];
+}
+
+void HX711Sens::filter(float (*sensorFilterCallback)(float value)) {
+    sensorFilterCb = sensorFilterCallback;
 }
 
 float HX711Sens::getCalibrateFactorInit(float weight) {

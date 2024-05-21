@@ -1,4 +1,4 @@
-/*
+/*  // https://stackoverflow.com/questions/77746047/sending-data-with-esp32-to-firebase-error-invalid-data-couldnt-parse-json-obj
  *  gm67-sens.h
  *
  *  gm67 sensor lib
@@ -42,8 +42,8 @@ public:
                       SerialConfig cfg = SERIAL_8N1, int8_t rxPin = 15, int8_t txPin = 14);
 #endif
     virtual ~GM67Sens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
 
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;

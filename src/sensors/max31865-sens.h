@@ -30,8 +30,8 @@ private:
 public:
     explicit MAX31865Sens(int8_t spiCs, int8_t spiMosi, int8_t spiMiso, int8_t spiClk, max31865_numwires wire = MAX31865_2WIRE, float _rtdNominal = MAX_31865_PT100_RNOMINAL, float _refResistor = MAX_31865_PT100_RREF);
     ~MAX31865Sens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
     void getValue(float *output) override;
     float getValueTemperature() const;
     void setPins(uint8_t _pin);

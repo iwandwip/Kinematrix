@@ -150,7 +150,7 @@ FlowmeterSens::FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProper
 
 FlowmeterSens::~FlowmeterSens() = default;
 
-void FlowmeterSens::init() {
+bool FlowmeterSens::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "FlowmeterSens";
         doc = new JsonDocument;
@@ -161,7 +161,7 @@ void FlowmeterSens::init() {
     (*doc)[name]["totalVolume"] = 0;
 }
 
-void FlowmeterSens::update() {
+bool FlowmeterSens::update() {
     if (millis() - sensorTimer >= 1000) {
         sensorClass->tick(1000);
         (*doc)[name]["currentRate"] = (float) sensorClass->getCurrentFlowrate();

@@ -22,15 +22,16 @@ Abstract::Abstract(int _enumRandomValue, float _dummyValue1, float _dummyValue2)
 
 Abstract::~Abstract() = default;
 
-void Abstract::init() {
+bool Abstract::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "Abstract";
         doc = new JsonDocument;
     }
     (*doc)[name] = 0;
+    return true;
 }
 
-void Abstract::update() {
+bool Abstract::update() {
     if (millis() - sensorTimer >= 500) {
         switch (enumRandomValue) {
             case 0:
@@ -48,6 +49,7 @@ void Abstract::update() {
         }
         sensorTimer = millis();
     }
+    return true;
 }
 
 void Abstract::setDocument(const char *objName) {

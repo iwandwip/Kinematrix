@@ -19,11 +19,11 @@ MAX31865Sens::MAX31865Sens(int8_t spiCs, int8_t spiMosi, int8_t spiMiso, int8_t 
 
 MAX31865Sens::~MAX31865Sens() = default;
 
-void MAX31865Sens::init() {
+bool MAX31865Sens::init() {
 
 }
 
-void MAX31865Sens::update() {
+bool MAX31865Sens::update() {
     if (millis() - sensorTimer >= 500) {
         sensorValue = this->temperature(sensorRtdNominal, sensorRefResistor);
         sensorTimer = millis();

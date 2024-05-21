@@ -211,12 +211,12 @@ TDSSens::TDSSens(uint8_t _pin, float *_temp, float _vref, float _adcRange)
 
 TDSSens::~TDSSens() = default;
 
-void TDSSens::init() {
+bool TDSSens::init() {
     GravityTDS::begin();
     *sensorTemp = 25.0;
 }
 
-void TDSSens::update() {
+bool TDSSens::update() {
     if (millis() - sensorTimer >= 500) {
         GravityTDS::setTemperature(*sensorTemp);
         GravityTDS::update();

@@ -25,13 +25,13 @@ BME280Sens::BME280Sens(int8_t _cs, int8_t _mosi, int8_t _miso, int8_t _sck)
 
 BME280Sens::~BME280Sens() = default;
 
-void BME280Sens::init() {
+bool BME280Sens::init() {
     if (Adafruit_BME280::begin()) {
         Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
     }
 }
 
-void BME280Sens::update() {
+bool BME280Sens::update() {
     if (millis() - sensorTimer >= 500) {
         sensorValue[BME_SENS_TEMPERATURE] = Adafruit_BME280::readTemperature();
         sensorValue[BME_SENS_PRESSURE] = Adafruit_BME280::readPressure() / 100.0F;

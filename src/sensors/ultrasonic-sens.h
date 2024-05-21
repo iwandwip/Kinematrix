@@ -26,8 +26,8 @@ private:
 
 public:
     ~UltrasonicSens();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
 
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;

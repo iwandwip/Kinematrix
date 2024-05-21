@@ -30,6 +30,7 @@ typedef struct {
 
 class LoRaModule {
 private:
+    int isLoRaReady;
     String dataSend;
     uint32_t sendTime;
     uint32_t receiveTime;
@@ -37,8 +38,9 @@ private:
 public:
     LoRaModule();
     ~LoRaModule();
-    int init(long frequency = 915E6);
-    int init(uint8_t ss, uint8_t reset, uint8_t dio0, long frequency = 915E6);
+    int init(long frequency = 915E6, void (*onInit)() = nullptr);
+    int init(uint8_t ss, uint8_t reset, uint8_t dio0, long frequency = 915E6, void (*onInit)() = nullptr);
+    bool isReady(void (*onReady)() = nullptr);
     void end();
 
     int packetRssi();

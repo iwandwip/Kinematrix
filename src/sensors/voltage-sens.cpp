@@ -30,11 +30,11 @@ VoltageSens::VoltageSens(uint8_t _pin, float _res1, float _res2, float _ref_volt
 
 VoltageSens::~VoltageSens() = default;
 
-void VoltageSens::init() {
+bool VoltageSens::init() {
     pinMode(sensorPin, INPUT);
 }
 
-void VoltageSens::update() {
+bool VoltageSens::update() {
     if (millis() - sensorTimer >= 500) {
         sensorValue = analogRead(sensorPin);
         sensorValue = (sensorValue * sensorRefVoltage) / sensorResolution;

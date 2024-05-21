@@ -17,13 +17,13 @@ INA219Sens::INA219Sens(uint8_t addr)
 
 INA219Sens::~INA219Sens() = default;
 
-void INA219Sens::init() {
+bool INA219Sens::init() {
     if (!Adafruit_INA219::begin()) {
         Serial.println("Failed to find INA219 chip");
     }
 }
 
-void INA219Sens::update() {
+bool INA219Sens::update() {
     if (millis() - sensorTimer >= 500) {
         sensorValue[INA219_SHUNT_VOLTAGE_MV] = Adafruit_INA219::getShuntVoltage_mV();
         sensorValue[INA219_BUS_VOLTAGE_V] = Adafruit_INA219::getBusVoltage_V();

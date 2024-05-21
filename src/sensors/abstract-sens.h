@@ -29,8 +29,8 @@ public:
     Abstract(int _enumRandomValue = 0);
     Abstract(int _enumRandomValue, float _dummyValue1, float _dummyValue2 = 0);
     virtual ~Abstract();
-    void init() override;
-    void update() override;
+    bool init() override;
+    bool update() override;
 
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;
