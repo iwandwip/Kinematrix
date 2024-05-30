@@ -16,17 +16,22 @@ bool KeypadI2CSens::init() {
         doc = new JsonDocument;
     }
     Keypad_I2C::begin();
-    (*doc)[name] = "";
+    (*doc)[name]["key"] = "";
+    (*doc)[name]["before"] = "";
     return true;
 }
 
 bool KeypadI2CSens::update() {
-    if (millis() - sensorTimer >= 30) {
-        key = String(Keypad_I2C::getKey());
-        (*doc)[name] = key;
+    if (millis() - sensorTimer >= 50) {
+        char getKey = Keypad_I2C::getKey();
+        (*doc)[name]["key"] = String(getKey);
+        if (getKey != NO_KEY) {
+            (*doc)[name]["before"] = String(getKey);
+        }
         sensorTimer = millis();
+        return true;
     }
-    return true;
+    return false;
 }
 
 void KeypadI2CSens::setDocument(const char *objName) {

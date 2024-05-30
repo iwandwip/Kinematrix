@@ -46,9 +46,6 @@ private:
     FirebaseConfig config;
     FirebaseAuthentication *authentication;
 
-    WiFiUDP *ntpUDP;
-    NTPClient *timeClient;
-
     String *data;
     String *address;
     uint8_t dataLen;
@@ -65,7 +62,6 @@ public:
     ~FirebaseModule();
 
     bool init(FirebaseAuthentication *_authentication, void (*initCallback)(void) = nullptr);
-    bool initNTP();
     bool connectToWiFi(const char *ssid, const char *pwd, void (*connectCallback)(void) = nullptr);
     bool isConnect();
 
@@ -106,13 +102,18 @@ public:
     void setFloat(float floatData, const char *addrs, void (*onData)(float data, String address) = nullptr);
     void setString(String strData, const char *addrs, void (*onData)(String data, String address) = nullptr);
 
-    void setJson(String getAddress, JsonVariant (*jsonCallback)(JsonVariant), void (*resultCb)(String, String) = nullptr);
+    void setJson(String getAddress, JsonVariant variant, void (*resultCb)(String, String) = nullptr);
+    void pushJson(String getAddress, JsonVariant variant, void (*resultCb)(String, String) = nullptr);
+
+    void setJson(String getAddress, JsonVariant (*jsonCallback)(JsonVariant),
+                 void (*resultCb)(String, String) = nullptr);
+    void pushJson(String getAddress, JsonVariant (*jsonCallback)(JsonVariant),
+                  void (*resultCb)(String, String) = nullptr);
     void getJson(String getAddress, void (*jsonCallback)(JsonVariant) = nullptr,
                  void (*resultCb)(String, String) = nullptr);
 
     float getData(const char *getAddress, void (*onData)(float data, String address) = nullptr);
     String getStrData(const char *getAddress, void (*onData)(String data, String address) = nullptr);
-    String getStrTime();
 
     void waitConnection(uint32_t __tmr);
     void debug(String header, String _data, String _address, bool endl = true);

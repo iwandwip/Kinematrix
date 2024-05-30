@@ -22,10 +22,15 @@
 
 #include "modules/control/PID.h"
 
-#include "modules/db/firebase-handler.h"
+#include "modules/wifi/firebase-handler.h"
+#include "modules/wifi/whatsapp-bot.h"
+#include "modules/wifi/wifi-handler.h"
+
 #include "modules/display/lcd-menu.h"
 #include "modules/driver/motor/motor-driver.h"
 #include "modules/driver/servo/HCPCA9685.h"
+
+#include "modules/file/EEPROMLib.h"
 #include "modules/file/SDArduino.h"
 
 #include "modules/io/input-module.h"
@@ -41,12 +46,14 @@
 #include "sensors/aht-sens.h"
 #include "sensors/bme280-sens.h"
 #include "sensors/dht-sens.h"
+#include "sensors/digital-sens.h"
 #include "sensors/ds18b20-sens.h"
+#include "sensors/dust-sens.h"
 #include "sensors/flowmeter-sens.h"
 #include "sensors/gm67-sens.h"
 #include "sensors/hx711-sens.h"
 #include "sensors/ina219-sens.h"
-#include "sensors/ldr-sens.h"
+#include "sensors/keypad-i2c-sens.h"
 #include "sensors/max3010x-sens.h"
 #include "sensors/max6675-sens.h"
 #include "sensors/max31865-sens.h"

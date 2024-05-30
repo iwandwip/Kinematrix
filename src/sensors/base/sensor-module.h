@@ -48,6 +48,7 @@ private:
     char **name;
     uint8_t len;
     uint8_t lenName;
+    bool *sensorInit;
     bool sensorEnable;
     bool sensorReady;
 public:

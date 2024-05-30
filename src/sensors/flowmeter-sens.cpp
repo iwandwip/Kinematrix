@@ -159,6 +159,7 @@ bool FlowmeterSens::init() {
     (*doc)[name]["currentVolume"] = 0;
     (*doc)[name]["totalRate"] = 0;
     (*doc)[name]["totalVolume"] = 0;
+    return true;
 }
 
 bool FlowmeterSens::update() {
@@ -169,7 +170,9 @@ bool FlowmeterSens::update() {
         (*doc)[name]["totalRate"] = (float) sensorClass->getTotalFlowrate();
         (*doc)[name]["totalVolume"] = (float) sensorClass->getTotalVolume();
         sensorTimer = millis();
+        return true;
     }
+    return false;
 }
 
 void FlowmeterSens::process() {
@@ -190,4 +193,13 @@ JsonDocument FlowmeterSens::getDocument() {
 
 JsonVariant FlowmeterSens::getVariant(const char *searchName) {
     return (*doc)[searchName];
+}
+
+void FlowmeterSens::setTotalVolume(double totalVolume) {
+    sensorClass->setTotalVolume(totalVolume);
+}
+
+void FlowmeterSens::reset(void (*resetCallback)()) {
+    sensorClass->reset();
+    if (resetCallback != nullptr) resetCallback();
 }

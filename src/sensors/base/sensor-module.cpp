@@ -13,6 +13,7 @@ SensorModule::SensorModule()
           name(nullptr),
           len(0),
           lenName(0),
+          sensorInit(nullptr),
           sensorEnable(false),
           sensorReady(false) {
 }
@@ -32,24 +33,25 @@ SensorModule::~SensorModule() {
 void SensorModule::init(void (*initializeCallback)(void)) {
     if (base == nullptr) return;
     doc = new JsonDocument;
+    this->sensorInit = new bool[len];
     for (uint8_t i = 0; i < len; i++) {
         base[i]->setDocument(name[i]);
         base[i]->setDocumentValue(doc);
-        if (base[i]->init()) {
+        this->sensorInit[i] = base[i]->init();
+        if (this->sensorInit[i]) {
             Serial.print("| [NAME]: ");
             Serial.print(name[i]);
             Serial.print(" [INFO]: Init Success");
             Serial.println();
         } else {
-            disableLoopWDT();
             Serial.print("| [NAME]: ");
             Serial.print(name[i]);
             Serial.print(" [ERROR]: Init Failed");
             Serial.println();
-            while (1) delay(10);
         }
     }
     this->enable();
+    if (!this->sensorInit) return;
     if (initializeCallback != nullptr) initializeCallback();
 }
 
@@ -57,14 +59,20 @@ void SensorModule::update(void (*updateCallback)(void)) {
     if (base == nullptr || !sensorEnable) return;
     if (updateCallback != nullptr && sensorReady) updateCallback();
     for (uint8_t i = 0; i < len; i++) {
-        base[i]->update();
+        if (this->sensorInit[i]) base[i]->update();
+        else {
+            Serial.print("| [NAME]: ");
+            Serial.print(name[i]);
+            Serial.print(" [ERROR]: Not Initialized Correctly");
+            Serial.println();
+        }
     }
     if (!sensorReady) sensorReady = true;
 }
 
 bool SensorModule::isReady(void (*readyCallback)()) {
     if (readyCallback != nullptr) readyCallback();
-    return sensorReady;
+    return sensorReady && sensorInit;
 }
 
 void SensorModule::enable() {

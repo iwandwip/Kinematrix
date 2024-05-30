@@ -22,8 +22,9 @@ bool SoilMoistureSens::init() {
     }
     pinMode(sensorPin, INPUT);
     (*doc)[name]["raw"] = 0.0;
-    (*doc)[name]["moist"] = 0.0;
+    (*doc)[name]["val"] = 0.0;
     (*doc)[name]["volt"] = 0.0;
+    return true;
 }
 
 bool SoilMoistureSens::update() {
@@ -31,15 +32,17 @@ bool SoilMoistureSens::update() {
         int value = analogRead(sensorPin);
 #if defined(ESP32)
         (*doc)[name]["raw"] = value;
-        (*doc)[name]["moist"] = (100 - ((value / 4095.0) * 100));
+        (*doc)[name]["val"] = (100 - ((value / 4095.0) * 100));
         (*doc)[name]["volt"] = (value * 3.3) / 4095.0;
 #else
         (*doc)[name]["raw"] = value;
-        (*doc)[name]["moist"] = (100 - ((value / 1023.0) * 100));
+        (*doc)[name]["val"] = (100 - ((value / 1023.0) * 100));
         (*doc)[name]["volt"] = (value * 5.0) / 1023.0;
 #endif
         sensorTimer = millis();
+        return true;
     }
+    return false;
 }
 
 void SoilMoistureSens::setDocument(const char *objName) {

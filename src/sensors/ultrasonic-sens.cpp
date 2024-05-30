@@ -20,7 +20,7 @@ bool UltrasonicSens::init() {
 }
 
 bool UltrasonicSens::update() {
-    if (millis() - sensorTimer >= 500) {
+    if (millis() - sensorTimer >= 50) {
         (*doc)[name] = (int) this->ping_cm();
         sensorTimer = millis();
         return true;

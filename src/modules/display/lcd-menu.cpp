@@ -24,13 +24,18 @@ uint8_t cursorDownChar[8] = {0x00, 0x00, 0x04, 0x04, 0x04, 0x15, 0x0E, 0x04};
 uint8_t cursorUpChar[8] = {0x04, 0x0E, 0x15, 0x04, 0x04, 0x04, 0x00, 0x00};
 uint8_t cursorBlankChar[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-void LcdMenu::initialize(void (*initCallback)()) {
+void LcdMenu::initialize(bool _debug, void (*initCallback)()) {
     LiquidCrystal_I2C::init();
     LiquidCrystal_I2C::backlight();
     LiquidCrystal_I2C::createChar(CURSOR_DOWN_CHAR, cursorDownChar);
     LiquidCrystal_I2C::createChar(CURSOR_UP_CHAR, cursorUpChar);
     LiquidCrystal_I2C::createChar(CURSOR_BLANK_CHAR, cursorBlankChar);
     if (initCallback != nullptr) initCallback();
+    if (!_debug) return;
+    Serial.print("| [NAME]: ");
+    Serial.print("LCD");
+    Serial.print(" [INFO]: Init Success");
+    Serial.println();
 }
 
 void LcdMenu::onListen(MenuCursor *menuCursor, void (*listenCallback)()) {
@@ -48,19 +53,23 @@ void LcdMenu::showMenu(MenuProperties *properties, bool forced) {
     }
 
     if (millis() - lcdPrintTimer >= 250 || forced) {
-        if (!forced) showCursor(properties);
+        if (!forced) this->showCursor(properties);
         LiquidCrystal_I2C::setCursor(0, 0);
         LiquidCrystal_I2C::print(buffer[properties->select]);
-        if (!forced) showCursor(properties);
+        if (!forced) this->showCursor(properties);
 
-        if (!forced) showCursor(properties);
+        if (!forced) this->showCursor(properties);
         LiquidCrystal_I2C::setCursor(0, 1);
         LiquidCrystal_I2C::print(buffer[properties->select + 1]);
-        if (!forced) showCursor(properties);
+        if (!forced) this->showCursor(properties);
         lcdPrintTimer = millis();
     }
 
     if (forced) return;
+    this->onCursor(properties);
+}
+
+void LcdMenu::onCursor(MenuProperties *properties) {
     if (cursor_->down) {
         if (properties->index < properties->len - 1) {
             if (properties->upCount == MAX_LCD_ROW_LEN - 1 && properties->select < properties->len - MAX_LCD_ROW_LEN)
@@ -121,7 +130,13 @@ void LcdMenu::onSelect(MenuProperties *properties, const char *options, void (*o
     }
     if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
         optionCallback();
-        return;
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
     }
 }
 
@@ -174,10 +189,6 @@ int LcdMenu::get(int nums) {
 
 MenuProperties *LcdMenu::end() {
     return nullptr;
-}
-
-LcdMenu &LcdMenu::operator[](uint8_t index) {
-    return *this;
 }
 
 void LcdMenu::freeCharArray(char *str) {

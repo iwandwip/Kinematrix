@@ -39,18 +39,18 @@ private:
     using LiquidCrystal_I2C::LiquidCrystal_I2C;
 
 public:
-    void initialize(void (*initCallback)() = nullptr);
+    void initialize(bool _debug = false, void (*initCallback)() = nullptr);
     void onListen(MenuCursor *menuCursor, void (*listenCallback)());
     void showMenu(MenuProperties *properties, bool forced = false);
+    void onCursor(MenuProperties *properties);
     void showCursor(MenuProperties *properties);
-    void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)() = nullptr);
+    void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)());
     void formatMenu(MenuProperties *properties, uint8_t index, const char *format, ...);
     void backToMenu(MenuProperties *beforeProperties, MenuProperties *afterProperties);
     void clearMenu(MenuProperties *firstMenu, ...);
     int begin(int nums);
     int get(int nums);
     MenuProperties *end();
-    LcdMenu &operator[](uint8_t index);
     void freeCharArray(char *str);
     MenuProperties *createMenu(int menuSize, ...);
     MenuProperties *createEmptyMenu(int menuSize, const char *text = nullptr);

@@ -21,17 +21,24 @@ bool SoilPHSens::init() {
         name = "SoilPHSens";
         doc = new JsonDocument;
     }
-    (*doc)[name] = 0;
+    (*doc)[name]["raw"] = 0;
+    (*doc)[name]["val"] = 0;
+    (*doc)[name]["volt"] = 0.0;
+    return true;
 }
 
 bool SoilPHSens::update() {
     if (millis() - sensorTimer >= 500) {
-        float x = analogRead(sensorPin);
-        double soilPh = -0.0693 * x + 7.3855;
+        float value = analogRead(sensorPin);
+        double soilPh = -0.0693 * value + 7.3855;
         soilPh = (soilPh < 0) ? 0 : soilPh;
-        (*doc)[name] = soilPh;
+        (*doc)[name]["raw"] = value;
+        (*doc)[name]["val"] = soilPh;
+        (*doc)[name]["volt"] = (value * 5.0) / 1023.0;
         sensorTimer = millis();
+        return true;
     }
+    return false;
 }
 
 void SoilPHSens::setDocument(const char *objName) {

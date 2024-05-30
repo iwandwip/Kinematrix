@@ -12,6 +12,8 @@
 
 #include "Arduino.h"
 
+float mapFloat(float x, float iMin, float iMax, float oMin, float oMax);
+
 class PID {
 private:
     float kp, ki, kd, td;
@@ -27,7 +29,6 @@ public:
     float getDeltaError(void);
     float getNegOutput(void);
     void reset(void);
-    float mapFloat(float x, float iMin, float iMax, float oMin, float oMax);
 };
 
 class PIDv2 {
@@ -38,42 +39,51 @@ private:
     float target;
     float outputMin, outputMax;
 public:
-    PIDv2(float kp, float ki, float kd, float setpoint) {
-        Kp = kp;
-        Ki = ki;
-        Kd = kd;
+    PIDv2(float kp, float ki, float kd, float setpoint);
+    void setSetpoint(float setpoint);
+    void setOutputLimits(float min, float max);
+    float compute(float input);
+};
 
-        prevError = 0;
-        integral = 0;
-        target = setpoint;
-        outputMin = 0;
-        outputMax = 255;
-    }
+#define AUTOMATIC    1
+#define MANUAL       0
+#define DIRECT       0
+#define REVERSE      1
+#define P_ON_M       0
+#define P_ON_E       1
 
-    void setSetpoint(float setpoint) {
-        target = setpoint;
-    }
+class PIDv3 {
+public:
+    PIDv3();
+    void setMode(int Mode);
+    bool compute(float mySetpoint, float myInput);
+    void setOutputLimits(float Min, float Max);
+    void setTunings(float Kp, float Ki, float Kd, int POn = P_ON_E);
+    void setControllerDirection(int Direction);
+    void setSampleTime(float NewSampleTime);
+    float getKp();
+    float getKi();
+    float getKd();
+    float getOutput();
+    int getMode();
+    int getDirection();
 
-    void setOutputLimits(float min, float max) {
-        outputMin = min;
-        outputMax = max;
-    }
-
-    float compute(float input) {
-        float error = target - input;
-        integral += error;
-        float derivative = error - prevError;
-        prevError = error;
-
-        float output = Kp * error + Ki * integral + Kd * derivative;
-
-        if (output > outputMax)
-            output = outputMax;
-        else if (output < outputMin)
-            output = outputMin;
-
-        return output;
-    }
+private:
+    void initialize();
+    float dispKp;
+    float dispKi;
+    float dispKd;
+    float kp;
+    float ki;
+    float kd;
+    float myOutput;
+    int controllerDirection;
+    int pOn;
+    unsigned long lastTime;
+    float outputSum, lastInput;
+    float SampleTime;
+    float outMin, outMax;
+    bool inAuto, pOnE;
 };
 
 #endif

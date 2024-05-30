@@ -219,6 +219,9 @@ public:
     void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
+
+    void setTotalVolume(double totalVolume);
+    void reset(void (*resetCallback)() = nullptr);
 };
 
 #endif  // FLOWMETER_SENS_H

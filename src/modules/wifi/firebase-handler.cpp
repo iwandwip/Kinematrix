@@ -13,9 +13,7 @@
 #include "addons/TokenHelper.h"
 
 FirebaseModule::FirebaseModule()
-        : ntpUDP(nullptr),
-          timeClient(nullptr),
-          data(nullptr),
+        : data(nullptr),
           address(nullptr),
           dataLen(0),
           addrLen(0) {
@@ -57,16 +55,6 @@ bool FirebaseModule::init(FirebaseAuthentication *_authentication, void (*initCa
     return true;
 }
 
-bool FirebaseModule::initNTP() {
-    //    ntpUDP = new WiFiUDP();
-    //    timeClient = new NTPClient(*ntpUDP);
-
-    //    configTime(GMT_OFFSET_WIB, DAYLIGHT_OFFSET, NTP_SERVER);
-    //    timeClient->begin();
-    //    timeClient->setTimeOffset(GMT_OFFSET_WIB);
-    return true;
-}
-
 bool FirebaseModule::connectToWiFi(const char *ssid, const char *pwd, void (*connectCallback)(void)) {
     WiFi.mode(WIFI_OFF);
     delay(1000);
@@ -92,9 +80,6 @@ bool FirebaseModule::isConnect() {
 
 bool FirebaseModule::update(void (*onUpdate)(void)) {
     if (onUpdate != nullptr) onUpdate();
-    while (!timeClient->update()) {
-        timeClient->forceUpdate();
-    }
     return true;
 }
 
@@ -235,22 +220,30 @@ void FirebaseModule::setString(String strData, const char *addrs, void (*onData)
     }
 }
 
-float FirebaseModule::getData(const char *getAddress, void (*onData)(float data, String address)) {
-    float dataRet = 0.0;
-    if (isConnect() && Firebase.RTDB.getFloat(&fbdo, F(getAddress))) {
-        dataRet = fbdo.to<float>();
-        if (onData != nullptr) onData(dataRet, getAddress);
+void FirebaseModule::setJson(String getAddress, JsonVariant variant, void (*resultCb)(String, String)) {
+    JsonDocument doc;
+    JsonVariant jsonRes = variant;
+    String json, res, err;
+    serializeJson(jsonRes, json);
+    FirebaseJson firebaseJson;
+    firebaseJson.setJsonData(json.c_str());
+    if (Firebase.RTDB.setJSON(&fbdo, getAddress.c_str(), &firebaseJson)) {
+        res = "ok";
+    } else {
+        err = fbdo.errorReason();
     }
-    return dataRet;
+    if (resultCb != nullptr) resultCb(res, err);
 }
 
-void FirebaseModule::getJson(String getAddress, void (*jsonCallback)(JsonVariant), void (*resultCb)(String, String)) {
-    String res, err;
-    if (Firebase.RTDB.getJSON(&fbdo, getAddress.c_str())) {
-        JsonDocument doc;
-        res = fbdo.to<FirebaseJson>().raw();
-        deserializeJson(doc, res.c_str());
-        jsonCallback(doc);
+void FirebaseModule::pushJson(String getAddress, JsonVariant variant, void (*resultCb)(String, String)) {
+    JsonDocument doc;
+    JsonVariant jsonRes = variant;
+    String json, res, err;
+    serializeJson(jsonRes, json);
+    FirebaseJson firebaseJson;
+    firebaseJson.setJsonData(json.c_str());
+    if (Firebase.RTDB.pushJSON(&fbdo, getAddress.c_str(), &firebaseJson)) {
+        res = "ok";
     } else {
         err = fbdo.errorReason();
     }
@@ -273,6 +266,44 @@ void FirebaseModule::setJson(String getAddress, JsonVariant (*jsonCallback)(Json
     if (resultCb != nullptr) resultCb(res, err);
 }
 
+void FirebaseModule::pushJson(String getAddress, JsonVariant (*jsonCallback)(JsonVariant),
+                              void (*resultCb)(String, String)) {
+    JsonDocument doc;
+    JsonVariant jsonRes = jsonCallback(doc);
+    String json, res, err;
+    serializeJson(jsonRes, json);
+    FirebaseJson firebaseJson;
+    firebaseJson.setJsonData(json.c_str());
+    if (Firebase.RTDB.pushJSON(&fbdo, getAddress.c_str(), &firebaseJson)) {
+        res = "ok";
+    } else {
+        err = fbdo.errorReason();
+    }
+    if (resultCb != nullptr) resultCb(res, err);
+}
+
+void FirebaseModule::getJson(String getAddress, void (*jsonCallback)(JsonVariant), void (*resultCb)(String, String)) {
+    String res, err;
+    if (Firebase.RTDB.getJSON(&fbdo, getAddress.c_str())) {
+        JsonDocument doc;
+        res = fbdo.to<FirebaseJson>().raw();
+        deserializeJson(doc, res.c_str());
+        jsonCallback(doc);
+    } else {
+        err = fbdo.errorReason();
+    }
+    if (resultCb != nullptr) resultCb(res, err);
+}
+
+float FirebaseModule::getData(const char *getAddress, void (*onData)(float data, String address)) {
+    float dataRet = 0.0;
+    if (isConnect() && Firebase.RTDB.getFloat(&fbdo, F(getAddress))) {
+        dataRet = fbdo.to<float>();
+        if (onData != nullptr) onData(dataRet, getAddress);
+    }
+    return dataRet;
+}
+
 String FirebaseModule::getStrData(const char *getAddress, void (*onData)(String data, String address)) {
     String dataRet = "";
     if (isConnect() && Firebase.RTDB.getString(&fbdo, F(getAddress))) {
@@ -282,11 +313,6 @@ String FirebaseModule::getStrData(const char *getAddress, void (*onData)(String 
         if (onData != nullptr) onData(dataRet, getAddress);
     }
     return dataRet;
-}
-
-String FirebaseModule::getStrTime() {
-    return String(timeClient->getDay()) + ";" + String(timeClient->getHours()) + ";" +
-           String(timeClient->getMinutes()) + ";" + String(timeClient->getSeconds());
 }
 
 void FirebaseModule::waitConnection(uint32_t __tmr) {
