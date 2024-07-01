@@ -74,10 +74,10 @@ void DigitalOut::toggleInit(unsigned long delay_time, int num, void (*toggleCall
     }
 }
 
-void DigitalOut::toggleAsync(unsigned long delay_time, void (*toggleCallback)()) {
+void DigitalOut::toggleAsync(unsigned long delay_time, void (*toggleCallback)(bool state)) {
     if (millis() - _toggleTime >= delay_time) {
-        if (toggleCallback != nullptr) toggleCallback();
         set(!_state);
+        if (toggleCallback != nullptr) toggleCallback(_state);
         _toggleTime = millis();
     }
 }

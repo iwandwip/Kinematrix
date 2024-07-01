@@ -50,6 +50,10 @@ bool TimerDuration::isExpired() const {
     }
 }
 
+bool TimerDuration::isRunning() const {
+    return _isRunning;
+}
+
 void TimerDuration::reset() {
     _startMillis = millis();
 }

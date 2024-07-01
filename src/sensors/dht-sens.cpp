@@ -8,48 +8,46 @@
 #include "dht-sens.h"
 #include "Arduino.h"
 
-DHTSens::DHTSens()
-        : sensorClass(nullptr),
-          sensorValue{0.0, 0.0},
-          sensorTimer(0),
-          sensorPin(3),
-          sensorType(DHT22) {
-}
-
-DHTSens::DHTSens(uint8_t _pin, uint8_t _type)
-        : sensorClass(nullptr),
-          sensorValue{0.0, 0.0},
-          sensorTimer(0),
-          sensorPin(_pin),
-          sensorType(_type) {
-}
-
 DHTSens::~DHTSens() = default;
 
 bool DHTSens::init() {
-    sensorClass = new DHT(sensorPin, sensorType);
-    (*sensorClass).begin();
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "DHTSens";
+        doc = new JsonDocument;
+    }
+    DHT::begin();
+    (*doc)[name]["temp"] = 0;
+    (*doc)[name]["hum"] = 0;
+    return true;
 }
 
 bool DHTSens::update() {
     if (millis() - sensorTimer >= 500) {
-        sensorValue[0] = (*sensorClass).readTemperature();
-        sensorValue[1] = (*sensorClass).readHumidity();
-        sensorTimer = millis();
+        (*doc)[name]["temp"] = DHT::readTemperature();
+        (*doc)[name]["hum"] = DHT::readHumidity();
+        return true;
     }
+    return false;
 }
 
-void DHTSens::getValue(float *output) {
-    output[0] = sensorValue[0];
-    output[1] = sensorValue[1];
+void DHTSens::setDocument(const char *objName) {
+    name = objName;
 }
 
-float DHTSens::getValueTemperature() const {
-    return sensorValue[0];
+void DHTSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
 }
 
-float DHTSens::getValueHumidity() const {
-    return sensorValue[1];
+JsonDocument DHTSens::getDocument() {
+    return (*doc);
+}
+
+JsonVariant DHTSens::getVariant(const char *searchName) {
+    return (*doc)[searchName];
+}
+
+float DHTSens::getValueDHTSens() const {
+    return (*doc)[name].as<float>();
 }
 
 void DHTSens::setPins(uint8_t _pin) {

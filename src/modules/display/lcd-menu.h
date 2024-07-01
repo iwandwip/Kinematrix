@@ -12,7 +12,9 @@
 #include "LiquidCrystal_I2C.h"
 #include "SPI.h"
 
-const uint8_t MAX_BUFF_LEN = 20;
+const uint8_t MAX_BUFF_LEN = 24;
+
+typedef void (*CallbackMenu)(void);
 
 struct MenuCursor {
     bool up;
@@ -26,6 +28,7 @@ struct MenuProperties {
     char option[MAX_BUFF_LEN];
     char **text;
     bool *isHasCb;
+//    CallbackMenu* onClickCallback;
     uint8_t len;
     int select;
     int index;
@@ -36,17 +39,21 @@ class LcdMenu : public LiquidCrystal_I2C {
 private:
     MenuCursor *cursor_;
     uint32_t lcdPrintTimer;
+    int lcdTotalRow;
+    int lcdTotalCol;
     using LiquidCrystal_I2C::LiquidCrystal_I2C;
 
 public:
     void initialize(bool _debug = false, void (*initCallback)() = nullptr);
+    void setLen(int row = 16, int col = 2);
     void onListen(MenuCursor *menuCursor, void (*listenCallback)());
-    void showMenu(MenuProperties *properties, bool forced = false);
+    void showMenu(MenuProperties *properties, bool forced = false, uint32_t showTime = 250);
     void onCursor(MenuProperties *properties);
     void showCursor(MenuProperties *properties);
+    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)());
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)());
+    void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor));
     void formatMenu(MenuProperties *properties, uint8_t index, const char *format, ...);
-    void backToMenu(MenuProperties *beforeProperties, MenuProperties *afterProperties);
     void clearMenu(MenuProperties *firstMenu, ...);
     int begin(int nums);
     int get(int nums);
@@ -56,11 +63,6 @@ public:
     MenuProperties *createEmptyMenu(int menuSize, const char *text = nullptr);
     void freeMenu(MenuProperties *menuProperties);
     void showCursor(bool state);
-    MenuCursor getCursor();
-    bool cursorUp();
-    bool cursorDown();
-    bool cursorSelect();
-    bool cursorBack();
     void debugPrint(const char *format, ...);
     void debug(MenuProperties *properties, uint8_t index);
     void wait(uint32_t time);

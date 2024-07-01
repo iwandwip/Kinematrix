@@ -8,45 +8,51 @@
 #include "aht-sens.h"
 #include "Arduino.h"
 
-AHTSens::AHTSens()
-        : sensorClass(nullptr),
-          sensorValue{0, 0},
-          sensorPin(A0),
-          sensorTimer(0) {
-}
-
 AHTSens::~AHTSens() = default;
 
 bool AHTSens::init() {
-    sensorClass = new Adafruit_AHTX0;
-    if (!(*sensorClass).begin())
-        while (true) {
-            delay(10);
-            break;
-        }
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "AHTSens";
+        doc = new JsonDocument;
+    }
+    if (!Adafruit_AHTX0::begin()) {
+        return false;
+    }
+    (*doc)[name]["temp"] = 0.0;
+    (*doc)[name]["hum"] = 0.0;
+    return true;
 }
 
 bool AHTSens::update() {
     if (millis() - sensorTimer >= 500) {
-        sensors_event_t dataBuffer[2];
-        (*sensorClass).getEvent(&dataBuffer[1], &dataBuffer[0]);
-        sensorValue[0] = dataBuffer[0].temperature;
-        sensorValue[1] = dataBuffer[1].relative_humidity;
+        sensors_event_t humidity, temp;
+        Adafruit_AHTX0::getEvent(&humidity, &temp);
+        (*doc)[name]["temp"] = temp.temperature;
+        (*doc)[name]["hum"] = humidity.relative_humidity;
         sensorTimer = millis();
+        return true;
     }
+    return false;
 }
 
-void AHTSens::getValue(float *output) {
-    output[0] = sensorValue[0];
-    output[1] = sensorValue[1];
+void AHTSens::setDocument(const char *objName) {
+    name = objName;
 }
 
-float AHTSens::getValueTemperature() const {
-    return sensorValue[0];
+void AHTSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
 }
 
-float AHTSens::getValueHumidity() const {
-    return sensorValue[1];
+JsonDocument AHTSens::getDocument() {
+    return (*doc);
+}
+
+JsonVariant AHTSens::getVariant(const char *searchName) {
+    return (*doc)[searchName];
+}
+
+float AHTSens::getValueAHTSens() const {
+    return (*doc)[name].as<float>();
 }
 
 void AHTSens::setPins(uint8_t _pin) {

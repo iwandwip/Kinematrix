@@ -83,6 +83,10 @@ void SensorModule::disable() {
     sensorEnable = false;
 }
 
+bool SensorModule::isEnable() {
+    return sensorEnable;
+}
+
 void SensorModule::addModule(BaseSens *sensModule) {
     BaseSens **newBase = (BaseSens **) realloc(base, (len + 1) * sizeof(BaseSens *));  // increase length by 1
     if (newBase == nullptr) {
@@ -170,8 +174,12 @@ BaseSens *SensorModule::getModuleByNamePtr(const char *searchName) {
     return base[count];
 }
 
-const char *SensorModule::getName(uint8_t index) {
+char *SensorModule::getName(uint8_t index) {
     return name[index];
+}
+
+char **SensorModule::getNames() {
+    return name;
 }
 
 void SensorModule::clearModules() {
@@ -301,10 +309,10 @@ void SensorModule::debug(uint32_t time, bool showHeapMemory, void (*debugCallbac
     if (!isReady()) return;
     static uint32_t debugTime = 0;
     if (millis() - debugTime >= time) {
-        debug(showHeapMemory);
         if (debugCallback != nullptr) {
             debugCallback();
         }
+        debug(showHeapMemory);
         debugTime = millis();
     }
 }

@@ -8,6 +8,54 @@
 #include "keypad-i2c-sens.h"
 #include "Arduino.h"
 
+KeypadSens::~KeypadSens() = default;
+
+bool KeypadSens::init() {
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "KeypadSens";
+        doc = new JsonDocument;
+    }
+    (*doc)[name]["key"] = "";
+    (*doc)[name]["before"] = "";
+    return true;
+}
+
+bool KeypadSens::update() {
+    char getKey = Keypad::getKey();
+    (*doc)[name]["key"] = String(getKey);
+    if (getKey != NO_KEY) {
+        (*doc)[name]["before"] = String(getKey);
+        return true;
+    }
+    return true;
+}
+
+void KeypadSens::setDocument(const char *objName) {
+    name = objName;
+}
+
+void KeypadSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
+JsonDocument KeypadSens::getDocument() {
+    return (*doc);
+}
+
+JsonVariant KeypadSens::getVariant(const char *searchName) {
+    return (*doc)[searchName];
+}
+
+float KeypadSens::getValueKeypadSens() const {
+    return (*doc)[name].as<float>();
+}
+
+void KeypadSens::setPins(uint8_t _pin) {
+    sensorPin = _pin;
+}
+
+////////////////////////////////////////////////////////////////
+
 KeypadI2CSens::~KeypadI2CSens() = default;
 
 bool KeypadI2CSens::init() {
@@ -22,16 +70,13 @@ bool KeypadI2CSens::init() {
 }
 
 bool KeypadI2CSens::update() {
-    if (millis() - sensorTimer >= 50) {
-        char getKey = Keypad_I2C::getKey();
-        (*doc)[name]["key"] = String(getKey);
-        if (getKey != NO_KEY) {
-            (*doc)[name]["before"] = String(getKey);
-        }
-        sensorTimer = millis();
+    char getKey = Keypad_I2C::getKey();
+    (*doc)[name]["key"] = String(getKey);
+    if (getKey != NO_KEY) {
+        (*doc)[name]["before"] = String(getKey);
         return true;
     }
-    return false;
+    return true;
 }
 
 void KeypadI2CSens::setDocument(const char *objName) {

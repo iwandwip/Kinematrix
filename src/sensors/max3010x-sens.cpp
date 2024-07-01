@@ -45,7 +45,7 @@ bool MAX3010xSens::update() {
 
     if (irValue < 50000) {
         (*doc)[name]["bpm"] = 0;
-        (*doc)[name]["avgBpm"] = 0;
+//        (*doc)[name]["avgBpm"] = 0;
         return false;
     } // No finger
     else {

@@ -179,6 +179,15 @@ void FlowmeterSens::process() {
     sensorClass->count();
 }
 
+void FlowmeterSens::resetValue() {
+    (*doc)[name]["currentRate"] = 0;
+    (*doc)[name]["currentVolume"] = 0;
+    (*doc)[name]["totalRate"] = 0;
+    (*doc)[name]["totalVolume"] = 0;
+    sensorClass->setTotalVolume(0);
+    sensorClass->reset();
+}
+
 void FlowmeterSens::setDocument(const char *objName) {
     name = objName;
 }

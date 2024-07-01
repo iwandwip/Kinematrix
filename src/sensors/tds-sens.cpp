@@ -78,7 +78,8 @@ float GravityTDS::getKvalue() {
 void GravityTDS::update() {
     this->analogValue = analogRead(this->pin);
     this->voltage = this->analogValue / this->adcRange * this->aref;
-    this->ecValue = (133.42 * this->voltage * this->voltage * this->voltage - 255.86 * this->voltage * this->voltage + 857.39 * this->voltage) * this->kValue;
+    this->ecValue = (133.42 * this->voltage * this->voltage * this->voltage - 255.86 * this->voltage * this->voltage +
+                     857.39 * this->voltage) * this->kValue;
     this->ecValue25 = this->ecValue / (1.0 + 0.02 * (this->temperature - 25.0));  //temperature compensation
     this->tdsValue = ecValue25 * TdsFactor;
     if (cmdSerialDataAvailable() > 0) {
@@ -97,7 +98,8 @@ float GravityTDS::getEcValue() {
 
 void GravityTDS::readKValues() {
     EEPROM_read(this->kValueAddress, this->kValue);
-    if (EEPROM.read(this->kValueAddress) == 0xFF && EEPROM.read(this->kValueAddress + 1) == 0xFF && EEPROM.read(this->kValueAddress + 2) == 0xFF && EEPROM.read(this->kValueAddress + 3) == 0xFF) {
+    if (EEPROM.read(this->kValueAddress) == 0xFF && EEPROM.read(this->kValueAddress + 1) == 0xFF &&
+        EEPROM.read(this->kValueAddress + 2) == 0xFF && EEPROM.read(this->kValueAddress + 3) == 0xFF) {
         this->kValue = 1.0;   // default value: K = 1.0
         EEPROM_write(this->kValueAddress, this->kValue);
     }
@@ -166,7 +168,9 @@ void GravityTDS::ecCalibration(byte mode) {
                 // Serial.print(rawECsolution);
                 // Serial.print("  ecvalue:");
                 // Serial.println(ecValue);
-                KValueTemp = rawECsolution / (133.42 * voltage * voltage * voltage - 255.86 * voltage * voltage + 857.39 * voltage);  //calibrate in the  buffer solution, such as 707ppm(1413us/cm)@25^c
+                KValueTemp = rawECsolution / (133.42 * voltage * voltage * voltage - 255.86 * voltage * voltage +
+                                              857.39 *
+                                              voltage);  //calibrate in the  buffer solution, such as 707ppm(1413us/cm)@25^c
                 if ((rawECsolution > 0) && (rawECsolution < 2000) && (KValueTemp > 0.25) && (KValueTemp < 4.0)) {
                     Serial.println();
                     Serial.print(F(">>>Confirm Successful,K:"));
@@ -200,11 +204,10 @@ void GravityTDS::ecCalibration(byte mode) {
 }
 
 TDSSens::TDSSens(uint8_t _pin, float *_temp, float _vref, float _adcRange)
-        : sensorValue(0.0),
-          sensorTemp(_temp),
+        : sensorTemp(_temp),
           sensorPin(_pin),
           sensorTimer(0) {
-    GravityTDS::setPin(_pin);
+    GravityTDS::setPin(sensorPin);
     GravityTDS::setAref(_vref);
     GravityTDS::setAdcRange(_adcRange);
 }
@@ -212,25 +215,47 @@ TDSSens::TDSSens(uint8_t _pin, float *_temp, float _vref, float _adcRange)
 TDSSens::~TDSSens() = default;
 
 bool TDSSens::init() {
+    if (strcmp(name, "") == 0 && doc == nullptr) {
+        name = "TDSSens";
+        doc = new JsonDocument;
+    }
+#if defined(ESP32)
+    if (!EEPROM.begin(512)) return false;
+#endif
+    (*doc)[name] = 0;
     GravityTDS::begin();
-    *sensorTemp = 25.0;
+    return true;
 }
 
 bool TDSSens::update() {
     if (millis() - sensorTimer >= 500) {
         GravityTDS::setTemperature(*sensorTemp);
         GravityTDS::update();
-        sensorValue = GravityTDS::getTdsValue();
+        (*doc)[name] = GravityTDS::getTdsValue();
         sensorTimer = millis();
+        return true;
     }
+    return false;
 }
 
-void TDSSens::getValue(float *output) {
-    *output = sensorValue;
+void TDSSens::setDocument(const char *objName) {
+    name = objName;
 }
 
-float TDSSens::getValueTDS() const {
-    return sensorValue;
+void TDSSens::setDocumentValue(JsonDocument *docBase) {
+    doc = docBase;
+}
+
+JsonDocument TDSSens::getDocument() {
+    return (*doc);
+}
+
+JsonVariant TDSSens::getVariant(const char *searchName) {
+    return (*doc)[searchName];
+}
+
+float TDSSens::getValueTDSSens() const {
+    return (*doc)[name].as<float>();
 }
 
 void TDSSens::setPins(uint8_t _pin) {

@@ -17,12 +17,17 @@
 #include "modules/communication/wired/serial/hard-serial.h"
 #include "modules/communication/wired/serial/soft-serial.h"
 #include "modules/communication/wired/serial/swap-serial.h"
+#include "modules/communication/wired/spi/spi-serial.h"
 #include "modules/communication/wired/spi/dot-matrix.h"
 #include "modules/communication/wireless/lora/lora-com.h"
+#include "modules/communication/wireless/now/esp-now.h"
 
 #include "modules/control/PID.h"
+#include "modules/control/KNN.h"
 
+#include "modules/wifi/datetime-ntp.h"
 #include "modules/wifi/firebase-handler.h"
+#include "modules/wifi/telegram-bot.h"
 #include "modules/wifi/whatsapp-bot.h"
 #include "modules/wifi/wifi-handler.h"
 
@@ -36,6 +41,7 @@
 #include "modules/io/input-module.h"
 #include "modules/io/output-module.h"
 #include "modules/io/rotary-module.h"
+#include "modules/io/seven-segment.h"
 
 #include "modules/task/Task.h"
 #include "modules/time/timer-duration.h"
@@ -50,6 +56,7 @@
 #include "sensors/ds18b20-sens.h"
 #include "sensors/dust-sens.h"
 #include "sensors/flowmeter-sens.h"
+#include "sensors/gps-sens.h"
 #include "sensors/gm67-sens.h"
 #include "sensors/hx711-sens.h"
 #include "sensors/ina219-sens.h"
@@ -58,6 +65,7 @@
 #include "sensors/max6675-sens.h"
 #include "sensors/max31865-sens.h"
 #include "sensors/rfid-sens.h"
+#include "sensors/rpm-sens.h"
 #include "sensors/rtc-sens.h"
 #include "sensors/soil-sens.h"
 #include "sensors/soilph-sens.h"

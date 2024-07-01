@@ -30,8 +30,8 @@ bool SoilPHSens::init() {
 bool SoilPHSens::update() {
     if (millis() - sensorTimer >= 500) {
         float value = analogRead(sensorPin);
-        double soilPh = -0.0693 * value + 7.3855;
-        soilPh = (soilPh < 0) ? 0 : soilPh;
+        double soilPh = (-0.0693 * value) + 7.3855; // y = -0.0693x + 7.3855
+        soilPh = (soilPh < 0) ? 0 : (soilPh > 14) ? 14 : soilPh;
         (*doc)[name]["raw"] = value;
         (*doc)[name]["val"] = soilPh;
         (*doc)[name]["volt"] = (value * 5.0) / 1023.0;

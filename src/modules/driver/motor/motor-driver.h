@@ -15,39 +15,43 @@
 namespace BTS8960 {
     class MotorDriver {
     private:
-        uint8_t enableLeft;
-        uint8_t enableRight;
-        uint8_t pwmLeft;
-        uint8_t pwmRight;
+        int enableLeft;
+        int enableRight;
+        int pwmLeft;
+        int pwmRight;
     public:
-        MotorDriver(uint8_t EN, uint8_t L_PWM, uint8_t R_PWM);
-        MotorDriver(uint8_t L_EN, uint8_t R_EN, uint8_t L_PWM, uint8_t R_PWM);
+        MotorDriver(int EN, int L_PWM, int R_PWM);
+        MotorDriver(int L_EN, int R_EN, int L_PWM, int R_PWM);
 
         void enable();
         void disable();
 
-        void turnLeft(uint8_t pwm);
-        void turnRight(uint8_t pwm);
+        void turnLeft(int pwm);
+        void turnRight(int pwm);
         void stop();
+
+        static const int NC = -1;
     };
 }
 
 namespace L298N {
     class MotorDriver {
     private:
-        uint8_t enable;
-        uint8_t inputLeft;
-        uint8_t inputRight;
-        uint8_t pwmChannel;
+        int enablePin;
+        int inputLeftPin;
+        int inputRightPin;
+        int pwmChannel;
 
     public:
-        MotorDriver(uint8_t EN, uint8_t IN1, uint8_t IN2);
+        MotorDriver(int EN, int IN1, int IN2);
 #if defined(ESP32)
         void setup(int freq = 30000, int ch = 0, int resolution = 8);
 #endif
-        void turnLeft(uint8_t pwm);
-        void turnRight(uint8_t pwm);
+        void turnLeft(int pwm);
+        void turnRight(int pwm);
         void stop();
+
+        static const int NC = -1;
     };
 }
 

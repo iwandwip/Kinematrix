@@ -215,6 +215,8 @@ public:
     bool update() override;
     void process() override;
 
+    void resetValue();
+
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;

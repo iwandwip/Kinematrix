@@ -86,6 +86,11 @@ void DigitalIn::resetCount() {
     count = 0;
 }
 
+void DigitalIn::resetState() {
+    previousSteadyState = HIGH;
+    lastSteadyState = HIGH;
+}
+
 void DigitalIn::update() {
     int currentState = getStateRaw();
     unsigned long currentTime = millis();

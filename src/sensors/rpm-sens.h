@@ -1,41 +1,48 @@
 /*
- *  aht-sens.h
+ *  rpm-sens.h
  *
- *  aht sensor lib
+ *  rpm sensor lib
  *  Created on: 2023. 4. 3
  */
 
 #pragma once
 
-#ifndef AHT_SENS_H
-#define AHT_SENS_H
+#ifndef RPM_SENS_H
+#define RPM_SENS_H
 
 #include "Arduino.h"
 #include "base/sensor-module.h"
-#include "Adafruit_Sensor.h"
-#include "Adafruit_AHTX0.h"
 
-class AHTSens : public BaseSens, public Adafruit_AHTX0 {
+class RPMSens : public BaseSens {
 private:
     JsonDocument *doc;
     const char *name;
 
+    volatile int encoderCount;
+    uint32_t interval;
+
+    int encoderPin;
+    void (*interruptCallback)();
+    int mode;
+
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
-    using Adafruit_AHTX0::Adafruit_AHTX0;
 public:
-    virtual ~AHTSens();
+    RPMSens(int _encoderPin, void (*_interruptCallback)() = nullptr, int _mode = RISING);
+    virtual ~RPMSens();
     bool init() override;
     bool update() override;
+
+    void count();
 
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
 
-    float getValueAHTSens() const;
+    float getValueRPMSens() const;
     void setPins(uint8_t _pin);
 };
 
-#endif  // AHT_SENS_H
+#endif  // RPM_SENS_H

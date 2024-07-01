@@ -7,10 +7,12 @@
 
 #include "ultrasonic-sens.h"
 #include "Arduino.h"
+#include "SPI.h"
 
 UltrasonicSens::~UltrasonicSens() = default;
 
 bool UltrasonicSens::init() {
+
     if (strcmp(name, "") == 0 && doc == nullptr) {
         name = "UltrasonicSens";
         doc = new JsonDocument;

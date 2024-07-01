@@ -45,6 +45,10 @@ bool SoilMoistureSens::update() {
     return false;
 }
 
+long SoilMoistureSens::setOffset(int low, int high) {
+    return random(low, high);
+}
+
 void SoilMoistureSens::setDocument(const char *objName) {
     name = objName;
 }

@@ -14,8 +14,14 @@
 class I2CScanner {
 public:
     I2CScanner();
-    ~I2CScanner();
-    void scan();
+    virtual ~I2CScanner();
+
+    void beginTransmission();
+    void scanI2CAddress();
+    void endTransmission();
+private:
+    int n_address_[8];
+    int n_devices_;
 };
 
 #endif  // KADITA_I2C_SCANNER_H

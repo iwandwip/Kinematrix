@@ -51,7 +51,7 @@ public:
     void setTimeOut(uint32_t time);
 
     void clearData();
-    void sendData();
+    void sendData(bool debug = false, bool endln = false);
     void sendDataCb(void (*onReceive)(const String &));
     void sendDataAsync(uint32_t _time = 500);
     void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)(const String &) = nullptr);

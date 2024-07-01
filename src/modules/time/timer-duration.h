@@ -21,6 +21,7 @@ public:
     void stop();
     void resume();
     bool isExpired() const;
+    bool isRunning() const;
     void reset();
     unsigned long getHours() const;
     unsigned long getMinutes() const;

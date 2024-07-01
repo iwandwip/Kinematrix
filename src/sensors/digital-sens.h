@@ -1,4 +1,4 @@
-/*
+/*  https://esp32.com/viewtopic.php?t=4061
  *  digital-sens.h
  *
  *  digital sensor lib
@@ -12,8 +12,9 @@
 
 #include "Arduino.h"
 #include "base/sensor-module.h"
+#include "../src/modules/io/input-module.h"
 
-class DigitalSens : public BaseSens {
+class DigitalSens : public BaseSens, public DigitalIn {
 private:
     JsonDocument *doc;
     const char *name;
@@ -23,8 +24,8 @@ private:
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
+    using DigitalIn::DigitalIn;
 public:
-    DigitalSens(uint8_t _inputPin, uint8_t _mode = INPUT);
     virtual ~DigitalSens();
     bool init() override;
     bool update() override;

@@ -28,6 +28,8 @@ public:
     bool init() override;
     bool update() override;
 
+    static long setOffset(int low, int high);
+
     void setDocument(const char *objName) override;
     void setDocumentValue(JsonDocument *docBase) override;
     JsonDocument getDocument() override;

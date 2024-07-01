@@ -32,7 +32,7 @@ bool HX711Sens::update() {
         if (this->is_ready()) {
             float units = this->get_units();
             if (units < 0) units = 0.0;
-            units /= format;
+            units = units / format;
             if (sensorFilterCb != nullptr) {
                 units = sensorFilterCb(units);
             }

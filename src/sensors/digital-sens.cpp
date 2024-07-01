@@ -8,12 +8,6 @@
 #include "digital-sens.h"
 #include "Arduino.h"
 
-DigitalSens::DigitalSens(uint8_t _inputPin, uint8_t _mode)
-        : doc(nullptr),
-          name(""),
-          mode(_mode),
-          sensorPin(_inputPin) {}
-
 DigitalSens::~DigitalSens() = default;
 
 bool DigitalSens::init() {
@@ -21,17 +15,15 @@ bool DigitalSens::init() {
         name = "DigitalSens";
         doc = new JsonDocument;
     }
-    pinMode(sensorPin, mode);
-    (*doc)[name] = 0;
+    (*doc)[name]["raw"] = 0;
+    (*doc)[name]["press"] = 0;
     return true;
 }
 
 bool DigitalSens::update() {
-    if (millis() - sensorTimer >= 50) {
-        int value = digitalRead(sensorPin);
-        (*doc)[name] = value;
-        sensorTimer = millis();
-    }
+    (*doc)[name]["raw"] = DigitalIn::getStateRaw();
+    (*doc)[name]["press"] = (int) DigitalIn::isPressed();
+    DigitalIn::update();
     return true;
 }
 

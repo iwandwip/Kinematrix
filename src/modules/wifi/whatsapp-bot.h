@@ -1,7 +1,7 @@
 /*
- *  whatsapp_bot_handler.h
+ *  whatsapp-bot.h
  *
- *  whatsapp_bot handler module
+ *  whatsapp-bot module
  *  Created on: 2023. 4. 3
  */
 

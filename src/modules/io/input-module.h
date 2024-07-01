@@ -41,6 +41,7 @@ public:
     void setCountMode(int mode);
     unsigned long getCount() const;
     void resetCount();
+    void resetState();
     void update();
     static void updateAll(DigitalIn *ptr, ...);
     static DigitalIn *stop();

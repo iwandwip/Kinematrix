@@ -75,15 +75,17 @@ private:
 #define TDS_SENS_H
 
 #include "base/sensor-module.h"
+#include "EEPROM.h"
 
 class TDSSens : public BaseSens, public GravityTDS {
 private:
-    /*variables*/
-    float sensorValue;
+    JsonDocument *doc;
+    const char *name;
+
     float *sensorTemp;
+
     uint8_t sensorPin;
     uint32_t sensorTimer;
-
     using GravityTDS::GravityTDS;
 
 public:
@@ -91,8 +93,13 @@ public:
     ~TDSSens();
     bool init() override;
     bool update() override;
-    void getValue(float *output) override;
-    float getValueTDS() const;
+
+    void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
+    JsonDocument getDocument() override;
+    JsonVariant getVariant(const char *searchName) override;
+
+    float getValueTDSSens() const;
     void setPins(uint8_t _pin);
 };
 

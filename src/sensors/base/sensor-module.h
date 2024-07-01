@@ -61,6 +61,7 @@ public:
 
     void enable();
     void disable();
+    bool isEnable();
 
     void addModule(BaseSens *sensModule);
     void addName(const char *newName);
@@ -78,7 +79,8 @@ public:
     BaseSens &getModuleByName(const char *searchName);
     BaseSens *getModuleByNamePtr(const char *searchName);
 
-    const char *getName(uint8_t index);
+    char *getName(uint8_t index);
+    char **getNames();
     void clearModules();
 
     uint8_t getModuleCount();

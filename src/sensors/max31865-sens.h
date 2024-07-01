@@ -21,19 +21,30 @@
 
 class MAX31865Sens : public BaseSens, public Adafruit_MAX31865 {
 private:
-    float sensorValue;
+    JsonDocument *doc;
+    const char *name;
+
     float sensorRtdNominal;
     float sensorRefResistor;
+
+    uint8_t sensorPin;
     uint32_t sensorTimer;
     using Adafruit_MAX31865::Adafruit_MAX31865;
 
 public:
-    explicit MAX31865Sens(int8_t spiCs, int8_t spiMosi, int8_t spiMiso, int8_t spiClk, max31865_numwires wire = MAX31865_2WIRE, float _rtdNominal = MAX_31865_PT100_RNOMINAL, float _refResistor = MAX_31865_PT100_RREF);
-    ~MAX31865Sens();
+    explicit MAX31865Sens(int8_t spiCs = 10, int8_t spiMosi = 11, int8_t spiMiso = 12, int8_t spiClk = 13,
+                          max31865_numwires wire = MAX31865_2WIRE, float _rtdNominal = MAX_31865_PT100_RNOMINAL,
+                          float _refResistor = MAX_31865_PT100_RREF);
+    virtual ~MAX31865Sens();
     bool init() override;
     bool update() override;
-    void getValue(float *output) override;
-    float getValueTemperature() const;
+
+    void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
+    JsonDocument getDocument() override;
+    JsonVariant getVariant(const char *searchName) override;
+
+    float getValueMAX31865Sens() const;
     void setPins(uint8_t _pin);
 };
 

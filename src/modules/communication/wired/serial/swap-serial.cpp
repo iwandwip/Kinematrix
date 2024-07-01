@@ -30,8 +30,12 @@ void SwapSerial::clearData() {
     dataSend = "";
 }
 
-void SwapSerial::sendData() {
+void SwapSerial::sendData(bool debug , bool endln) {
     serialPtr->println(dataSend);
+    if (debug) {
+        Serial.print(dataSend);
+        if (endln) Serial.println();
+    }
 }
 
 void SwapSerial::sendDataCb(void (*onReceive)(const String &)) {
