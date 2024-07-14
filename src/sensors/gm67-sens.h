@@ -4,7 +4,7 @@
  *  gm67 sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_GM67_SENS
 #pragma once
 
 #ifndef GM67_SENS_H
@@ -55,3 +55,4 @@ public:
 };
 
 #endif  // GM67_SENS_H
+#endif

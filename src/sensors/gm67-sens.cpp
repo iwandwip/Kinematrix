@@ -4,7 +4,7 @@
  *  gm67 sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_GM67_SENS
 #include "gm67-sens.h"
 #include "Arduino.h"
 
@@ -65,3 +65,5 @@ float GM67Sens::getValueGM67Sens() const {
 void GM67Sens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+
+#endif

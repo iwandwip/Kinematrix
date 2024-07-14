@@ -16,7 +16,7 @@
  *  flowmeter sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_FLOWMETER_SENS
 #pragma once
 
 #ifndef FLOWMETER_H
@@ -227,3 +227,4 @@ public:
 };
 
 #endif  // FLOWMETER_SENS_H
+#endif

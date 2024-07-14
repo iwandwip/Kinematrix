@@ -21,6 +21,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_TDS_SENS
 #pragma once
 
 #ifndef GRAVITY_TDS_H
@@ -104,3 +105,4 @@ public:
 };
 
 #endif  // TDS_SENS_H
+#endif

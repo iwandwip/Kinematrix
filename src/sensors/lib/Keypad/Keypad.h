@@ -29,7 +29,7 @@
 || #
 ||
 */
-
+#ifdef USE_KEYPAD_I2C_SENS
 #ifndef KEYPAD_H
 #define KEYPAD_H
 
@@ -149,3 +149,5 @@ private:
 || | 1.0 2007-XX-XX - Mark Stanley : Initial Release
 || #
 */
+
+#endif

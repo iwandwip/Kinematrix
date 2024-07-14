@@ -4,7 +4,7 @@
  *  rfid sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_RFID_SENS
 #include "rfid-sens.h"
 #include "Arduino.h"
 
@@ -59,3 +59,4 @@ String RFID_Mfrc522::getValueRFID_Mfrc522() const {
 void RFID_Mfrc522::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

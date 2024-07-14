@@ -4,7 +4,7 @@
  *  whatsapp-bot module
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_WHATSAPP_BOT
 #pragma once
 
 #ifndef WHATSAPP_BOT_HANDLER_H
@@ -30,5 +30,6 @@ public:
     static void resultStatusCallback(String res, String err);
 };
 
+#endif
 #endif
 #endif

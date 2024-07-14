@@ -5,6 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
+
+#ifdef USE_I2C_SCANNER
 #include "i2c-scanner.h"
 
 I2CScanner::I2CScanner()
@@ -67,3 +69,4 @@ void I2CScanner::endTransmission() {
     Serial.println("| WIRE END");
 }
 
+#endif

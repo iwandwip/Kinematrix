@@ -4,7 +4,7 @@
  *  dust sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_DUST_SENS
 #pragma once
 
 #ifndef DUST_SENS_H
@@ -55,3 +55,4 @@ public:
 };
 
 #endif  // DUST_SENS_H
+#endif

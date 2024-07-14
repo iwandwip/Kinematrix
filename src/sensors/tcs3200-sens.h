@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_TCS3200_SENS
 #pragma once
 
 #ifndef TCS_3200_SENS_H
@@ -39,3 +40,4 @@ public:
 };
 
 #endif  // TCS_3200_SENS_H
+#endif

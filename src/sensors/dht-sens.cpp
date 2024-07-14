@@ -4,7 +4,7 @@
  *  dht sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_DHT_SENS
 #include "dht-sens.h"
 #include "Arduino.h"
 
@@ -53,3 +53,5 @@ float DHTSens::getValueDHTSens() const {
 void DHTSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+
+#endif

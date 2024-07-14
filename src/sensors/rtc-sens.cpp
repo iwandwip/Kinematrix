@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_RTC_SENS
 #include "rtc-sens.h"
 #include "Arduino.h"
 
@@ -90,3 +91,4 @@ DateTime RTC_DS3231Sens::getDateTime() {
 uint32_t RTC_DS3231Sens::toUnixTime(const String &timestamp) {
     return DateTime(timestamp.c_str()).unixtime();
 }
+#endif

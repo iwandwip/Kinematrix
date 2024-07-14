@@ -4,7 +4,7 @@
  *  PID lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_PID
 #pragma once
 
 #ifndef PID_LIB_H
@@ -86,4 +86,5 @@ private:
     bool inAuto, pOnE;
 };
 
+#endif
 #endif

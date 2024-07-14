@@ -4,7 +4,7 @@
  *  ds18b20 sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_DS18B20_SENS
 #pragma once
 
 #ifndef DS18B20_SENS_H
@@ -43,3 +43,4 @@ public:
 };
 
 #endif  // DS18B20_SENS_H
+#endif

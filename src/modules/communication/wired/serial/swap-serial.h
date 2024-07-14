@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_SWAP_SERIAL
 #pragma once
 
 #ifndef SWAP_SERIAL_COM_H
@@ -65,3 +66,4 @@ public:
 
 #endif // defined(ESP8266) || defined(ESP32)
 #endif // SWAP_SERIAL_COM_H
+#endif

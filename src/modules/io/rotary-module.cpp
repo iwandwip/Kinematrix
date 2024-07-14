@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_ROTARY_MODULE
 #include "rotary-module.h"
 
 RotaryModule::RotaryModule(uint8_t pin_clock_, uint8_t pin_data_)
@@ -43,3 +44,4 @@ bool RotaryModule::isMoveCCW() const {
 bool RotaryModule::isStop() const {
     return direction == 0;
 }
+#endif

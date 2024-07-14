@@ -4,7 +4,7 @@
  *  motor-driver driver
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_MOTOR_DRIVER
 #pragma once
 
 #ifndef MOTOR_DRIVER_H
@@ -56,3 +56,4 @@ namespace L298N {
 }
 
 #endif  // MOTOR_DRIVER_H
+#endif

@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_TELEGRAM_BOT
 #include "telegram-bot.h"
 
 #if defined(ESP32) || defined(ESP8266)
@@ -49,4 +50,5 @@ void TelegramBot::sendMessages(const String &msg) {
     UniversalTelegramBot::sendMessage(botChatId, msg, "");
 }
 
+#endif
 #endif

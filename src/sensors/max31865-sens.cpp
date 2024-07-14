@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_MAX31865_SENS
 #include "max31865-sens.h"
 #include "Arduino.h"
 
@@ -60,3 +61,4 @@ float MAX31865Sens::getValueMAX31865Sens() const {
 void MAX31865Sens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

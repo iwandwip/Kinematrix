@@ -26,6 +26,7 @@ INCLUDING, BUT NOT LIMITED TO, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR 
 REASON WHATSOEVER.
 */
 
+#ifdef USE_SERVO_DRIVER
 
 #ifndef HCPCA9685_h
 #define HCPCA9685_h
@@ -143,4 +144,5 @@ private:
     void _AutoIncrement(boolean Mode);
 };
 
+#endif
 #endif

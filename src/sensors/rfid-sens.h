@@ -4,7 +4,7 @@
  *  rfid sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_RFID_SENS
 #pragma once
 
 #ifndef RFID_SENS_H
@@ -39,3 +39,4 @@ public:
 };
 
 #endif  // RFID_SENS_H
+#endif

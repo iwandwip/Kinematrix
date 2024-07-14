@@ -4,7 +4,7 @@
  *  voltage sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_VOLTAGE_SENS
 #pragma once
 
 #ifndef VOLTAGE_SENS_H
@@ -37,3 +37,4 @@ public:
 };
 
 #endif  // VOLTAGE_SENS_H
+#endif

@@ -4,7 +4,7 @@
  *  ina219 sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_INA219_SENS
 #include "ina219-sens.h"
 #include "Arduino.h"
 
@@ -58,3 +58,5 @@ float INA219Sens::getValueINA219Sens() const {
 void INA219Sens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+
+#endif

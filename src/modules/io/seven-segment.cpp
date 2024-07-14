@@ -4,7 +4,7 @@
  *  seven segment c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SEVEN_SEGMENT
 #include "seven-segment.h"
 
 SevenSegment::SevenSegment(int pinA, int pinB, int pinC, int pinD, int *enablePins, int numDisplays) {
@@ -102,3 +102,5 @@ void SevenSegment::displayDigit(int digit) {
         digitalWrite(pinD, bitRead(digit, 3)); // MSB
     }
 }
+
+#endif

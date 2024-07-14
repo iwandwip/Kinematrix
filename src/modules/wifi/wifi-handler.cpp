@@ -4,7 +4,7 @@
  *  Wi-Fi handler c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_WIFI_HANDLER
 #include "wifi-handler.h"
 
 #if defined(ESP32) || defined(ESP8266)
@@ -35,4 +35,5 @@ bool WiFiHandler::isConnect() {
     return connect;
 }
 
+#endif
 #endif

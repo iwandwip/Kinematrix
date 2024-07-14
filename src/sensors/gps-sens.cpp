@@ -4,7 +4,7 @@
  *  gps sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_GPS_SENS
 #include "gps-sens.h"
 #include "Arduino.h"
 
@@ -67,3 +67,5 @@ float GPSSens::getValueGPSSens() const {
 void GPSSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+
+#endif

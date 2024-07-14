@@ -4,7 +4,7 @@
  *  dust sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_DUST_SENS
 #include "dust-sens.h"
 #include "Arduino.h"
 
@@ -89,3 +89,4 @@ float DustSens::getValueDustSens() const {
 void DustSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

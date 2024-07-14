@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_GPS_SENS
 #pragma once
 
 #ifndef GPS_SENS_H
@@ -57,3 +58,4 @@ public:
 };
 
 #endif  // GPS_SENS_H
+#endif

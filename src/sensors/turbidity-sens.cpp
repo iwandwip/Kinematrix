@@ -4,7 +4,7 @@
  *  turbidity sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_TURBIDITY_SENS
 #include "turbidity-sens.h"
 #include "Arduino.h"
 
@@ -76,3 +76,4 @@ float TurbiditySens::getValueTurbiditySens() const {
 void TurbiditySens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

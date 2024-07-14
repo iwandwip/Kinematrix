@@ -4,7 +4,7 @@
  *  soilph sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SOILPH_SENS
 #pragma once
 
 #ifndef SOILPH_SENS_H
@@ -38,3 +38,4 @@ public:
 };
 
 #endif  // SOILPH_SENS_H
+#endif

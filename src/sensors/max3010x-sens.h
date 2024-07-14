@@ -4,7 +4,7 @@
  *  max3010x sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_MAX3010X_SENS
 #pragma once
 
 #ifndef MAX_3010X_SENS_H
@@ -46,3 +46,4 @@ public:
 };
 
 #endif  // MAX_3010X_SENS_H
+#endif

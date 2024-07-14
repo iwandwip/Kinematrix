@@ -4,7 +4,7 @@
  *  io expander module header
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_IO_EXPANDER
 #ifndef KADITA_IO_EXPANDER_H
 #define KADITA_IO_EXPANDER_H
 
@@ -21,3 +21,4 @@ public:
 };
 
 #endif  // KADITA_IO_EXPANDER_H
+#endif

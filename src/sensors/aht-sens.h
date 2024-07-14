@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_AHT_SENS
 #pragma once
 
 #ifndef AHT_SENS_H
@@ -39,3 +40,4 @@ public:
 };
 
 #endif  // AHT_SENS_H
+#endif

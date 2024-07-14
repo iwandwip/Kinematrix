@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_FIREBASE_HANDLER
 #pragma once
 
 #ifndef FIREBASE_HANDLER_H
@@ -533,3 +534,4 @@ void FirebaseModule::resultStatusCallback(String res, String err) {
 #endif
 #endif
 #endif  // FIREBASE_HANDLER_H
+#endif 

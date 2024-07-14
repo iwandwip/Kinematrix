@@ -4,7 +4,7 @@
  *  bme280 sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_BME280_SENS
 #pragma once
 
 #ifndef BME280_SENS_H
@@ -45,3 +45,4 @@ public:
 };
 
 #endif  // BME280_SENS_H
+#endif

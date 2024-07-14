@@ -4,7 +4,7 @@
  *  Wi-Fi handler module
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_WIFI_HANDLER
 #pragma once
 
 #ifndef WIFI_HANDLER_H
@@ -24,5 +24,6 @@ public:
     bool isConnect();
 };
 
+#endif
 #endif
 #endif

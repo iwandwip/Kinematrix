@@ -4,7 +4,7 @@
  *  ultrasonic sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_ULTRASONIC_SENS
 #include "ultrasonic-sens.h"
 #include "Arduino.h"
 #include "SPI.h"
@@ -57,3 +57,4 @@ float UltrasonicSens::getValueIn() {
 void UltrasonicSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

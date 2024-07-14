@@ -5,6 +5,9 @@
  *  Created on: 2023. 4. 3
  */
 
+
+#ifdef USE_AHT_SENS
+
 #include "aht-sens.h"
 #include "Arduino.h"
 
@@ -58,3 +61,5 @@ float AHTSens::getValueAHTSens() const {
 void AHTSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+
+#endif

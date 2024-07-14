@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_MAX31865_SENS
 #pragma once
 
 #ifndef MAX31865_SENS_H
@@ -49,3 +50,4 @@ public:
 };
 
 #endif  // MAX31865_SENS_H
+#endif

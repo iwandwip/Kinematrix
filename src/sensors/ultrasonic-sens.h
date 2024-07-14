@@ -4,7 +4,7 @@
  *  ultrasonic sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_ULTRASONIC_SENS
 #pragma once
 
 #ifndef ULTRASONIC_SENS_H
@@ -40,3 +40,4 @@ public:
 };
 
 #endif  // ULTRASONIC_SENS_H
+#endif

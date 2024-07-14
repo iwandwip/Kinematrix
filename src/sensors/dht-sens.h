@@ -4,7 +4,7 @@
  *  dht sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_DHT_SENS
 #pragma once
 
 #ifndef DHT_SENS_H
@@ -40,3 +40,4 @@ public:
 };
 
 #endif  // DHT_SENS_H
+#endif

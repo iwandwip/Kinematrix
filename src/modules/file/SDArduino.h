@@ -4,7 +4,7 @@
  *  SDArduino lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SD_ARDUINO
 #pragma once
 
 #ifndef SD_ARDUINO_H
@@ -261,3 +261,4 @@ String SDArduino::readFilesString(const char *_file_name, bool debug) {
 #endif
 
 #endif // SD_ARDUINO_H
+#endif

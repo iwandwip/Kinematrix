@@ -4,7 +4,7 @@
  *  lcd menu c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_LCD_MENU
 #include "lcd-menu.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -358,3 +358,4 @@ void LcdMenu::debug(MenuProperties *properties, uint8_t index) {
 void LcdMenu::wait(uint32_t time) {
     delay(time);
 }
+#endif

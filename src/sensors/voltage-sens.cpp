@@ -4,7 +4,7 @@
  *  voltage sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_VOLTAGE_SENS
 #include "voltage-sens.h"
 #include "Arduino.h"
 
@@ -54,3 +54,4 @@ float VoltageSens::getValueVoltage() const {
 void VoltageSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

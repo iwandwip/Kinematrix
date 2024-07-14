@@ -4,7 +4,7 @@
  *  seven segment header
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SEVEN_SEGMENT
 #pragma once
 
 #ifndef KINEMATRIX_SEVEN_SEGMENT
@@ -29,3 +29,4 @@ public:
 };
 
 #endif  // KINEMATRIX_SEVEN_SEGMENT
+#endif

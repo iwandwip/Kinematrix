@@ -1,3 +1,5 @@
+
+#ifdef USE_SPI_SERIAL
 //#include "spi-serial.h"
 //
 //SPIMaster::SPIMaster()
@@ -103,3 +105,4 @@
 //    }
 //    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 //}
+#endif

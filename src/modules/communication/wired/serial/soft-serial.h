@@ -4,7 +4,7 @@
  *  serial communication lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SOFT_SERIAL
 #pragma once
 
 #ifndef SOFT_SERIAL_COM_H
@@ -51,4 +51,5 @@ public:
 
 #endif
 
+#endif
 #endif

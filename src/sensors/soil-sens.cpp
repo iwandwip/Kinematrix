@@ -4,7 +4,7 @@
  *  soil sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SOIL_MOISTURE_SENSOR
 #include "soil-sens.h"
 #include "Arduino.h"
 
@@ -72,3 +72,4 @@ float SoilMoistureSens::getValueSoilMoistureSens() const {
 void SoilMoistureSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

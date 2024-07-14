@@ -4,7 +4,7 @@
  *  ds18b20 sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_DS18B20_SENS
 #include "ds18b20-sens.h"
 #include "Arduino.h"
 
@@ -65,3 +65,4 @@ float DS18B20Sens::getValueTemperature() const {
 void DS18B20Sens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

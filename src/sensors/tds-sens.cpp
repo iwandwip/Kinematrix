@@ -21,6 +21,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_TDS_SENS
 #include "tds-sens.h"
 #include "Arduino.h"
 #include "EEPROM.h"
@@ -261,3 +262,4 @@ float TDSSens::getValueTDSSens() const {
 void TDSSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

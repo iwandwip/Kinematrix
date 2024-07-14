@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_RTC_SENS
 #pragma once
 
 #ifndef RTC_SENS_H
@@ -62,3 +63,4 @@ public:
 };
 
 #endif  // RTC_SENS_H
+#endif

@@ -4,7 +4,7 @@
  *  soil sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SOIL_MOISTURE_SENSOR
 #pragma once
 
 #ifndef SOIL_SENS_H
@@ -40,3 +40,4 @@ public:
 };
 
 #endif  // SOIL_SENS_H
+#endif

@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_KNN
 #include "KNN.h"
 
 KNN::KNN(int k, int maxFeatures, int maxData) : k(k), maxFeatures(maxFeatures), maxData(maxData) {
@@ -88,3 +89,4 @@ void KNN::sortDistances(float distances[], int labels[]) {
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#ifdef USE_DATETIME_NTP
 #pragma once
 // https://randomnerdtutorials.com/esp32-datalogging-google-sheets/
 #ifndef KINEMATRIX_DATETIMENTP_H
@@ -69,5 +70,6 @@ protected:
     uint8_t ss;   ///< Seconds 0-59
 };
 
+#endif
 #endif
 #endif

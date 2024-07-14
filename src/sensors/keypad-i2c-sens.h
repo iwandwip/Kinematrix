@@ -5,7 +5,7 @@
  *  keypad-i2c sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_KEYPAD_I2C_SENS
 #pragma once
 
 #ifndef KEYPAD_I2C_SENS
@@ -69,3 +69,4 @@ public:
 };
 
 #endif  // KEYPAD_I2C_SENS
+#endif

@@ -4,7 +4,7 @@
  *  serial communication c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SWAP_SERIAL
 #include "swap-serial.h"
 
 #if defined(ESP8266) || defined(ESP32)
@@ -132,4 +132,5 @@ String SwapSerial::parseStr(String data, char separator[], int index) {
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
+#endif
 #endif

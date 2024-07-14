@@ -1,3 +1,4 @@
+#ifdef USE_ESP_NOW
 #pragma once
 
 #ifndef MAC_ADDRESS_MANAGER_H
@@ -50,5 +51,6 @@ public:
     static void defaultReceiveCallback(const uint8_t *mac, const uint8_t *incomingData, int len);
 };
 
+#endif
 #endif
 #endif

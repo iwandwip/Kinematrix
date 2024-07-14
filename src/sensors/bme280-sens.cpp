@@ -4,7 +4,7 @@
  *  bme280 sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_BME280_SENS
 #include "bme280-sens.h"
 #include "Arduino.h"
 
@@ -67,3 +67,5 @@ float BME280Sens::getValueHumidity() const {
 void BME280Sens::setPins(uint8_t _pin) {
 
 }
+
+#endif

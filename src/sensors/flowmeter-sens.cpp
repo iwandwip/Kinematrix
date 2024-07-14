@@ -8,7 +8,7 @@
  *  flowmeter sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_FLOWMETER_SENS
 #include "flowmeter-sens.h"
 #include "Arduino.h"
 
@@ -212,3 +212,4 @@ void FlowmeterSens::reset(void (*resetCallback)()) {
     sensorClass->reset();
     if (resetCallback != nullptr) resetCallback();
 }
+#endif

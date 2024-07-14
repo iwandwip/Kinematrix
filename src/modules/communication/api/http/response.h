@@ -1,3 +1,5 @@
+#ifdef USE_HTTP_API_CLIENT
+
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
@@ -26,3 +28,4 @@ private:
 };
 
 #endif // RESPONSE_H
+#endif

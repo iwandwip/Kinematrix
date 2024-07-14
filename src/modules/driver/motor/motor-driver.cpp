@@ -1,3 +1,4 @@
+#ifdef USE_MOTOR_DRIVER
 #include "motor-driver.h"
 
 namespace BTS8960 {
@@ -102,3 +103,5 @@ namespace L298N {
 #endif
     }
 }
+
+#endif

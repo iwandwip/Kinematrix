@@ -4,6 +4,7 @@
  *  serial communication c
  *  Created on: 2023. 4. 3
  */
+#ifdef USE_SOFT_SERIAL
 
 #include "soft-serial.h"
 

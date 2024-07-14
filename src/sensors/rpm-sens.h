@@ -4,7 +4,7 @@
  *  rpm sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_RPM_SENS
 #pragma once
 
 #ifndef RPM_SENS_H
@@ -46,3 +46,4 @@ public:
 };
 
 #endif  // RPM_SENS_H
+#endif

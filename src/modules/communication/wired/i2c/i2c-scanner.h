@@ -5,6 +5,9 @@
  *  Created on: 2023. 4. 3
  */
 
+
+#ifdef USE_I2C_SCANNER
+
 #ifndef KADITA_I2C_SCANNER_H
 #define KADITA_I2C_SCANNER_H
 
@@ -25,3 +28,4 @@ private:
 };
 
 #endif  // KADITA_I2C_SCANNER_H
+#endif

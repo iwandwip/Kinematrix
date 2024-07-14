@@ -4,7 +4,7 @@
  *  lcd menu header
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_LCD_MENU
 #ifndef KADITA_LCD_MENU_H
 #define KADITA_LCD_MENU_H
 
@@ -69,3 +69,4 @@ public:
 };
 
 #endif  // KADITA_LCD_MENU_H
+#endif

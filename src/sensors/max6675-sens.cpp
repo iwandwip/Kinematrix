@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_MAX6675_SENS
 #include "max6675-sens.h"
 #include "Arduino.h"
 
@@ -31,3 +32,5 @@ float MAX6675Sens::getValueTemperature() const {
 void MAX6675Sens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+
+#endif

@@ -1,3 +1,4 @@
+#ifdef USE_EEPROM_LIB
 #pragma once
 
 #ifndef EEPROM_LIB_ARDUINO
@@ -29,3 +30,4 @@ private:
 
 #endif
 #endif  // EEPROM_LIB_ARDUINO
+#endif

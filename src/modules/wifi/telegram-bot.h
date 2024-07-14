@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_TELEGRAM_BOT
 #pragma once
 
 #ifndef TELEGRAM_BOT_HANDLER_H
@@ -45,5 +46,6 @@ public:
 public:
 };
 
+#endif
 #endif
 #endif

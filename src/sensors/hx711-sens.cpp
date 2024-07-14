@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_HX711_SENS
 #include "hx711-sens.h"
 #include "Arduino.h"
 
@@ -126,3 +127,4 @@ void HX711Sens::setPins(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin) {
     this->sensorDOUTPin = _sensorDOUTPin;
     this->sensorSCKPin = _sensorSCKPin;
 }
+#endif

@@ -1,6 +1,7 @@
 // Copyright (c) Sandeep Mistry. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef USE_LORA_COM
 #ifndef LORA_BASE_H // changed
 #define LORA_BASE_H // changed
 
@@ -133,4 +134,5 @@ private:
 
 extern LoRaClass LoRa;
 
+#endif
 #endif

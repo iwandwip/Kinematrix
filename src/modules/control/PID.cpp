@@ -4,7 +4,7 @@
  *  PID lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_PID
 #include "PID.h"
 
 float mapFloat(float x, float iMin, float iMax, float oMin, float oMax) {
@@ -224,3 +224,5 @@ int PIDv3::getMode() {
 int PIDv3::getDirection() {
     return controllerDirection;
 }
+
+#endif

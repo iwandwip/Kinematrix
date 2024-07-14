@@ -27,6 +27,7 @@ REASON WHATSOEVER.
 */
 
 
+#ifdef USE_SERVO_DRIVER
 
 #include "HCPCA9685.h"
 #include <Wire.h>
@@ -377,3 +378,5 @@ void HCPCA9685::_AutoIncrement(boolean Mode) {
     Data = (Data & MODE1_AI_MASK) | (Mode << MODE1_AI_BIT);
     I2CWriteReg(MODE1, Data);
 }
+
+#endif

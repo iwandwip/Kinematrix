@@ -1,3 +1,4 @@
+#ifdef USE_DATETIME_NTP
 #include "datetime-ntp.h"
 
 #if defined(ESP32) || defined(ESP8266)
@@ -178,4 +179,5 @@ uint32_t time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
     return ((days * 24L + h) * 60 + m) * 60 + s;
 }
 
+#endif
 #endif

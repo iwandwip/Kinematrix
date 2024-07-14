@@ -4,6 +4,7 @@
  *  serial communication lib
  *  Created on: 2023. 4. 3
  */
+#ifdef USE_HARD_SERIAL
 
 #pragma once
 
@@ -49,4 +50,5 @@ public:
     String getStrData(String data, uint8_t index, char separator[]);
 };
 
+#endif
 #endif

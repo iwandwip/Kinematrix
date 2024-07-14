@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_LORA_COM
 #pragma once
 
 #ifndef LORA_COM_H
@@ -73,3 +74,4 @@ public:
 };
 
 #endif  // LORA_COM_H
+#endif

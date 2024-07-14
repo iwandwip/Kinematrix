@@ -22,6 +22,7 @@
  *
  */
 
+#ifdef USE_LORA_COM
 #include "lora-com.h"
 
 LoRaModule::LoRaModule() {
@@ -178,3 +179,4 @@ String LoRaModule::parseStr(String data, char separator[], int index) {
     }
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+#endif

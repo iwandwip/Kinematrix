@@ -1,3 +1,5 @@
+#ifdef USE_HTTP_API_CLIENT
+
 #pragma once
 #ifndef HTTP_API_CLIENT_H
 #define HTTP_API_CLIENT_H
@@ -9,9 +11,9 @@
 #include <ArduinoJson.h>
 #include "response.h"
 
-class HttpClient {
+class HttpApiClient {
 public:
-    HttpClient();
+    HttpApiClient();
     bool begin(const char* ssid, const char* password);
     void setAuthorization(const char* authToken);
     void addParam(const char* key, const char* value);
@@ -41,5 +43,6 @@ private:
     // Helper method to collect headers
     String collectHeaders();
 };
+#endif
 #endif
 #endif

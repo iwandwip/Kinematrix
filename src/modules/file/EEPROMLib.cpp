@@ -1,3 +1,4 @@
+#ifdef USE_EEPROM_LIB
 #include "EEPROMLib.h"
 
 #if defined(ESP32) || defined(ESP8266)
@@ -89,4 +90,5 @@ void EEPROMLib::reset() {
     }
 }
 
+#endif
 #endif

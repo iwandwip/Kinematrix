@@ -4,7 +4,7 @@
  *  keypad-i2c sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_KEYPAD_I2C_SENS
 #include "keypad-i2c-sens.h"
 #include "Arduino.h"
 
@@ -102,3 +102,4 @@ float KeypadI2CSens::getValueKeypadI2CSens() const {
 void KeypadI2CSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

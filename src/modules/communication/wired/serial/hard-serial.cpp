@@ -4,6 +4,7 @@
  *  serial communication c
  *  Created on: 2023. 4. 3
  */
+#ifdef USE_HARD_SERIAL
 
 #include "hard-serial.h"
 
@@ -118,3 +119,4 @@ String HardSerial::parseStr(String data, char separator[], int index) {
     }
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+#endif

@@ -1,3 +1,5 @@
+
+#ifdef USE_SPI_SERIAL
 //#pragma once
 //
 //#ifndef KINEMATRIX_SPI_MASTER_H
@@ -37,3 +39,5 @@
 //};
 //
 //#endif  // KINEMATRIX_SPI_MASTER_H
+
+#endif

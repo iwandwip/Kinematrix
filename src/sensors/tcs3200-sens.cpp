@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_TCS3200_SENS
 #include "tcs3200-sens.h"
 #include "Arduino.h"
 
@@ -55,3 +56,4 @@ float TCS3200Sens::getValueTCS3200Sens() const {
 void TCS3200Sens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

@@ -4,7 +4,7 @@
  *  12c expander module header
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_I2C_EXPANDER
 #ifndef KADITA_I2C_EXPANDER_H
 #define KADITA_I2C_EXPANDER_H
 
@@ -19,3 +19,4 @@ public:
 };
 
 #endif  // KADITA_I2C_EXPANDER_H
+#endif

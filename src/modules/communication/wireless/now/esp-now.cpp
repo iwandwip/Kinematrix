@@ -1,3 +1,4 @@
+#ifdef USE_ESP_NOW
 #include "esp-now.h"
 
 #if defined(ESP32) || defined(ESP8266)
@@ -189,4 +190,5 @@ void ESPNow::defaultReceiveCallback(const uint8_t *mac, const uint8_t *incomingD
 
 }
 
+#endif
 #endif

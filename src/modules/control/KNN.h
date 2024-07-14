@@ -5,6 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
+
+#ifdef USE_KNN
 #pragma once
 
 #ifndef KNN_LIB_H
@@ -31,4 +33,5 @@ public:
     const char *predict(float dataPoint[]);
 };
 
+#endif
 #endif

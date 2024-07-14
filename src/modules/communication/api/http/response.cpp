@@ -1,3 +1,5 @@
+#ifdef USE_HTTP_API_CLIENT
+
 #include "response.h"
 
 Response::Response(int statusCode, String body, String headers)
@@ -43,3 +45,5 @@ std::vector<Response::Header> Response::parseHeaders() const {
     }
     return headerVector;
 }
+
+#endif

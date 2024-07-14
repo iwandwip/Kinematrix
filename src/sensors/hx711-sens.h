@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_HX711_SENS
 #pragma once
 
 #ifndef HX711_SENS_H
@@ -56,3 +57,4 @@ public:
 };
 
 #endif  // HX711_SENS_H
+#endif

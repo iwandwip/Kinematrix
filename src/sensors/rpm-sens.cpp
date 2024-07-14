@@ -4,7 +4,7 @@
  *  rpm sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_RPM_SENS
 #include "rpm-sens.h"
 #include "Arduino.h"
 
@@ -70,3 +70,4 @@ float RPMSens::getValueRPMSens() const {
 void RPMSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+#endif

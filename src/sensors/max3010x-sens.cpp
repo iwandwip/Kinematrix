@@ -4,7 +4,7 @@
  *  max3010x sensor c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_MAX3010X_SENS
 #include "max3010x-sens.h"
 #include "Arduino.h"
 
@@ -80,3 +80,5 @@ float MAX3010xSens::getValueMAX3010xSens() const {
 void MAX3010xSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
 }
+
+#endif

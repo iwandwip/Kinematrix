@@ -4,7 +4,7 @@
  *  whatsapp-bot module
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_WHATSAPP_BOT
 #include "whatsapp-bot.h"
 
 #if defined(ESP32) || defined(ESP8266)
@@ -53,4 +53,5 @@ void WhatsappBot::resultStatusCallback(String res, String err) {
     }
 }
 
+#endif
 #endif

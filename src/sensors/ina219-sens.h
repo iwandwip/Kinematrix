@@ -4,7 +4,7 @@
  *  ina219 sensor lib
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_INA219_SENS
 #pragma once
 
 #ifndef INA219_SENS_H
@@ -38,3 +38,4 @@ public:
 };
 
 #endif  // INA219_SENS_H
+#endif

@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_ROTARY_MODULE
 #ifndef KADITA_ROTARY_MODULE_H
 #define KADITA_ROTARY_MODULE_H
 
@@ -29,3 +30,4 @@ public:
 };
 
 #endif  // KADITA_ROTARY_MODULE_H
+#endif
