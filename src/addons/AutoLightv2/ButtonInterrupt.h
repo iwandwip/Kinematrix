@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT_v2
 #pragma once
 
 #ifndef BUTTON_INTERRUPT_H
@@ -47,3 +47,4 @@ namespace AutoLight {
 }
 
 #endif // BUTTON_INTERRUPT_H
+#endif

@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #pragma once
 
 #ifndef KEED_CONFIG_H
@@ -104,3 +104,4 @@ String memstr(const byte *byteArray, size_t size);
 #endif
 
 #endif // KEED_CONFIG_H
+#endif

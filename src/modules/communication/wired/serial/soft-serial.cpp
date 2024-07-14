@@ -131,3 +131,4 @@ String SoftSerial::parseStr(String data, char separator[], int index) {
 }
 
 #endif
+#endif

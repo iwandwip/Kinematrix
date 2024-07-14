@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #include "KeedDisplay.h"
 
 KeedDisplay::KeedDisplay(uint32_t _channel, uint8_t _address)
@@ -57,3 +57,4 @@ void KeedDisplay::on() {
         // display->fillCircle(pos[i][0], pos[i][1], 2, SSD1306_WHITE);
     }
 }
+#endif

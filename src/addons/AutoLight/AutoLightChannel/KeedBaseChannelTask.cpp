@@ -5,6 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef  USE_AUTOLIGHT
+
 #include "KeedBaseChannel.h"
 
 void KeedBaseChannel::taskSequence0() {
@@ -337,3 +339,4 @@ void KeedBaseChannel::taskSequence8() {
 //    setWaveLedCustom(HIGH);
 //    setWaveLedCustom(LOW);
 }
+#endif

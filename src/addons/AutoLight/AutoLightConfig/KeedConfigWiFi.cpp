@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #include "KeedConfig.h"
 
 #if defined(ESP32)
@@ -176,3 +176,4 @@ void KeedWiFi::runServer() {
 }
 
 #endif // ESP32
+#endif

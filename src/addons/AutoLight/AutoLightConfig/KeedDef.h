@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #pragma once
 
 #ifndef KEED_DEF_H
@@ -127,3 +127,4 @@ typedef enum {
 } eeprom_address_offset_t;
 
 #endif // KEED_DEF_H
+#endif

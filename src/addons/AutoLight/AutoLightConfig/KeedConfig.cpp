@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #include "KeedConfig.h"
 
 KeedConfiguration::KeedConfiguration(bool _debug)
@@ -111,4 +111,5 @@ void KeedCore::createCore(uint8_t _core_index, void (*core_callback)(void *pvPar
     index++;
 }
 
+#endif
 #endif

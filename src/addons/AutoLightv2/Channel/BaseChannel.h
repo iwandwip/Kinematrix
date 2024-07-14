@@ -5,6 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef  USE_AUTOLIGHT_v2
+
 #pragma once
 
 #ifndef BASE_CHANNEL_H
@@ -122,3 +124,4 @@ namespace AutoLight {
 }
 
 #endif // BASE_CHANNEL_H
+#endif
