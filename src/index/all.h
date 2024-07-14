@@ -21,6 +21,8 @@
 #include "modules/communication/wired/spi/dot-matrix.h"
 #include "modules/communication/wireless/lora/lora-com.h"
 #include "modules/communication/wireless/now/esp-now.h"
+#include "modules/communication/api/http/response.h"
+#include "modules/communication/api/http/http-api-client.h"
 
 #include "modules/control/PID.h"
 #include "modules/control/KNN.h"
