@@ -11,5 +11,6 @@
 #define KINEMATRIX_LIB_H
 
 #include "Arduino.h"
+#include "index/all.h"
 
 #endif

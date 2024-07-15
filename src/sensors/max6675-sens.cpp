@@ -5,29 +5,32 @@
  *  Created on: 2023. 4. 3
  */
 
+#ifdef USE_MAX6675_SENS
 #include "max6675-sens.h"
 #include "Arduino.h"
+//
+//MAX6675Sens::~MAX6675Sens() = default;
+//
+//bool MAX6675Sens::init() {
+//
+//}
+//
+//bool MAX6675Sens::update() {
+//    if (millis() - sensorTimer >= 500) {
+//        sensorValue = (float) this->readCelsius();
+//    }
+//}
+//
+//void MAX6675Sens::getValue(float *output) {
+//    *output = sensorValue;
+//}
+//
+//float MAX6675Sens::getValueTemperature() const {
+//    return sensorValue;
+//}
+//
+//void MAX6675Sens::setPins(uint8_t _pin) {
+//    sensorPin = _pin;
+//}
 
-MAX6675Sens::~MAX6675Sens() = default;
-
-bool MAX6675Sens::init() {
-
-}
-
-bool MAX6675Sens::update() {
-    if (millis() - sensorTimer >= 500) {
-        sensorValue = (float) this->readCelsius();
-    }
-}
-
-void MAX6675Sens::getValue(float *output) {
-    *output = sensorValue;
-}
-
-float MAX6675Sens::getValueTemperature() const {
-    return sensorValue;
-}
-
-void MAX6675Sens::setPins(uint8_t _pin) {
-    sensorPin = _pin;
-}
+#endif

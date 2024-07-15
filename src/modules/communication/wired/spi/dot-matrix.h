@@ -4,7 +4,7 @@
  *  io expander module header
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_DOT_MATRIX
 #ifndef KADITA_DOT_MATRIX_H
 #define KADITA_DOT_MATRIX_H
 
@@ -20,3 +20,4 @@ public:
 };
 
 #endif  // KADITA_DOT_MATRIX_H
+#endif

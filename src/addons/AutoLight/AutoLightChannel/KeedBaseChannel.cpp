@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #include "KeedBaseChannel.h"
 
 KeedBaseChannel::KeedBaseChannel(bool _isUsingExpander)
@@ -180,3 +180,4 @@ void KeedBaseChannel::on() {
         set(cfg.pin_ptr[i], HIGH);
     }
 }
+#endif

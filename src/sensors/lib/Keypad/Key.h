@@ -28,7 +28,7 @@
 || #
 ||
 */
-
+#ifdef USE_KEYPAD_I2C_SENS
 #ifndef Keypadlib_KEY_H_
 #define Keypadlib_KEY_H_
 
@@ -68,3 +68,5 @@ private:
 || | 1.0 2012-06-04 - Mark Stanley : Initial Release
 || #
 */
+
+#endif

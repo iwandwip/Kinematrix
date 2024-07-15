@@ -4,7 +4,7 @@
  *  arduino timer duration c
  *  Created on: 2023. 4. 3
  */
-
+#ifdef USE_SD_ARDUINO
 #include "SDArduino.h"
 
 #if defined(ESP32)
@@ -16,4 +16,5 @@
 
 #endif
 
+#endif
 #endif

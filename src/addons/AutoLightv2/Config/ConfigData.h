@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT_v2
 #ifndef CONFIG_DATA_H
 #define CONFIG_DATA_H
 
@@ -60,3 +60,5 @@ namespace AutoLight {
 }
 
 #endif // CONFIG_DATA_H
+
+#endif

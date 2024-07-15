@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #pragma once
 
 #ifndef KEED_DISPLAY_H
@@ -41,3 +41,4 @@ public:
 };
 
 #endif // KEED_DISPLAY_H
+#endif

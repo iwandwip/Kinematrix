@@ -36,7 +36,7 @@
 || #
 ||
 */
-
+#ifdef USE_KEYPAD_I2C_SENS
 #include "Keypad_I2C.h"
 
 // Let the user define a keymap - assume the same row/column count as defined in constructor
@@ -108,3 +108,5 @@ word Keypad_I2C::pinState_set() {
 || | 1.0 2012-07-12 - Joe Young : Initial Release
 || #
 */
+
+#endif

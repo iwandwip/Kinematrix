@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #include "Arduino.h"
 
 const uint8_t SPACE = 2;
@@ -47,3 +47,5 @@ const uint8_t POS_24[24][2] = {
 
 const uint8_t POS_32[32][2] = {
 };
+
+#endif

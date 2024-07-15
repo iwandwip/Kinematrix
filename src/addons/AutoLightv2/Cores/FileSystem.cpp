@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT_v2
 #include "FileSystem.h"
 
 #if defined(ESP32)
@@ -308,4 +308,5 @@ namespace AutoLight {
 
 }
 
+#endif
 #endif

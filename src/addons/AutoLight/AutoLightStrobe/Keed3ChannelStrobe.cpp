@@ -4,7 +4,7 @@
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
  */
-
+#ifdef  USE_AUTOLIGHT
 #include "Keed3ChannelStrobe.h"
 
 #define setHigh(...) setStateHigh(__VA_ARGS__, -1)
@@ -199,3 +199,4 @@ void Keed3ChannelStrobe::on() {
         set(cfg.pin_ptr[i], HIGH);
     }
 }
+#endif
