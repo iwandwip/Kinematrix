@@ -48,7 +48,7 @@ bool WiFiHandler::connectToWiFi(const char *ssid, const char *pwd, void (*reconn
 }
 
 bool WiFiHandler::isConnect() {
-    return connect;
+    return WiFi.status() == WL_CONNECTED;
 }
 #endif
 #endif
