@@ -8,7 +8,7 @@
 #include "gm67-sens.h"
 #include "Arduino.h"
 
-#if defined(ESP32)
+//#if defined(ESP32)
 //
 //GM67Sens::GM67Sens(HardwareSerial *_serialPtr, long baud, SerialConfig cfg,
 //                   int8_t rxPin, int8_t txPin) {
