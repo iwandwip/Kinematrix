@@ -29,6 +29,7 @@
 || #
 ||
 */
+#ifdef USE_KEYPAD_I2C_SENS
 #include "Keypad.h"
 
 // <<constructor>> Allows custom keymap, pin configuration, and keypad sizes.
@@ -292,3 +293,5 @@ void Keypad::transitionTo(byte idx, KeyState nextState) {
 || | 1.0 2007-XX-XX - Mark Stanley : Initial Release
 || #
 */
+
+#endif

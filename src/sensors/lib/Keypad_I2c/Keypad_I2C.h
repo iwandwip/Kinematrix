@@ -36,7 +36,7 @@
 || #
 ||
 */
-
+#ifdef USE_KEYPAD_I2C_SENS
 #ifndef KEYPAD_I2C_H
 #define KEYPAD_I2C_H
 
@@ -95,3 +95,5 @@ private:
 || | 1.0 2012-07-12 - Joe Young : Initial Release
 || #
 */
+
+#endif
