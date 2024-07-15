@@ -62,10 +62,11 @@ HttpClient::HttpClient() {
 }
 
 bool HttpClient::begin(const char* ssid, const char* password) {
+    Serial.println("Connecting to WiFi...");
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.println("Connecting to WiFi...");
+        delay(10);
+        Serial.println(".");
     }
     Serial.println("Connected to WiFi");
     requestReady = true;
