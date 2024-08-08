@@ -1,15 +1,16 @@
 /*
  *  Kinematrix.h
  *
- *  Kinematrix index lib
+ *  Kinematrix lib
  *  Created on: 2023. 4. 3
  */
 
 #pragma once
 
-#ifndef KINEMATRIX_LIB_H
-#define KINEMATRIX_LIB_H
+#pragma message("[INFO]: compiling Kinematrix started")
 
 #include "Arduino.h"
+#include "KinematrixModules.h"
+#include "KinematrixSensor.h"
 
-#endif
+#pragma message("[INFO]: compiling Kinematrix done")
