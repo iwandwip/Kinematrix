@@ -8,107 +8,133 @@ Utilize this library to fulfill your project needs. Within it, there are modules
 ## Basic Usage
 #### Example 1
 ```cpp
+#define ENABLE_SENSOR_MODULE
+#define ENABLE_SENSOR_MODULE_UTILITY
+#define ENABLE_SENSOR_ULTRASONIC
+#define ENABLE_SENSOR_SOIL
+
 #include "Kinematrix.h"
-#include "index/ultrasonic.h"
-#include "index/soil_moisture.h"
 
 SensorModule sensor;
 
 void setup() {
-  Serial.begin(115200);
-  sensor.addModule("sonar", new UltrasonicSens(13, 12));
-  sensor.addModule("moisture", new SoilMoistureSens(A0));
-  sensor.init();
+    Serial.begin(115200);
+    sensor.addModule("sonar", new UltrasonicSens(13, 12));
+    sensor.addModule("moisture", new SoilMoistureSens(A0));
+    sensor.init();
 }
 
 void loop() {
-  sensor.update([]() -> void {
-    sensor.debug(300, true);
-  });
+    sensor.update([]() -> void {
+        sensor.debug(300, true);
+    });
 }
 
 ```
 #### Example 2
 ```cpp
+#define ENABLE_MODULE_DIGITAL_INPUT
+#define ENABLE_MODULE_DIGITAL_OUTPUT
+
 #include "Kinematrix.h"
-#include "index/digital_input.h"
-#include "index/digital_output.h"
 
 DigitalIn button(2);
 DigitalOut led(3);
 
 void setup() {
-  Serial.begin(115200);
+    Serial.begin(115200);
 }
 
 void loop() {
-  if (button.isPressed()) {
-    led.on();
-  }
-  button.update();
+    if (button.isPressed()) {
+        led.on();
+    }
+    button.update();
 }
 
 ```
 
 ## Package List
-First, add the header
+First, include package according to your project's needs
+```cpp
+// modules
+#define ENABLE_MODULE_I2C_EXPANDER
+#define ENABLE_MODULE_I2C_SCANNER
+#define ENABLE_MODULE_IO_EXPANDER
+
+#define ENABLE_MODULE_SERIAL_HARD
+#define ENABLE_MODULE_SERIAL_SOFT
+#define ENABLE_MODULE_SERIAL_SWAP
+
+#define ENABLE_MODULE_SERIAL_SPI
+#define ENABLE_MODULE_DOT_MATRIX
+#define ENABLE_MODULE_LORA_COM
+#define ENABLE_MODULE_ESP_NOW
+
+#define ENABLE_MODULE_PID
+#define ENABLE_MODULE_KNN
+
+#define ENABLE_MODULE_DATETIME_NTP
+#define ENABLE_MODULE_FIREBASE_HANDLER
+#define ENABLE_MODULE_TELEGRAM_BOT
+#define ENABLE_MODULE_WHATSAPP_BOT
+#define ENABLE_MODULE_WIFI_HANDLER
+
+#define ENABLE_MODULE_LCD_MENU
+
+#define ENABLE_MODULE_MOTOR_DRIVER
+#define ENABLE_MODULE_SERVO_HCPA9685
+
+#define ENABLE_MODULE_EEPROM_LIB
+#define ENABLE_MODULE_SD_ARDUINO
+
+#define ENABLE_MODULE_DIGITAL_INPUT
+#define ENABLE_MODULE_DIGITAL_OUTPUT
+#define ENABLE_MODULE_ROTARY_ENCODER
+#define ENABLE_MODULE_SEVEN_SEGMENT
+
+#define ENABLE_MODULE_TASK_HANDLER
+#define ENABLE_MODULE_TIMER_DURATION
+#define ENABLE_MODULE_TIMER_TASK
+
+// sensor
+#define ENABLE_SENSOR_MODULE
+#define ENABLE_SENSOR_MODULE_UTILITY
+
+#define ENABLE_SENSOR_ABSTRACT
+#define ENABLE_SENSOR_AHT
+#define ENABLE_SENSOR_ANALOG
+#define ENABLE_SENSOR_BME280
+#define ENABLE_SENSOR_DHT
+#define ENABLE_SENSOR_DIGITAL
+#define ENABLE_SENSOR_DS18B20
+#define ENABLE_SENSOR_DUST
+#define ENABLE_SENSOR_FLOWMETER
+#define ENABLE_SENSOR_GPS
+#define ENABLE_SENSOR_GM67
+#define ENABLE_SENSOR_HX711
+#define ENABLE_SENSOR_INA219
+#define ENABLE_SENSOR_KEYPADI2C
+#define ENABLE_SENSOR_MAX3010X
+#define ENABLE_SENSOR_MAX3010XV2
+#define ENABLE_SENSOR_MAX6675
+#define ENABLE_SENSOR_MAX30100LIB
+#define ENABLE_SENSOR_MAX31865
+#define ENABLE_SENSOR_RFID
+#define ENABLE_SENSOR_RPM
+#define ENABLE_SENSOR_RTC
+#define ENABLE_SENSOR_SOIL
+#define ENABLE_SENSOR_SOILPH
+#define ENABLE_SENSOR_TCS3200
+#define ENABLE_SENSOR_TDS
+#define ENABLE_SENSOR_TURBIDITY
+#define ENABLE_SENSOR_ULTRASONIC
+#define ENABLE_SENSOR_VOLTAGE
+```
+And now you can add the header
 ```cpp
 #include "Kinematrix.h"
 ```
-You can include all libraries
-```cpp
-#include "index/all.h"
-```
-or include them one by one
-```cpp
-// modules
-#include "modules/communication/wired/i2c/i2c-expander.h"
-#include "modules/communication/wired/i2c/i2c-scanner.h"
-#include "modules/communication/wired/i2c/io-expander.h"
-#include "modules/communication/wired/serial/hard-serial.h"
-#include "modules/communication/wired/serial/soft-serial.h"
-#include "modules/communication/wired/serial/swap-serial.h"
-#include "modules/communication/wired/spi/dot-matrix.h"
-#include "modules/communication/wireless/lora/lora-com.h"
-
-#include "modules/db/firebase-handler.h"
-#include "modules/display/lcd-menu.h"
-#include "modules/driver/motor/motor-driver.h"
-#include "modules/driver/servo/HCPCA9685.h"
-#include "modules/file/SDArduino.h"
-
-#include "modules/io/input-module.h"
-#include "modules/io/output-module.h"
-#include "modules/io/rotary-module.h"
-
-#include "modules/task/Task.h"
-#include "modules/time/timer-duration.h"
-#include "modules/time/timer-task.h"
-
-// sensor
-#include "sensors/abstract-sens.h"
-#include "sensors/aht-sens.h"
-#include "sensors/bme280-sens.h"
-#include "sensors/dht-sens.h"
-#include "sensors/ds18b20-sens.h"
-#include "sensors/flowmeter-sens.h"
-#include "sensors/gm67-sens.h"
-#include "sensors/hx711-sens.h"
-#include "sensors/ina219-sens.h"
-#include "sensors/ldr-sens.h"
-#include "sensors/max6675-sens.h"
-#include "sensors/max31865-sens.h"
-#include "sensors/rfid-sens.h"
-#include "sensors/rtc-sens.h"
-#include "sensors/soil-sens.h"
-#include "sensors/soilph-sens.h"
-#include "sensors/tds-sens.h"
-#include "sensors/turbidity-sens.h"
-#include "sensors/ultrasonic-sens.h"
-#include "sensors/voltage-sens.h"
-
-```
-
 
 ## Authors
 
