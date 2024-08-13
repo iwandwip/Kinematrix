@@ -12,5 +12,6 @@
 #include "Arduino.h"
 #include "KinematrixModules.h"
 #include "KinematrixSensor.h"
+#include "KinematrixAddons.h"
 
 #pragma message("[INFO]: compiling Kinematrix done")

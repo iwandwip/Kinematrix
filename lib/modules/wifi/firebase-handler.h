@@ -120,16 +120,16 @@ public:
     float getData(const char *getAddress, void (*onData)(float data, String address) = nullptr);
     String getStrData(const char *getAddress, void (*onData)(String data, String address) = nullptr);
 
-    void waitConnection(uint32_t _tmr);
-    void debug(const String &header, const String &_data, const String &_address, bool endl = true);
-    int getFreeHeapMemory();
+    static void waitConnection(uint32_t _tmr);
+    static void debug(const String &header, const String &_data, const String &_address, bool endl = true);
+    static int getFreeHeapMemory();
 
     void firestoreListDocument(const String &collectionId, size_t pageSize, void (*jsonCallback)(JsonVariant, size_t),
                                void (*resultCb)(const String &, const String &) = nullptr);
     String firestoreUpdateDocument(const String &collectionId, const String &documentId,
                                    JsonVariant (*jsonCallback)(JsonVariant),
                                    void (*resultCb)(const String &, const String &) = nullptr);
-    String firestoreGetDocumentId(JsonVariant res);
+    static String firestoreGetDocumentId(JsonVariant res);
     static void resultStatusCallback(const String &res, const String &err);
 
     void createDocument();

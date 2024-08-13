@@ -9,6 +9,6 @@
 #ifndef AUTO_LIGHT_V2_H
 #define AUTO_LIGHT_V2_H
 
-#include "addons/AutoLightv2/Index.h"
+#include "AutoLightv2/Index.h"
 
 #endif // AUTO_LIGHT_V2_H

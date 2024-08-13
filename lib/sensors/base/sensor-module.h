@@ -105,8 +105,8 @@ public:
     void debug(bool showHeapMemory = false);
     void debug(uint32_t time, bool showHeapMemory = false, void (*debugCallback)() = nullptr);
     void debugPretty(uint32_t time = 1000);
-    void print(const char *format, ...);
-    void wait(uint32_t time);
+    static void print(const char *format, ...);
+    static void wait(uint32_t time);
 };
 
 #endif  // SENSOR_MODULE_H

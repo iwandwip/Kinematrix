@@ -11,9 +11,18 @@
 #define BASE_CHANNEL_H
 
 #include "Arduino.h"
-#include "modules/communication/wired/i2c/io-expander.h"
-#include "modules/io/output-module.h"
-#include "modules/time/timer-task.h"
+
+#ifndef ENABLE_MODULE_HELPER_IO_EXPANDER
+#define ENABLE_MODULE_HELPER_IO_EXPANDER
+#endif
+#ifndef ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
+#define ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
+#endif
+#ifndef ENABLE_MODULE_HELPER_TIMER_TASK
+#define ENABLE_MODULE_HELPER_TIMER_TASK
+#endif
+
+#include "KinematrixModulesHelper.h"
 
 #include "../Config/BaseConfig.h"
 #include "../ButtonInterrupt.h"

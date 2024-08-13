@@ -51,6 +51,8 @@
 #endif
 
 #ifdef ENABLE_MODULE_LORA_COM
+#include "../lib/modules/communication/wireless/lora/lora-base.h"
+#include "../lib/modules/communication/wireless/lora/lora-base.cpp"
 #include "../lib/modules/communication/wireless/lora/lora-com.h"
 #include "../lib/modules/communication/wireless/lora/lora-com.cpp"
 #endif

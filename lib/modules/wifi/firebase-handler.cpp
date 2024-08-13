@@ -92,12 +92,9 @@ bool FirebaseModule::onTask(
 }
 
 void FirebaseModule::initData(uint8_t totalDataLen) {
-    if (data != nullptr) {
-        delete[] data;
-    }
-    if (address != nullptr) {
-        delete[] address;
-    }
+    delete[] data;
+    delete[] address;
+
     dataLen = 0;
     addrLen = 0;
 

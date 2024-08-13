@@ -17,7 +17,8 @@ namespace AutoLight {
                       .num_of_pressed_ = 0,
                       .is_pressed_ = false,
                       .is_changed_ = false,
-              } {
+              },
+              isr_callback_(nullptr) {
     }
 
     ButtonInterrupt::~ButtonInterrupt() {
@@ -46,15 +47,15 @@ namespace AutoLight {
         volatile_data_.is_pressed_ = false;
     }
 
-    volatile bool ButtonInterrupt::isPressed() {
+    volatile bool ButtonInterrupt::isPressed() const {
         return volatile_data_.is_pressed_ || volatile_data_.is_changed_;
     }
 
-    volatile int ButtonInterrupt::getNumOfPressed() {
+    volatile int ButtonInterrupt::getNumOfPressed() const {
         return volatile_data_.num_of_pressed_;
     }
 
-    int ButtonInterrupt::getPins() {
+    int ButtonInterrupt::getPins() const {
         return pin_interrupt_;
     }
 

@@ -23,8 +23,8 @@ private:
     float **trainingData;
     char **trainingLabels;
 
-    float calculateDistance(float dataPoint[], float trainDataPoint[]);
-    void sortDistances(float distances[], int labels[]);
+    float calculateDistance(float dataPoint[], float trainDataPoint[]) const;
+    void sortDistances(float distances[], int labels[]) const;
 
 public:
     KNN(int k, int maxFeatures, int maxData);

@@ -5,6 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
+#pragma once
+
 #ifdef ENABLE_MODULE_HELPER_I2C_EXPANDER
 #include "../lib/modules/communication/wired/i2c/i2c-expander.h"
 #include "../lib/modules/communication/wired/i2c/i2c-expander.cpp"
@@ -46,6 +48,8 @@
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_LORA_COM
+#include "../lib/modules/communication/wireless/lora/lora-base.h"
+#include "../lib/modules/communication/wireless/lora/lora-base.cpp"
 #include "../lib/modules/communication/wireless/lora/lora-com.h"
 #include "../lib/modules/communication/wireless/lora/lora-com.cpp"
 #endif

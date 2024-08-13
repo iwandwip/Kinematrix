@@ -246,50 +246,109 @@ bool SensorModule::isModulePresent(uint8_t index) {
 
 void SensorModule::debug(const char *searchName, bool showHeapMemory, bool endl) {
     if (!isReady() || searchName == nullptr) return;
-    String output = "| " + String(searchName) + ": ";
+
+    Serial.print(F("| "));
+    Serial.print(searchName);
+    Serial.print(F(": "));
+
     auto variant = this->operator[](searchName);
     if (variant.is<JsonArray>()) {
         for (int i = 0; i < variant.size(); ++i) {
+            Serial.print(F("["));
+            Serial.print(i);
+            Serial.print(F("] "));
             if (variant[i].is<int>()) {
-                output += "[" + String(i) + "] " + String(variant[i].as<int>()) + " ";
-            } else if (variant[i].is<float>() || variant[i].is<double>()) {
-                output += "[" + String(i) + "] " + String(variant[i].as<float>()) + " ";
+                Serial.print(variant[i].as<int>());
+            } else if (variant[i].is<float>()) {
+                Serial.print(variant[i].as<float>());
             } else {
-                output += "[" + String(i) + "] " + String(variant[i].as<const char *>()) + " ";
+                Serial.print(variant[i].as<const char *>());
             }
+            Serial.print(F(" "));
         }
     } else if (variant.is<JsonObject>()) {
         for (JsonPair kv: variant.as<JsonObject>()) {
+            Serial.print(F("["));
+            Serial.print(kv.key().c_str());
+            Serial.print(F("] "));
             if (kv.value().is<int>()) {
-                output += "[" + String(kv.key().c_str()) + "] " + String(kv.value().as<int>()) + " ";
-            } else if (kv.value().is<float>() || kv.value().is<double>()) {
-                output += "[" + String(kv.key().c_str()) + "] " + String(kv.value().as<float>()) + " ";
+                Serial.print(kv.value().as<int>());
+            } else if (kv.value().is<float>()) {
+                Serial.print(kv.value().as<float>());
             } else {
-                output += "[" + String(kv.key().c_str()) + "] " + String(kv.value().as<const char *>()) + " ";
+                Serial.print(kv.value().as<const char *>());
             }
+            Serial.print(F(" "));
         }
     } else {
         if (variant.is<int>()) {
-            output += String(variant.as<int>());
-        } else if (variant.is<float>() || variant.is<double>()) {
-            output += String(variant.as<float>());
+            Serial.print(variant.as<int>());
+        } else if (variant.is<float>()) {
+            Serial.print(variant.as<float>());
         } else {
-            output += String(variant.as<const char *>());
+            Serial.print(variant.as<const char *>());
         }
     }
-    Serial.print(output);
+
 #if defined(ESP32)
     if (showHeapMemory) {
-        Serial.print("| mem: ");
+        Serial.print(F("| mem: "));
         Serial.print(ESP.getFreeHeap());
     }
 #else
     if (showHeapMemory) {
-        Serial.print("| mem: ");
+        Serial.print(F("| mem: "));
         Serial.print(freeMemory());
     }
 #endif
+
     if (endl) Serial.println();
+
+//    if (!isReady() || searchName == nullptr) return;
+//    String output = "| " + String(searchName) + ": ";
+//    auto variant = this->operator[](searchName);
+//    if (variant.is<JsonArray>()) {
+//        for (int i = 0; i < variant.size(); ++i) {
+//            if (variant[i].is<int>()) {
+//                output += "[" + String(i) + "] " + String(variant[i].as<int>()) + " ";
+//            } else if (variant[i].is<float>() || variant[i].is<double>()) {
+//                output += "[" + String(i) + "] " + String(variant[i].as<float>()) + " ";
+//            } else {
+//                output += "[" + String(i) + "] " + String(variant[i].as<const char *>()) + " ";
+//            }
+//        }
+//    } else if (variant.is<JsonObject>()) {
+//        for (JsonPair kv: variant.as<JsonObject>()) {
+//            if (kv.value().is<int>()) {
+//                output += "[" + String(kv.key().c_str()) + "] " + String(kv.value().as<int>()) + " ";
+//            } else if (kv.value().is<float>() || kv.value().is<double>()) {
+//                output += "[" + String(kv.key().c_str()) + "] " + String(kv.value().as<float>()) + " ";
+//            } else {
+//                output += "[" + String(kv.key().c_str()) + "] " + String(kv.value().as<const char *>()) + " ";
+//            }
+//        }
+//    } else {
+//        if (variant.is<int>()) {
+//            output += String(variant.as<int>());
+//        } else if (variant.is<float>() || variant.is<double>()) {
+//            output += String(variant.as<float>());
+//        } else {
+//            output += String(variant.as<const char *>());
+//        }
+//    }
+//    Serial.print(output);
+//#if defined(ESP32)
+//    if (showHeapMemory) {
+//        Serial.print("| mem: ");
+//        Serial.print(ESP.getFreeHeap());
+//    }
+//#else
+//    if (showHeapMemory) {
+//        Serial.print("| mem: ");
+//        Serial.print(freeMemory());
+//    }
+//#endif
+//    if (endl) Serial.println();
 }
 
 void SensorModule::debug(bool showHeapMemory) {

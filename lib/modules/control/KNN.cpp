@@ -65,7 +65,7 @@ const char *KNN::predict(float dataPoint[]) {
     return predictedLabel;
 }
 
-float KNN::calculateDistance(float dataPoint[], float trainDataPoint[]) {
+float KNN::calculateDistance(float dataPoint[], float trainDataPoint[]) const {
     float sum = 0;
     for (int i = 0; i < maxFeatures; i++) {
         sum += pow(dataPoint[i] - trainDataPoint[i], 2);
@@ -73,7 +73,7 @@ float KNN::calculateDistance(float dataPoint[], float trainDataPoint[]) {
     return sqrt(sum);
 }
 
-void KNN::sortDistances(float distances[], int labels[]) {
+void KNN::sortDistances(float distances[], int labels[]) const {
     for (int i = 0; i < currentDataSize - 1; i++) {
         for (int j = i + 1; j < currentDataSize; j++) {
             if (distances[i] > distances[j]) {

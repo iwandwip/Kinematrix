@@ -21,17 +21,17 @@ namespace AutoLight {
 
     class ButtonInterrupt {
     public:
-        ButtonInterrupt(bool _enable_unit_test = false);
+        explicit ButtonInterrupt(bool _enable_unit_test = false);
         virtual ~ButtonInterrupt();
 
         void attach(uint8_t _pin, int _pin_mode, int _isr_mode, void (*_callback)(), uint32_t _timer = 250);
         void readInterrupt(void (*_callback)() = nullptr);
         void resetButton();
 
-        volatile bool isPressed();
-        volatile int getNumOfPressed();
+        volatile bool isPressed() const;
+        volatile int getNumOfPressed() const;
 
-        int getPins();
+        int getPins() const;
         ButtonInterrupt *operator()();
 
         void debug(int8_t _sequence_index = -1);

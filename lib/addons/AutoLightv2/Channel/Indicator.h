@@ -11,8 +11,15 @@
 #if defined(ESP32)
 
 #include "Arduino.h"
-#include "modules/io/output-module.h"
-#include "modules/time/timer-task.h"
+
+#ifndef ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
+#define ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
+#endif
+#ifndef ENABLE_MODULE_HELPER_TIMER_TASK
+#define ENABLE_MODULE_HELPER_TIMER_TASK
+#endif
+
+#include "KinematrixModulesHelper.h"
 
 namespace AutoLight {
     const int MAXNUM_INDICATOR = 4;

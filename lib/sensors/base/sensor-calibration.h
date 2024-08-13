@@ -16,13 +16,13 @@
 #include "Preferences.h"
 #else
 
-#ifndef ENABLE_KINEMATRIX_HELPER_EEPROM
-#define ENABLE_KINEMATRIX_HELPER_EEPROM
+#ifndef ENABLE_MODULE_HELPER_EEPROM_LIB
+#define ENABLE_MODULE_HELPER_EEPROM_LIB
 #endif
 
 #pragma message("[COMPILED]: sensor-calibration.h")
 
-#include "KinematrixHelper.h"
+#include "KinematrixModulesHelper.h"
 #include "sensor-header.h"
 
 #endif

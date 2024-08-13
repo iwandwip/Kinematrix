@@ -5,6 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
+#pragma once
+
 #ifdef ENABLE_SENSOR_HELPER_MODULE
 #include "../lib/sensors/base/sensor-header.h"
 #include "../lib/sensors/base/sensor-header.cpp"

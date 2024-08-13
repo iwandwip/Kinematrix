@@ -23,8 +23,10 @@ bool DHTSens::init() {
 
 bool DHTSens::update() {
     if (millis() - sensorTimer >= 500) {
-        (*doc)[name]["temp"] = DHT::readTemperature();
-        (*doc)[name]["hum"] = DHT::readHumidity();
+        float temp = DHT::readTemperature();
+        float hum = DHT::readHumidity();
+        (*doc)[name]["temp"] = isnan(temp) ? 0.0f : DHT::readTemperature();
+        (*doc)[name]["hum"] = isnan(hum) ? 0.0f : DHT::readHumidity();
         return true;
     }
     return false;
