@@ -130,6 +130,10 @@ First, include package according to your project's needs
 #define ENABLE_SENSOR_TURBIDITY
 #define ENABLE_SENSOR_ULTRASONIC
 #define ENABLE_SENSOR_VOLTAGE
+
+// addons
+#define ENABLE_ADDONS_AUTOLIGHT
+#define ENABLE_ADDONS_AUTOLIGHT_V2
 ```
 And now you can add the header
 ```cpp
