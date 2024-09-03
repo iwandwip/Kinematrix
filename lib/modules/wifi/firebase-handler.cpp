@@ -84,8 +84,7 @@ bool FirebaseModule::update(void (*onUpdate)(void)) {
     return true;
 }
 
-bool FirebaseModule::onTask(
-        void (*onTask)(FirebaseData fbdo, FirebaseAuthentication auth, FirebaseConfig config)) {
+bool FirebaseModule::onTask(void (*onTask)(FirebaseData fbdo, FirebaseAuthentication auth, FirebaseConfig config)) {
     if (onTask != nullptr) {
         onTask(fbdo, *authentication, config);
     }
@@ -363,7 +362,7 @@ void FirebaseModule::firestoreListDocument(const String &collectionId, size_t pa
     }
 }
 
-String FirebaseModule::firestoreUpdateDocument(const String &collectionId, const String &documentId,
+void FirebaseModule::firestoreUpdateDocument(const String &collectionId, const String &documentId,
                                                JsonVariant (*jsonCallback)(JsonVariant),
                                                void (*resultCb)(const String &, const String &)) {
     String json, mask, documentPath, result, err;
@@ -376,7 +375,7 @@ String FirebaseModule::firestoreUpdateDocument(const String &collectionId, const
         mask += ",";
     }
     int lastCommaIndex = mask.lastIndexOf(',');
-    mask = mask.substring(0, lastCommaIndex);
+    mask = mask.substring(0, lastCommaIndex); // remove last comma
     documentPath = collectionId + "/" + documentId;
     if (Firebase.Firestore.patchDocument(&fbdo, authentication->projectID,
                                          "", documentPath.c_str(),
@@ -388,7 +387,6 @@ String FirebaseModule::firestoreUpdateDocument(const String &collectionId, const
     if (resultCb != nullptr) {
         resultCb(result, err);
     }
-    return result;
 }
 
 String FirebaseModule::firestoreGetDocumentId(JsonVariant res) {

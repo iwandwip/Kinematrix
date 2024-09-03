@@ -142,6 +142,11 @@
 #include "../lib/sensors/rtc-sens.cpp"
 #endif
 
+#ifdef ENABLE_SENSOR_SCD30
+#include "../lib/sensors/scd30-sens.h"
+#include "../lib/sensors/scd30-sens.cpp"
+#endif
+
 #ifdef ENABLE_SENSOR_SOIL
 #include "../lib/sensors/soil-sens.h"
 #include "../lib/sensors/soil-sens.cpp"

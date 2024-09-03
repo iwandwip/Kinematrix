@@ -7,7 +7,7 @@
 
 #include "seven-segment.h"
 
-SevenSegment::SevenSegment(int pinA, int pinB, int pinC, int pinD, int *enablePins, int numDisplays) {
+SevenSegment::SevenSegment(int pinA, int pinB, int pinC, int pinD, const int *enablePins, int numDisplays) {
     this->pinA = pinA;
     this->pinB = pinB;
     this->pinC = pinC;
@@ -48,16 +48,14 @@ SevenSegment::SevenSegment(int pinA, int pinB, int pinC, int pinD) {
 
 // Destructor
 SevenSegment::~SevenSegment() {
-    if (enablePins != nullptr) {
-        delete[] enablePins;
-    }
+    delete[] enablePins;
 }
 
 // Method to display a number
-void SevenSegment::displayNumber(int number) {
+void SevenSegment::displayNumber(int number, uint32_t _delay_ms) {
     // Ensure the number is within the range that can be displayed
-    int maxNumber = pow(10, numDisplays) - 1;
-    int minNumber = -maxNumber / 10;
+    double maxNumber = pow(10, numDisplays) - 1;
+    double minNumber = -maxNumber / 10;
     if (number < minNumber || number > maxNumber) return;
 
     // Break the number into digits
@@ -72,22 +70,18 @@ void SevenSegment::displayNumber(int number) {
 
     // Display each digit one by one
     for (int i = 0; i < numDisplays; i++) {
+        if (enablePins != nullptr) digitalWrite(enablePins[i], HIGH);
         if (isNegative && i == 0) {
             displayDigit(10); // Custom representation for '-'
         } else {
             displayDigit(digits[i]);
         }
-        if (enablePins != nullptr) {
-            digitalWrite(enablePins[i], HIGH);
-            delay(5); // Adjust delay for proper multiplexing
-            digitalWrite(enablePins[i], LOW);
-        } else {
-            delay(5); // Delay for single display without enable pin
-        }
+        delay(_delay_ms); // Adjust delay for proper multiplexing
+        if (enablePins != nullptr) digitalWrite(enablePins[i], LOW);
     }
 }
 
-void SevenSegment::displayDigit(int digit) {
+void SevenSegment::displayDigit(int digit) const {
     if (digit < 0 || digit > 10) return; // Check for valid digit range (0-9 and custom '-')
     if (digit == 10) {
         // Custom representation for '-'

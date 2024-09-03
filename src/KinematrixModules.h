@@ -144,6 +144,16 @@
 #include "../lib/modules/io/seven-segment.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_SEVEN_SEGMENT_PCF
+#include "../lib/modules/io/seven-segment-pcf.h"
+#include "../lib/modules/io/seven-segment-pcf.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SEVEN_SEGMENT_74HC595
+#include "../lib/modules/io/seven-segment-74hc595.h"
+#include "../lib/modules/io/seven-segment-74hc595.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_TASK_HANDLER
 #include "../lib/modules/task/Task.h"
 #include "../lib/modules/task/Task.cpp"

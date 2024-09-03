@@ -92,6 +92,8 @@ First, include package according to your project's needs
 #define ENABLE_MODULE_DIGITAL_OUTPUT
 #define ENABLE_MODULE_ROTARY_ENCODER
 #define ENABLE_MODULE_SEVEN_SEGMENT
+#define ENABLE_MODULE_SEVEN_SEGMENT_PCF
+#define ENABLE_MODULE_SEVEN_SEGMENT_74HC595
 
 #define ENABLE_MODULE_TASK_HANDLER
 #define ENABLE_MODULE_TIMER_DURATION
@@ -123,6 +125,7 @@ First, include package according to your project's needs
 #define ENABLE_SENSOR_RFID
 #define ENABLE_SENSOR_RPM
 #define ENABLE_SENSOR_RTC
+#define ENABLE_SENSOR_SCD30
 #define ENABLE_SENSOR_SOIL
 #define ENABLE_SENSOR_SOILPH
 #define ENABLE_SENSOR_TCS3200

@@ -74,6 +74,7 @@ void SensorModule::update(const char *searchName) {
     if (base == nullptr || !sensorEnable) return;
     BaseSens *module = getModuleByNamePtr(searchName);
     module->update();
+    if (!sensorReady) sensorReady = true;
 }
 
 bool SensorModule::isReady(void (*readyCallback)()) {

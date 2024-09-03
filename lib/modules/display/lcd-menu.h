@@ -16,7 +16,7 @@
 
 const uint8_t MAX_BUFF_LEN = 24;
 
-typedef void (*CallbackMenu)(void);
+typedef void (*CallbackMenu)();
 
 struct MenuCursor {
     bool up;

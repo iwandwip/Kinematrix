@@ -211,29 +211,112 @@ namespace AutoLight {
     void BaseChannel::taskSequence6() {
 //        Serial.println("BaseChannel::taskSequence5() start");
         // blink 1 by 1 ////////////////////////////////////////
-        {
-            for (int i = 0; i < config_data_ptr_->header.pin_size_; ++i) {
-                for (int j = 0; j < 4; ++j) {
-                    set(config_data_ptr_->header.pin_ptr_[i], HIGH);
-                    sleep(channel_data_.delay_time_);
-                    set(config_data_ptr_->header.pin_ptr_[i], LOW);
-                    sleep(channel_data_.delay_time_);
-                }
-                sleep(channel_data_.delay_time_);
-            }
-            for (int i = config_data_ptr_->header.pin_size_; i > 0; --i) {
-                for (int j = 0; j < 4; ++j) {
-                    set(config_data_ptr_->header.pin_ptr_[i - 1], HIGH);
-                    sleep(channel_data_.delay_time_);
-                    set(config_data_ptr_->header.pin_ptr_[i - 1], LOW);
-                    sleep(channel_data_.delay_time_);
-                }
-                sleep(channel_data_.delay_time_);
-            }
-            off();
-            sleep(500);
-        }
+//        {
+//            for (int i = 0; i < config_data_ptr_->header.pin_size_; ++i) {
+//                for (int j = 0; j < 4; ++j) {
+//                    set(config_data_ptr_->header.pin_ptr_[i], HIGH);
+//                    sleep(channel_data_.delay_time_);
+//                    set(config_data_ptr_->header.pin_ptr_[i], LOW);
+//                    sleep(channel_data_.delay_time_);
+//                }
+//                sleep(channel_data_.delay_time_);
+//            }
+//            for (int i = config_data_ptr_->header.pin_size_; i > 0; --i) {
+//                for (int j = 0; j < 4; ++j) {
+//                    set(config_data_ptr_->header.pin_ptr_[i - 1], HIGH);
+//                    sleep(channel_data_.delay_time_);
+//                    set(config_data_ptr_->header.pin_ptr_[i - 1], LOW);
+//                    sleep(channel_data_.delay_time_);
+//                }
+//                sleep(channel_data_.delay_time_);
+//            }
+//            off();
+//            sleep(500);
+//        }
 //        Serial.println("BaseChannel::taskSequence5() end");
+
+        {
+            int halfSize = config_data_ptr_->header.pin_size_ / 2;
+
+            for (int i = config_data_ptr_->header.pin_size_; i > 0; --i) {
+                int time = map(config_data_ptr_->header.pin_size_ - i, 1, config_data_ptr_->header.pin_size_, channel_data_.delay_time_ + (channel_data_.delay_time_ / 2), channel_data_.delay_time_ / 2);
+                for (int j = config_data_ptr_->header.pin_size_ - 1; j >= config_data_ptr_->header.pin_size_ - i; --j) {
+                    if (j >= halfSize) {
+                        set(config_data_ptr_->header.pin_ptr_[halfSize + (config_data_ptr_->header.pin_size_ - 1) - j], HIGH);
+                        sleep(time);
+                        set(config_data_ptr_->header.pin_ptr_[halfSize + (config_data_ptr_->header.pin_size_ - 1) - j], LOW);
+                    } else {
+                        set(config_data_ptr_->header.pin_ptr_[j], HIGH);
+                        sleep(time);
+                        set(config_data_ptr_->header.pin_ptr_[j], LOW);
+                    }
+                }
+                if (i > halfSize) {
+                    set(config_data_ptr_->header.pin_ptr_[config_data_ptr_->header.pin_size_ - i], HIGH);
+                } else {
+                    set(config_data_ptr_->header.pin_ptr_[config_data_ptr_->header.pin_size_ - (halfSize - i) - 1], HIGH);
+                }
+            }
+            sleep(channel_data_.delay_time_ * 12);
+
+            for (int i = config_data_ptr_->header.pin_size_; i > 0; --i) {
+                if (i > halfSize) set(config_data_ptr_->header.pin_ptr_[halfSize + (config_data_ptr_->header.pin_size_ - i)], LOW);
+                else set(config_data_ptr_->header.pin_ptr_[i - 1], LOW);
+                sleep(channel_data_.delay_time_);
+            }
+
+            for (int j = 0; j < 2; ++j) {
+                for (int i = 0; i < config_data_ptr_->header.pin_size_; ++i) {
+                    if (i < halfSize) set(config_data_ptr_->header.pin_ptr_[i], HIGH);
+                    else set(config_data_ptr_->header.pin_ptr_[config_data_ptr_->header.pin_size_ - (i - halfSize) - 1], HIGH);
+                    sleep(channel_data_.delay_time_);
+                }
+                for (int i = config_data_ptr_->header.pin_size_; i > 0; --i) {
+                    if (i > halfSize) set(config_data_ptr_->header.pin_ptr_[halfSize + (config_data_ptr_->header.pin_size_ - i)], LOW);
+                    else set(config_data_ptr_->header.pin_ptr_[i - 1], LOW);
+                    sleep(channel_data_.delay_time_);
+                }
+            }
+
+            for (int i = 0; i < config_data_ptr_->header.pin_size_ / 2; ++i) {
+                set(config_data_ptr_->header.pin_ptr_[i], HIGH);
+//            set(config_data_ptr_->header.pin_ptr_[halfSize + i], HIGH);
+                set(config_data_ptr_->header.pin_ptr_[halfSize + i], HIGH);
+                sleep(channel_data_.delay_time_);
+            }
+            for (int i = 0; i < config_data_ptr_->header.pin_size_ / 2; ++i) {
+                set(config_data_ptr_->header.pin_ptr_[i], LOW);
+//            set(config_data_ptr_->header.pin_ptr_[halfSize + i], LOW);
+                set(config_data_ptr_->header.pin_ptr_[halfSize + i], LOW);
+                sleep(channel_data_.delay_time_);
+            }
+
+            for (int j = 0; j < 2; ++j) {
+                for (int i = 0; i < config_data_ptr_->header.pin_size_ / 2; ++i) {
+                    set(config_data_ptr_->header.pin_ptr_[halfSize - i - 1], HIGH);
+//            set(config_data_ptr_->header.pin_ptr_[halfSize + i], HIGH);
+                    set(config_data_ptr_->header.pin_ptr_[config_data_ptr_->header.pin_size_ - i - 1], HIGH);
+                    sleep(channel_data_.delay_time_);
+                }
+                for (int i = 0; i < config_data_ptr_->header.pin_size_ / 2; ++i) {
+                    set(config_data_ptr_->header.pin_ptr_[i], LOW);
+//            set(config_data_ptr_->header.pin_ptr_[halfSize + i], LOW);
+                    set(config_data_ptr_->header.pin_ptr_[halfSize + i], LOW);
+                    sleep(channel_data_.delay_time_);
+                }
+            }
+
+            sleep(channel_data_.delay_time_ * 18);
+
+            for (int i = 0; i < 2; ++i) {
+                on();
+                sleep(channel_data_.delay_time_ * 3);
+                off();
+                sleep(channel_data_.delay_time_ * 3);
+            }
+
+            sleep(channel_data_.delay_time_ * 18);
+        }
     }
 
     void BaseChannel::taskSequence7() {
@@ -333,9 +416,27 @@ namespace AutoLight {
                     sleep(channel_data_.delay_time_);
                 }
             };
-            for (int i = 0; i < 4; ++i) {
+
+            auto setWaveLedReverse = [&](int value) -> void {
+                for (int i = (config_data_ptr_->header.pin_size_ / 2) - 1; i >= 0; --i) {
+                    if (i >= ceil((config_data_ptr_->header.pin_size_ / 2) / 2)) {
+                        set(config_data_ptr_->header.pin_ptr_[i + (config_data_ptr_->header.pin_size_ / 2)], value);
+                        set(config_data_ptr_->header.pin_ptr_[(config_data_ptr_->header.pin_size_) - i - 1], value);
+                    } else {
+                        set(config_data_ptr_->header.pin_ptr_[i], value);
+                        set(config_data_ptr_->header.pin_ptr_[(config_data_ptr_->header.pin_size_ / 2) - (i + 1)], value);
+                    }
+                    sleep(channel_data_.delay_time_);
+                }
+            };
+
+            for (int i = 0; i < 2; ++i) {
                 setWaveLed(HIGH);
                 setWaveLed(LOW);
+            }
+            for (int i = 0; i < 2; ++i) {
+                setWaveLedReverse(HIGH);
+                setWaveLedReverse(LOW);
             }
         }
 //        Serial.println("BaseChannel::taskSequence9() end");

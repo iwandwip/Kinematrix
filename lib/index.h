@@ -45,6 +45,8 @@
 #include "modules/io/output-module.h"
 #include "modules/io/rotary-module.h"
 #include "modules/io/seven-segment.h"
+#include "modules/io/seven-segment-pcf.h"
+#include "modules/io/seven-segment-74hc595.h"
 
 #include "modules/task/Task.h"
 #include "modules/time/timer-duration.h"
@@ -73,6 +75,7 @@
 #include "sensors/rfid-sens.h"
 #include "sensors/rpm-sens.h"
 #include "sensors/rtc-sens.h"
+#include "sensors/scd30-sens.h"
 #include "sensors/soil-sens.h"
 #include "sensors/soilph-sens.h"
 #include "sensors/tcs3200-sens.h"

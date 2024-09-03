@@ -67,7 +67,7 @@ public:
     bool connectToWiFi(const char *ssid, const char *pwd, void (*connectCallback)() = nullptr);
     bool isConnect() const;
 
-    bool update(void (*onUpdate)() = nullptr);
+    static bool update(void (*onUpdate)() = nullptr);
     bool onTask(void (*onTask)(FirebaseData fbdo, FirebaseAuthentication auth, FirebaseConfig config) = nullptr);
     void initData(uint8_t totalDataLen);
 
@@ -81,19 +81,12 @@ public:
         if (_debug) debug("addData", String(newData), String(newAddressData), true);
     }
 
-    void sendDataFloat(void (*onSendData)(String data, String address) = nullptr,
-                       void (*resultCb)(const String &, const String &) = nullptr);
-    void sendDataAsyncFloat(uint32_t _time = 2000, void (*onSendData)(String data, String address) = nullptr,
-                            void (*resultCb)(const String &, const String &) = nullptr);
-    void sendDataAsyncOrderFloat(uint32_t _time = 200, void (*onSendData)(String data, String address) = nullptr,
-                                 void (*resultCb)(const String &, const String &) = nullptr);
-    void sendDataString(void (*onSendData)(String data, String address) = nullptr,
-                        void (*resultCb)(const String &, const String &) = nullptr);
-    void sendDataAsyncString(uint32_t _time = 2000, void (*onSendData)(String data, String address) = nullptr,
-                             void (*resultCb)(const String &, const String &) = nullptr, void (*onDone)() = nullptr);
-    void sendDataAsyncOrderString(uint32_t _time = 200, void (*onSendData)(String data, String address) = nullptr,
-                                  void (*resultCb)(const String &, const String &) = nullptr,
-                                  void (*onDone)() = nullptr);
+    void sendDataFloat(void (*onSendData)(String data, String address) = nullptr, void (*resultCb)(const String &, const String &) = nullptr);
+    void sendDataAsyncFloat(uint32_t _time = 2000, void (*onSendData)(String data, String address) = nullptr, void (*resultCb)(const String &, const String &) = nullptr);
+    void sendDataAsyncOrderFloat(uint32_t _time = 200, void (*onSendData)(String data, String address) = nullptr, void (*resultCb)(const String &, const String &) = nullptr);
+    void sendDataString(void (*onSendData)(String data, String address) = nullptr, void (*resultCb)(const String &, const String &) = nullptr);
+    void sendDataAsyncString(uint32_t _time = 2000, void (*onSendData)(String data, String address) = nullptr, void (*resultCb)(const String &, const String &) = nullptr, void (*onDone)() = nullptr);
+    void sendDataAsyncOrderString(uint32_t _time = 200, void (*onSendData)(String data, String address) = nullptr, void (*resultCb)(const String &, const String &) = nullptr, void (*onDone)() = nullptr);
 
     template<typename T, typename U = const char *>
     void set(T val, U addr) {
@@ -105,17 +98,12 @@ public:
     void setFloat(float floatData, const char *addrs, void (*onData)(float data, String address) = nullptr);
     void setString(const String &strData, const char *addrs, void (*onData)(String data, String address) = nullptr);
 
-    void
-    setJson(const String &getAddress, JsonVariant variant, void (*resultCb)(const String &, const String &) = nullptr);
-    void
-    pushJson(const String &getAddress, JsonVariant variant, void (*resultCb)(const String &, const String &) = nullptr);
+    void setJson(const String &getAddress, JsonVariant variant, void (*resultCb)(const String &, const String &) = nullptr);
+    void pushJson(const String &getAddress, JsonVariant variant, void (*resultCb)(const String &, const String &) = nullptr);
 
-    void setJson(const String &getAddress, JsonVariant (*jsonCallback)(JsonVariant),
-                 void (*resultCb)(const String &, const String &) = nullptr);
-    void pushJson(const String &getAddress, JsonVariant (*jsonCallback)(JsonVariant),
-                  void (*resultCb)(const String &, const String &) = nullptr);
-    void getJson(const String &getAddress, void (*jsonCallback)(JsonVariant) = nullptr,
-                 void (*resultCb)(const String &, const String &) = nullptr);
+    void setJson(const String &getAddress, JsonVariant (*jsonCallback)(JsonVariant), void (*resultCb)(const String &, const String &) = nullptr);
+    void pushJson(const String &getAddress, JsonVariant (*jsonCallback)(JsonVariant), void (*resultCb)(const String &, const String &) = nullptr);
+    void getJson(const String &getAddress, void (*jsonCallback)(JsonVariant) = nullptr, void (*resultCb)(const String &, const String &) = nullptr);
 
     float getData(const char *getAddress, void (*onData)(float data, String address) = nullptr);
     String getStrData(const char *getAddress, void (*onData)(String data, String address) = nullptr);
@@ -124,11 +112,8 @@ public:
     static void debug(const String &header, const String &_data, const String &_address, bool endl = true);
     static int getFreeHeapMemory();
 
-    void firestoreListDocument(const String &collectionId, size_t pageSize, void (*jsonCallback)(JsonVariant, size_t),
-                               void (*resultCb)(const String &, const String &) = nullptr);
-    String firestoreUpdateDocument(const String &collectionId, const String &documentId,
-                                   JsonVariant (*jsonCallback)(JsonVariant),
-                                   void (*resultCb)(const String &, const String &) = nullptr);
+    void firestoreListDocument(const String &collectionId, size_t pageSize, void (*jsonCallback)(JsonVariant, size_t), void (*resultCb)(const String &, const String &) = nullptr);
+    void firestoreUpdateDocument(const String &collectionId, const String &documentId, JsonVariant (*jsonCallback)(JsonVariant), void (*resultCb)(const String &, const String &) = nullptr);
     static String firestoreGetDocumentId(JsonVariant res);
     static void resultStatusCallback(const String &res, const String &err);
 
