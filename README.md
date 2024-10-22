@@ -122,6 +122,8 @@ First, include package according to your project's needs
 #define ENABLE_SENSOR_MAX6675
 #define ENABLE_SENSOR_MAX30100LIB
 #define ENABLE_SENSOR_MAX31865
+#define ENABLE_SENSOR_MLX90614
+#define ENABLE_SENSOR_PH
 #define ENABLE_SENSOR_RFID
 #define ENABLE_SENSOR_RPM
 #define ENABLE_SENSOR_RTC
