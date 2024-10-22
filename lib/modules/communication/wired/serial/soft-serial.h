@@ -10,8 +10,7 @@
 #ifndef SOFT_SERIAL_COM_H
 #define SOFT_SERIAL_COM_H
 
-#if defined(ESP8266)
-#elif defined(ESP32)
+#if defined(ESP32)
 #else
 
 #pragma message("[COMPILED]: soft-serial.h")

@@ -6,7 +6,7 @@
 
 #include "Task.h"
 
-#if defined(ESP32) || defined(ESP8266)
+#if defined(ESP32)
 
 TaskHandle::TaskHandle()
         : ux_priority_(1),

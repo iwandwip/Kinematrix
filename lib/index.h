@@ -72,6 +72,8 @@
 #include "sensors/max6675-sens.h"
 #include "sensors/max30100lib-sens.h"
 #include "sensors/max31865-sens.h"
+#include "sensors/mlx90614-sens.h"
+#include "sensors/ph-sens.h"
 #include "sensors/rfid-sens.h"
 #include "sensors/rpm-sens.h"
 #include "sensors/rtc-sens.h"

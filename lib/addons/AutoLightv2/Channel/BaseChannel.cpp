@@ -287,6 +287,125 @@ namespace AutoLight {
         return true;
     }
 
+    int BaseChannel::findMax(int num, ...) {
+        va_list args;
+        va_start(args, num);
+        int maxVal = num;
+        while (true) {
+            int next = va_arg(args, int);
+            if (next == -1) break;
+            if (next > maxVal) {
+                maxVal = next;
+            }
+        }
+        va_end(args);
+        return maxVal;
+    }
+
+    int BaseChannel::shiftArrayAccordingToOrder(const int patterns[][8], int patternSize, uint8_t *mainArray, int mainArraySize, int *arr, int &lastIndex, int targetIndex, bool reverse) {
+        int patternIndex = (24 - mainArraySize) / 2;
+        if (patternIndex < 0 || patternIndex >= patternSize) return 0;
+
+        int subArraySize = patterns[patternIndex][targetIndex];
+        if (subArraySize == 0) return 0;
+
+        int currentIndex = 0;
+        for (int i = 0; i < targetIndex; i++) {
+            currentIndex += patterns[patternIndex][i];
+        }
+
+        for (int i = 0; i < subArraySize; i++) {
+            if (!reverse) {
+                arr[lastIndex + i] = mainArray[currentIndex + i];
+            } else {
+                arr[lastIndex + i] = mainArray[currentIndex + subArraySize - 1 - i];
+            }
+        }
+
+        lastIndex += subArraySize;
+        return subArraySize;
+    }
+
+    int BaseChannel::shiftArrayAccordingToPosition(int *mainArray, int mainArraySize, int *arr, int &lastIndex, int targetIndex) {
+        const int patterns[9][8] = {
+                {3, 4, 4, 1, 1, 4, 4, 3},  // For size 24
+                {3, 3, 4, 1, 1, 4, 3, 3},  // For size 22
+                {3, 3, 3, 1, 1, 3, 3, 3},  // For size 20
+                {3, 2, 3, 1, 1, 3, 2, 3},  // For size 18
+                {3, 2, 2, 1, 1, 2, 2, 3},  // For size 16
+                {3, 1, 2, 1, 1, 1, 2, 3},  // For size 14
+                {3, 1, 1, 1, 1, 1, 1, 3},  // For size 12
+                {3, 0, 1, 1, 1, 1, 0, 3},  // For size 10
+                {3, 0, 0, 1, 1, 0, 0, 3}   // For size 8
+        };
+
+        int patternIndex = (24 - mainArraySize) / 2;
+        if (patternIndex < 0 || patternIndex >= 9) return 0;
+
+        int subArraySize = patterns[patternIndex][targetIndex];
+        if (subArraySize == 0) return 0;
+
+        int currentIndex = 0;
+        for (int i = 0; i < targetIndex; i++) {
+            currentIndex += patterns[patternIndex][i];
+        }
+
+        for (int i = 0; i < subArraySize; i++) {
+            arr[lastIndex + i] = mainArray[currentIndex + i];
+        }
+
+        lastIndex += subArraySize;
+        return subArraySize;
+    }
+
+    void BaseChannel::resetArray(int *mainArray, int &arrSize, int &arrLastIndex) {
+        for (int i = 0; i < arrSize; i++) {
+            mainArray[i] = 0;
+        }
+        arrSize = 0;
+        arrLastIndex = 0;
+    }
+
+    void BaseChannel::splitArrayDynamically(int *mainArray, int mainArraySize) {
+        int currentIndex = 0;
+        // Define patterns for different sizes
+        const int patterns[9][8] = {
+                {3, 4, 4, 1, 1, 4, 4, 3},  // For size 24
+                {3, 3, 4, 1, 1, 4, 3, 3},  // For size 22
+                {3, 3, 3, 1, 1, 3, 3, 3},  // For size 20
+                {3, 2, 3, 1, 1, 3, 2, 3},  // For size 18
+                {3, 2, 2, 1, 1, 2, 2, 3},  // For size 16
+                {3, 1, 2, 1, 1, 1, 2, 3},  // For size 14
+                {3, 1, 1, 1, 1, 1, 1, 3},  // For size 12
+                {3, 0, 1, 1, 1, 1, 0, 3},  // For size 10
+                {3, 0, 0, 1, 1, 0, 0, 3}   // For size 8
+        };
+
+        int patternIndex = (24 - mainArraySize) / 2;
+        if (patternIndex < 0 || patternIndex >= 9) return;
+
+        Serial.print("| patternIndex: ");
+        Serial.println(patternIndex);
+
+        const int *subArraySizes = patterns[patternIndex];
+
+        for (int i = 0; i < 8; i++) {
+            int subArraySize = subArraySizes[i];
+            Serial.print("Sub-array ");
+            Serial.print(i + 1);
+            Serial.print(": ");
+
+            for (int j = 0; j < subArraySize; j++) {
+                if (currentIndex < mainArraySize) {
+                    Serial.print(mainArray[currentIndex]);
+                    Serial.print(" ");
+                    currentIndex++;
+                }
+            }
+            Serial.println();
+        }
+    }
+
     void BaseChannel::setTaskSequenceFunction() {
         total_mode_[0] = &BaseChannel::off;
         total_mode_[1] = &BaseChannel::on;
@@ -300,6 +419,10 @@ namespace AutoLight {
         total_mode_[9] = &BaseChannel::taskSequence9;
         total_mode_[10] = &BaseChannel::taskSequence10;
         total_mode_[11] = &BaseChannel::taskSequence11;
+        total_mode_[12] = &BaseChannel::taskSequence12;
+        total_mode_[13] = &BaseChannel::taskSequence13;
+        total_mode_[14] = &BaseChannel::taskSequence14;
+        total_mode_[15] = &BaseChannel::taskSequence15;
     }
 
     void BaseChannel::debug() {

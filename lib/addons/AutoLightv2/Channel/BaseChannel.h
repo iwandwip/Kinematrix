@@ -29,9 +29,9 @@
 #include "../Cores/Task.h"
 
 namespace AutoLight {
-    const int MAXNUM_TASK_SEQUENCE = 10;
+    const int MAXNUM_TASK_SEQUENCE = 14;
     const int MAXNUM_TASK_SEQUENCE_ADDITION = 2;
-    const int MAXNUM_TOTAL_TASK_SEQUENCE = 12;
+    const int MAXNUM_TOTAL_TASK_SEQUENCE = 16;
     const int MAXNUM_TASK_TIME = 250;
 
     const int DEFAULT_DELAY_TIME = 50;
@@ -105,10 +105,21 @@ namespace AutoLight {
         void taskSequence9();
         void taskSequence10();
         void taskSequence11();
+        void taskSequence12();
+        void taskSequence13();
+        void taskSequence14();
+        void taskSequence15();
 
     private:
         bool addIoExpander(IOExpander *_io_expander);
         bool beginIoExpander();
+
+        // operation
+        int findMax(int num, ...);
+        int shiftArrayAccordingToOrder(const int patterns[][8], int patternSize, uint8_t* mainArray, int mainArraySize, int* arr, int& lastIndex, int targetIndex, bool reverse = false);
+        int shiftArrayAccordingToPosition(int* mainArray, int mainArraySize, int* arr, int& lastIndex, int targetIndex);
+        void resetArray(int* mainArray, int& arrSize, int& arrLastIndex);
+        void splitArrayDynamically(int* mainArray, int mainArraySize);
 
         void setTaskSequenceFunction();
 

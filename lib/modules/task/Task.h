@@ -9,7 +9,7 @@
 
 #define ENABLE_ARDUINO_RTOS 0
 
-#if defined(ESP32) || defined(ESP8266)
+#if defined(ESP32)
 
 #include "Arduino.h"
 

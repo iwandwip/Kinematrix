@@ -49,7 +49,7 @@ public:
     float getUnits(byte times = 1);
     uint32_t getADC(byte times = 1);
     float getCalibrateFactor(float units, float weight);
-    float getValueWeight(bool isCanZero = true) const;
+    [[nodiscard]] float getValueWeight(bool isCanZero = true) const;
     void setPins(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin);
 
     constexpr static const float G = 1.0;

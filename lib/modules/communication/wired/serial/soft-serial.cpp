@@ -7,8 +7,7 @@
 
 #include "soft-serial.h"
 
-#if defined(ESP8266)
-#elif defined(ESP32)
+#if defined(ESP32)
 #else
 
 SoftSerial::SoftSerial() {

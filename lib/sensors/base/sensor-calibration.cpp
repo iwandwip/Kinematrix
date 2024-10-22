@@ -13,6 +13,7 @@ AnalogCalibration::AnalogCalibration(const char *calibrationName, Preferences *p
           calibrationName(calibrationName),
           calibrationDataCount(0),
           preferences(preferences) {}
+#elif defined(ESP8266)
 #else
 
 AnalogCalibration::AnalogCalibration(const char *calibrationName, EEPROMLib *eepromLib, int initialAddress)
@@ -25,9 +26,8 @@ AnalogCalibration::AnalogCalibration(const char *calibrationName, EEPROMLib *eep
 #endif
 
 AnalogCalibration::~AnalogCalibration() {
-    if (calibrationDataArray != nullptr) {
-        delete[] calibrationDataArray;
-    }
+    delete[] calibrationDataArray;
+
 }
 
 void AnalogCalibration::setAnalogConfig(int _sensorPin, float _voltageReference, int _adcRange) {
@@ -76,6 +76,7 @@ void AnalogCalibration::calibrateSensor() {
         preferences->putFloat(voltKey.c_str(), calibrationDataArray[i].voltage);
     }
     preferences->end();
+#elif defined(ESP8266)
 #else
     int address = eepromAddress;
     eepromLib->writeInt(address, numPoints);
@@ -100,7 +101,7 @@ void AnalogCalibration::calibrateSensorCustom() {
     }
 
     Serial.println(numPoints);
-    if (calibrationDataArray != nullptr) delete[] calibrationDataArray;
+    delete[] calibrationDataArray;
     calibrationDataArray = new CalibrationData[numPoints];
     calibrationDataCount = numPoints;
 
@@ -129,6 +130,7 @@ void AnalogCalibration::calibrateSensorCustom() {
         preferences->putFloat(voltKey.c_str(), calibrationDataArray[i].voltage);
     }
     preferences->end();
+#elif defined(ESP8266)
 #else
     int address = eepromAddress;
     eepromLib->writeInt(address, numPoints);
@@ -146,6 +148,8 @@ void AnalogCalibration::loadCalibration() {
 #ifdef ESP32
     preferences->begin(calibrationName, true);
     int numPoints = preferences->getUInt("numPoints", 0);
+#elif defined(ESP8266)
+    int numPoints;
 #else
     int address = eepromAddress;
     int numPoints = eepromLib->readInt(address);
@@ -154,7 +158,7 @@ void AnalogCalibration::loadCalibration() {
 
     calibrationDataCount = numPoints;
     if (numPoints > 0) {
-        if (calibrationDataArray != nullptr) delete[] calibrationDataArray;
+        delete[] calibrationDataArray;
         calibrationDataArray = new CalibrationData[numPoints];
         Serial.print("| Load: ");
         Serial.println(calibrationDataCount);
@@ -164,6 +168,7 @@ void AnalogCalibration::loadCalibration() {
             String voltKey = "volt" + String(i);
             calibrationDataArray[i].calibrationValue = preferences->getFloat(calKey.c_str(), 0.0);
             calibrationDataArray[i].voltage = preferences->getFloat(voltKey.c_str(), 0.0);
+#elif defined(ESP8266)
 #else
             calibrationDataArray[i].calibrationValue = eepromLib->readFloat(address);
             address += sizeof(float);
@@ -182,6 +187,7 @@ void AnalogCalibration::loadCalibration() {
 #ifdef ESP32
         Serial.print("| ESP.getFreeHeap(): ");
         Serial.print(ESP.getFreeHeap());
+#elif defined(ESP8266)
 #else
         Serial.print("| freeMemory(): ");
         Serial.print(freeMemory());
@@ -205,11 +211,11 @@ float AnalogCalibration::voltageToValue(float voltage, interpolation_cfg cfg) {
     else return 0.0;
 }
 
-AnalogCalibration::CalibrationData AnalogCalibration::getCalibrationValueFromUser(int i) {
+AnalogCalibration::CalibrationData AnalogCalibration::getCalibrationValueFromUser(int i) const {
     Serial.println();
-    CalibrationData cal;
+    CalibrationData cal{};
     while (true) {
-        float voltage = analogRead(sensorPin) * (voltageReference / adcRange);
+        float voltage = (float)analogRead(sensorPin) * (voltageReference / (float)adcRange);
         static uint32_t voltageTimer;
         if (millis() - voltageTimer >= 1000) {
             Serial.print("| voltage: ");
@@ -229,7 +235,7 @@ AnalogCalibration::CalibrationData AnalogCalibration::getCalibrationValueFromUse
 
 AnalogCalibration::CalibrationData AnalogCalibration::getCalibrationValueFromUserCustom(int i) {
     Serial.println();
-    CalibrationData cal;
+    CalibrationData cal{};
     Serial.println("| calibrationValue: ");
     while (true) {
         if (Serial.available()) {

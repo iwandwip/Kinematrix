@@ -125,6 +125,16 @@
 #include "../lib/sensors/max31865-sens.cpp"
 #endif
 
+#ifdef ENABLE_SENSOR_HELPER_MLX90614
+#include "../lib/sensors/mlx90614-sens.h"
+#include "../lib/sensors/mlx90614-sens.cpp"
+#endif
+
+#ifdef ENABLE_SENSOR_HELPER_PH
+#include "../lib/sensors/ph-sens.h"
+#include "../lib/sensors/ph-sens.cpp"
+#endif
+
 #ifdef ENABLE_SENSOR_HELPER_RFID
 #include "../lib/sensors/rfid-sens.h"
 #include "../lib/sensors/rfid-sens.cpp"

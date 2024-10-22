@@ -57,14 +57,14 @@ bool FirebaseModule::init(FirebaseAuthentication *_authentication, void (*initCa
 }
 
 bool FirebaseModule::connectToWiFi(const char *ssid, const char *pwd, void (*connectCallback)(void)) {
-    WiFiClass::mode(WIFI_OFF);
+    WiFi.mode(WIFI_OFF);
     delay(1000);
-    WiFiClass::mode(WIFI_STA);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pwd);
 
     Serial.print("Connecting to : ");
     Serial.println(ssid);
-    while (WiFiClass::status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED) {
         Serial.print(".");
         if (connectCallback != nullptr) connectCallback();
         delay(250);
@@ -72,11 +72,11 @@ bool FirebaseModule::connectToWiFi(const char *ssid, const char *pwd, void (*con
     Serial.println(WiFi.localIP());
 
     connect = true;
-    return WiFiClass::status() == WL_CONNECTED;
+    return WiFi.status() == WL_CONNECTED;
 }
 
 bool FirebaseModule::isConnect() const {
-    return (connect || WiFiClass::status() == WL_CONNECTED) && Firebase.ready();
+    return (connect || WiFi.status() == WL_CONNECTED) && Firebase.ready();
 }
 
 bool FirebaseModule::update(void (*onUpdate)(void)) {
@@ -88,6 +88,7 @@ bool FirebaseModule::onTask(void (*onTask)(FirebaseData fbdo, FirebaseAuthentica
     if (onTask != nullptr) {
         onTask(fbdo, *authentication, config);
     }
+    return true;
 }
 
 void FirebaseModule::initData(uint8_t totalDataLen) {
@@ -299,7 +300,7 @@ void FirebaseModule::getJson(const String &getAddress, void (*jsonCallback)(Json
 
 float FirebaseModule::getData(const char *getAddress, void (*onData)(float data, String address)) {
     float dataRet = 0.0;
-    if (isConnect() && Firebase.RTDB.getFloat(&fbdo, F(getAddress))) {
+    if (isConnect() && Firebase.RTDB.getFloat(&fbdo, getAddress)) {
         dataRet = fbdo.to<float>();
         if (onData != nullptr) onData(dataRet, getAddress);
     }
@@ -308,7 +309,7 @@ float FirebaseModule::getData(const char *getAddress, void (*onData)(float data,
 
 String FirebaseModule::getStrData(const char *getAddress, void (*onData)(String data, String address)) {
     String dataRet = "";
-    if (isConnect() && Firebase.RTDB.getString(&fbdo, F(getAddress))) {
+    if (isConnect() && Firebase.RTDB.getString(&fbdo, getAddress)) {
         dataRet = fbdo.to<String>();
         dataRet.replace("\\", "");
         dataRet.replace("\"", "");
@@ -363,13 +364,13 @@ void FirebaseModule::firestoreListDocument(const String &collectionId, size_t pa
 }
 
 void FirebaseModule::firestoreUpdateDocument(const String &collectionId, const String &documentId,
-                                               JsonVariant (*jsonCallback)(JsonVariant),
-                                               void (*resultCb)(const String &, const String &)) {
+                                             JsonVariant (*jsonCallback)(JsonVariant),
+                                             void (*resultCb)(const String &, const String &)) {
     String json, mask, documentPath, result, err;
     JsonDocument doc;
     JsonVariant res = jsonCallback(doc);
     serializeJson(res, json);
-    JsonObject root = res["fields"].as<JsonObject>();
+    auto root = res["fields"].as<JsonObject>();
     for (JsonPair kv: root) {
         mask += kv.key().c_str();
         mask += ",";
@@ -390,7 +391,7 @@ void FirebaseModule::firestoreUpdateDocument(const String &collectionId, const S
 }
 
 String FirebaseModule::firestoreGetDocumentId(JsonVariant res) {
-    String name = res["name"].as<String>();
+    auto name = res["name"].as<String>();
     int lastSlashIndex = name.lastIndexOf("/");
     String extractedID = name.substring(lastSlashIndex + 1);
     return extractedID;

@@ -12,8 +12,9 @@
 
 #include "Arduino.h"
 
-#ifdef ESP32
+#if defined(ESP32)
 #include "Preferences.h"
+#elif defined(ESP8266)
 #else
 
 #ifndef ENABLE_MODULE_HELPER_EEPROM_LIB
@@ -45,6 +46,7 @@ private:
 
 #ifdef ESP32
     Preferences *preferences;
+#elif defined(ESP8266)
 #else
     EEPROMLib *eepromLib;
     int eepromAddress;
@@ -54,14 +56,15 @@ private:
     float voltageReference;
     int adcRange;
 
-    CalibrationData getCalibrationValueFromUser(int i);
-    CalibrationData getCalibrationValueFromUserCustom(int i);
+    [[nodiscard]] CalibrationData getCalibrationValueFromUser(int i) const;
+    static CalibrationData getCalibrationValueFromUserCustom(int i);
     float lagrangeInterpolation(float voltage);
     float linearInterpolation(float voltage);
 
 public:
 #ifdef ESP32
     AnalogCalibration(const char *calibrationName, Preferences *preferences);
+#elif defined(ESP8266)
 #else
     AnalogCalibration(const char *calibrationName, EEPROMLib *eepromLib, int initialAddress);
 #endif

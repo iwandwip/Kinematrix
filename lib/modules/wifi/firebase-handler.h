@@ -18,7 +18,18 @@
 #include "Firebase_ESP_Client.h"
 #include "addons/RTDBHelper.h"
 #include "addons/TokenHelper.h"
-#include "WiFi.h"
+
+#if defined(ESP32) || defined(ARDUINO_RASPBERRY_PI_PICO_W)
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#elif __has_include(<WiFiNINA.h>)
+#include <WiFiNINA.h>
+#elif __has_include(<WiFi101.h>)
+#include <WiFi101.h>
+#elif __has_include(<WiFiS3.h>)
+#include <WiFiS3.h>
+#endif
 
 #include "NTPClient.h"
 #include "WiFiUdp.h"
@@ -65,7 +76,7 @@ public:
 
     bool init(FirebaseAuthentication *_authentication, void (*initCallback)() = nullptr);
     bool connectToWiFi(const char *ssid, const char *pwd, void (*connectCallback)() = nullptr);
-    bool isConnect() const;
+    [[nodiscard]] bool isConnect() const;
 
     static bool update(void (*onUpdate)() = nullptr);
     bool onTask(void (*onTask)(FirebaseData fbdo, FirebaseAuthentication auth, FirebaseConfig config) = nullptr);
