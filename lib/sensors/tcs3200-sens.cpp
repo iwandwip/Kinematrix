@@ -48,6 +48,20 @@ JsonVariant TCS3200Sens::getVariant(const char *searchName) {
     return (*doc)[searchName];
 }
 
+String TCS3200Sens::closestColorCustomRGB(int r, int g, int b, int distinctRGB[][3], String distinctColors[], int num_of_colors) {
+    int index = -1;
+    int biggestDifference = 765;
+    for (int i = 0; i < num_of_colors; i++) {
+        int difference = (int)sqrt(pow(r - distinctRGB[i][0], 2) + pow(g - distinctRGB[i][1], 2) + pow(b - distinctRGB[i][2], 2));
+        if (difference < biggestDifference) {
+            index = i;
+            biggestDifference = difference;
+        }
+    }
+    String colorReturn = "NA";
+    return (index == -1 ? colorReturn : distinctColors[index]);
+}
+
 float TCS3200Sens::getValueTCS3200Sens() const {
     return (*doc)[name].as<float>();
 }

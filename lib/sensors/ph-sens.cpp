@@ -8,17 +8,20 @@
 #include "ph-sens.h"
 #include "Arduino.h"
 
-PhSens::PhSens(uint8_t sensorPin, float voltage, float resolution, float *calibrationValue)
+PhSens::PhSens(uint8_t sensorPin, float voltage, float resolution, float *calibrationValue, uint8_t bufferSize)
         : doc(nullptr),
           name(""),
           voltage(voltage),
           resolution(resolution),
           calibrationValue(calibrationValue),
-          sensorPin(sensorPin) {
-
+          sensorPin(sensorPin),
+          bufferSize(bufferSize) {
+    bufferAnalog = new uint32_t[bufferSize];
 }
 
-PhSens::~PhSens() = default;
+PhSens::~PhSens() {
+    delete[] bufferAnalog;
+}
 
 bool PhSens::init() {
     if (strcmp(name, "") == 0 && doc == nullptr) {
@@ -31,12 +34,13 @@ bool PhSens::init() {
 }
 
 bool PhSens::update() {
-    for (int i = 0; i < PH_SENS_BUFFER_SIZE; i++) {
+    for (int i = 0; i < bufferSize; i++) {
         bufferAnalog[i] = analogRead(sensorPin);
         delay(30);
     }
-    for (int i = 0; i < 9; i++) {
-        for (int j = i + 1; j < PH_SENS_BUFFER_SIZE; j++) {
+
+    for (int i = 0; i < bufferSize - 1; i++) {
+        for (int j = i + 1; j < bufferSize; j++) {
             if (bufferAnalog[i] > bufferAnalog[j]) {
                 uint32_t temporaryAnalogValue = bufferAnalog[i];
                 bufferAnalog[i] = bufferAnalog[j];
@@ -44,13 +48,17 @@ bool PhSens::update() {
             }
         }
     }
+
     uint32_t averageAnalogValue = 0;
-    for (int i = 2; i < 8; i++) {
+    int startIdx = bufferSize / 4;
+    int endIdx = bufferSize - startIdx;
+
+    for (int i = startIdx; i < endIdx; i++) {
         averageAnalogValue += bufferAnalog[i];
     }
 
-    float phVoltageValue = (float) averageAnalogValue * voltage / resolution / 6.0;
-    float phValue = -5.70 * phVoltageValue + *calibrationValue;
+    double phVoltageValue = (float) averageAnalogValue * voltage / resolution / (float)(endIdx - startIdx);
+    double phValue = -5.70f * phVoltageValue + *calibrationValue;
 
     (*doc)[name]["volt"] = phVoltageValue;
     (*doc)[name]["ph"] = phValue;

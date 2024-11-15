@@ -21,13 +21,13 @@ private:
     float _last_estimate = 0;
     float _kalman_gain = 0;
 public:
-    KalmanFilter(float mea_e = 2.0, float est_e = 2.0, float q = 0.01);
+    explicit KalmanFilter(float mea_e = 2.0, float est_e = 2.0, float q = 0.01);
     float updateEstimate(float mea);
     void setMeasurementError(float mea_e);
     void setEstimateError(float est_e);
     void setProcessNoise(float q);
-    float getKalmanGain();
-    float getEstimateError();
+    float getKalmanGain() const;
+    float getEstimateError() const;
 };
 
 class MovingAverageFilter {
@@ -40,7 +40,7 @@ public:
     explicit MovingAverageFilter(int windowSize);
     ~MovingAverageFilter();
     void addMeasurement(float value);
-    float getFilteredValue();
+    float getFilteredValue() const;
     void clear();
 };
 

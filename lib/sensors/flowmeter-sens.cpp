@@ -143,8 +143,8 @@ FlowSensorProperties FS300A = {60.0f, 5.5f, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 FlowSensorProperties FS400A = {60.0f, 4.8f, {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
 
 
-FlowmeterSens::FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProperties _properties)
-        : sensorTimer(0) {
+FlowmeterSens::FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProperties _properties, uint32_t _sensorUpdateTimer)
+        : sensorTimer(0), sensorUpdateTimer(_sensorUpdateTimer) {
     sensorClass = new FlowMeter(digitalPinToInterrupt(_pin), _properties, _callback, RISING);
 }
 
@@ -163,8 +163,8 @@ bool FlowmeterSens::init() {
 }
 
 bool FlowmeterSens::update() {
-    if (millis() - sensorTimer >= 1000) {
-        sensorClass->tick(1000);
+    if (millis() - sensorTimer >= sensorUpdateTimer) {
+        sensorClass->tick(sensorUpdateTimer);
         (*doc)[name]["currentRate"] = (float) sensorClass->getCurrentFlowrate();
         (*doc)[name]["currentVolume"] = (float) sensorClass->getCurrentVolume();
         (*doc)[name]["totalRate"] = (float) sensorClass->getTotalFlowrate();

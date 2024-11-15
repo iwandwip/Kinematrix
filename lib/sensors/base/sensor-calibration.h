@@ -31,6 +31,8 @@
 typedef enum {
     LAGRANGE_INTERPOLATION,
     LINEAR_INTERPOLATION,
+    POLYNOMIAL_INTERPOLATION,
+    CUBIC_SPLINE_INTERPOLATION,
 } interpolation_cfg;
 
 class AnalogCalibration {
@@ -58,8 +60,6 @@ private:
 
     [[nodiscard]] CalibrationData getCalibrationValueFromUser(int i) const;
     static CalibrationData getCalibrationValueFromUserCustom(int i);
-    float lagrangeInterpolation(float voltage);
-    float linearInterpolation(float voltage);
 
 public:
 #ifdef ESP32
@@ -73,8 +73,14 @@ public:
     void setAnalogConfig(int _sensorPin, float _voltageReference, int _adcRange);
     void calibrateSensor();
     void calibrateSensorCustom();
-    void loadCalibration();
+    void loadCalibration(bool debug = true);
     float voltageToValue(float voltage, interpolation_cfg cfg = LAGRANGE_INTERPOLATION);
+
+    float lagrangeInterpolation(float voltage);
+    float linearInterpolation(float voltage, float tolerance = 0.0);
+    float polynomialInterpolation(float voltage);
+    void computeCubicSplineCoefficients(float *a, float *b, float *c, float *d);
+    float cubicSplineInterpolation(float voltage);
 };
 
 #endif  // SENSOR_CALIBRATION_H

@@ -8,11 +8,13 @@
 #include "sensor-calibration.h"
 
 #ifdef ESP32
+
 AnalogCalibration::AnalogCalibration(const char *calibrationName, Preferences *preferences)
         : calibrationDataArray(nullptr),
           calibrationName(calibrationName),
           calibrationDataCount(0),
           preferences(preferences) {}
+
 #elif defined(ESP8266)
 #else
 
@@ -47,7 +49,7 @@ void AnalogCalibration::calibrateSensor() {
     }
 
     Serial.println(numPoints);
-    if (calibrationDataArray != nullptr) delete[] calibrationDataArray;
+    delete[] calibrationDataArray;
     calibrationDataArray = new CalibrationData[numPoints];
     calibrationDataCount = numPoints;
 
@@ -144,10 +146,10 @@ void AnalogCalibration::calibrateSensorCustom() {
     Serial.println("| Kalibrasi Selesai");
 }
 
-void AnalogCalibration::loadCalibration() {
+void AnalogCalibration::loadCalibration(bool debug) {
 #ifdef ESP32
     preferences->begin(calibrationName, true);
-    int numPoints = preferences->getUInt("numPoints", 0);
+    int numPoints = (int) preferences->getUInt("numPoints", 0);
 #elif defined(ESP8266)
     int numPoints;
 #else
@@ -160,8 +162,10 @@ void AnalogCalibration::loadCalibration() {
     if (numPoints > 0) {
         delete[] calibrationDataArray;
         calibrationDataArray = new CalibrationData[numPoints];
-        Serial.print("| Load: ");
-        Serial.println(calibrationDataCount);
+        if (debug) {
+            Serial.print("| Load: ");
+            Serial.println(calibrationDataCount);
+        }
         for (int i = 0; i < numPoints; i++) {
 #ifdef ESP32
             String calKey = "cal" + String(i);
@@ -175,39 +179,40 @@ void AnalogCalibration::loadCalibration() {
             calibrationDataArray[i].voltage = eepromLib->readFloat(address);
             address += sizeof(float);
 #endif
+            if (debug) {
+                Serial.print("| index: ");
+                Serial.print(i + 1);
+                Serial.print("| " + String(calibrationName) + ": ");
+                Serial.print(calibrationDataArray[i].calibrationValue);
+                Serial.print("| voltage: ");
+                Serial.print(calibrationDataArray[i].voltage);
+                Serial.println();
+            }
+        }
 
-            Serial.print("| index: ");
-            Serial.print(i + 1);
-            Serial.print("| " + String(calibrationName) + ": ");
-            Serial.print(calibrationDataArray[i].calibrationValue);
-            Serial.print("| voltage: ");
-            Serial.print(calibrationDataArray[i].voltage);
+        if (debug) {
+#ifdef ESP32
+            Serial.print("| ESP.getFreeHeap(): ");
+            Serial.print(ESP.getFreeHeap());
+#elif defined(ESP8266)
+#else
+            Serial.print("| freeMemory(): ");
+            Serial.print(freeMemory());
+#endif
             Serial.println();
         }
 #ifdef ESP32
-        Serial.print("| ESP.getFreeHeap(): ");
-        Serial.print(ESP.getFreeHeap());
-#elif defined(ESP8266)
-#else
-        Serial.print("| freeMemory(): ");
-        Serial.print(freeMemory());
+        preferences->end();
 #endif
-        Serial.println();
     }
-#ifdef ESP32
-    preferences->end();
-#endif
 }
 
 float AnalogCalibration::voltageToValue(float voltage, interpolation_cfg cfg) {
     if (calibrationDataCount < 2) return 0.0;
-    if (voltage < calibrationDataArray[0].voltage) {
-        return calibrationDataArray[0].calibrationValue;
-    } else if (voltage > calibrationDataArray[calibrationDataCount - 1].voltage) {
-        return calibrationDataArray[calibrationDataCount - 1].calibrationValue;
-    }
     if (cfg == LAGRANGE_INTERPOLATION) return lagrangeInterpolation(voltage);
     else if (cfg == LINEAR_INTERPOLATION) return linearInterpolation(voltage);
+    else if (cfg == POLYNOMIAL_INTERPOLATION) return polynomialInterpolation(voltage);
+    else if (cfg == CUBIC_SPLINE_INTERPOLATION) return cubicSplineInterpolation(voltage); // Call cubic spline interpolation
     else return 0.0;
 }
 
@@ -215,7 +220,7 @@ AnalogCalibration::CalibrationData AnalogCalibration::getCalibrationValueFromUse
     Serial.println();
     CalibrationData cal{};
     while (true) {
-        float voltage = (float)analogRead(sensorPin) * (voltageReference / (float)adcRange);
+        float voltage = (float) analogRead(sensorPin) * (voltageReference / (float) adcRange);
         static uint32_t voltageTimer;
         if (millis() - voltageTimer >= 1000) {
             Serial.print("| voltage: ");
@@ -269,16 +274,80 @@ float AnalogCalibration::lagrangeInterpolation(float voltage) {
     return result;
 }
 
-float AnalogCalibration::linearInterpolation(float voltage) {
+float AnalogCalibration::linearInterpolation(float voltage, float tolerance) {
+    if (calibrationDataCount < 2) return 0.0;
     for (int i = 0; i < calibrationDataCount - 1; i++) {
-        if (voltage >= calibrationDataArray[i].voltage && voltage <= calibrationDataArray[i + 1].voltage) {
+        if ((calibrationDataArray[i].voltage >= voltage && voltage >= calibrationDataArray[i + 1].voltage) ||
+            (calibrationDataArray[i].voltage <= voltage && voltage <= calibrationDataArray[i + 1].voltage)) {
+
             float x0 = calibrationDataArray[i].voltage;
             float y0 = calibrationDataArray[i].calibrationValue;
             float x1 = calibrationDataArray[i + 1].voltage;
             float y1 = calibrationDataArray[i + 1].calibrationValue;
-            return y0 + (voltage - x0) * (y1 - y0) / (x1 - x0);
+
+            float interpolatedValue = y0 + (voltage - x0) * (y1 - y0) / (x1 - x0);
+
+            if (tolerance != 0.0) {
+                if (abs(interpolatedValue - y0) <= tolerance) return y0;
+                if (abs(interpolatedValue - y1) <= tolerance) return y1;
+            }
+            return interpolatedValue;
         }
     }
-    return voltage < calibrationDataArray[0].voltage ? calibrationDataArray[0].calibrationValue : calibrationDataArray[
-            calibrationDataCount - 1].calibrationValue;
+
+    return voltage < calibrationDataArray[calibrationDataCount - 1].voltage ? calibrationDataArray[calibrationDataCount - 1].calibrationValue
+                                                                            : calibrationDataArray[0].calibrationValue;
+}
+
+float AnalogCalibration::polynomialInterpolation(float voltage) {
+    float dividedDiff[calibrationDataCount][calibrationDataCount];
+    for (int i = 0; i < calibrationDataCount; i++) {
+        dividedDiff[i][0] = calibrationDataArray[i].calibrationValue;
+    }
+    for (int j = 1; j < calibrationDataCount; j++) {
+        for (int i = 0; i < calibrationDataCount - j; i++) {
+            dividedDiff[i][j] = (dividedDiff[i + 1][j - 1] - dividedDiff[i][j - 1]) /
+                                (calibrationDataArray[i + j].voltage - calibrationDataArray[i].voltage);
+        }
+    }
+    float result = dividedDiff[0][0];
+    float term = 1.0;
+    for (int i = 1; i < calibrationDataCount; i++) {
+        term *= (voltage - calibrationDataArray[i - 1].voltage);
+        result += term * dividedDiff[0][i];
+    }
+    return result;
+}
+
+void AnalogCalibration::computeCubicSplineCoefficients(float *a, float *b, float *c, float *d) {
+    int n = calibrationDataCount;
+    float h[n - 1];
+    float alpha[n - 1];
+    for (int i = 0; i < n - 1; i++) {
+        h[i] = calibrationDataArray[i + 1].voltage - calibrationDataArray[i].voltage;
+        alpha[i] = (calibrationDataArray[i + 1].calibrationValue - calibrationDataArray[i].calibrationValue) / h[i];
+    }
+    c[0] = 0;
+    for (int i = 1; i < n - 1; i++) {
+        c[i] = 0;
+    }
+    c[n - 1] = 0;
+    for (int i = 0; i < n - 1; i++) {
+        d[i] = (c[i + 1] - c[i]) / (3 * h[i]);
+        b[i] = alpha[i] - h[i] * (2 * c[i] + c[i + 1]) / 3;
+    }
+}
+
+float AnalogCalibration::cubicSplineInterpolation(float voltage) {
+    float a[calibrationDataCount], b[calibrationDataCount - 1], c[calibrationDataCount], d[calibrationDataCount - 1];
+    for (int i = 0; i < calibrationDataCount; i++) {
+        a[i] = calibrationDataArray[i].calibrationValue;
+    }
+    computeCubicSplineCoefficients(a, b, c, d);
+    int i = 0;
+    while (i < calibrationDataCount - 1 && voltage > calibrationDataArray[i + 1].voltage) {
+        i++;
+    }
+    float dx = voltage - calibrationDataArray[i].voltage;
+    return a[i] + b[i] * dx + c[i] * dx * dx + d[i] * dx * dx * dx;
 }

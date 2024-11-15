@@ -38,11 +38,11 @@ void KalmanFilter::setProcessNoise(float q) {
     _q = q;
 }
 
-float KalmanFilter::getKalmanGain() {
+float KalmanFilter::getKalmanGain() const {
     return _kalman_gain;
 }
 
-float KalmanFilter::getEstimateError() {
+float KalmanFilter::getEstimateError() const {
     return _err_estimate;
 }
 
@@ -69,7 +69,7 @@ void MovingAverageFilter::addMeasurement(float value) {
     _currentIndex = (_currentIndex + 1) % _windowSize;
 }
 
-float MovingAverageFilter::getFilteredValue() {
+float MovingAverageFilter::getFilteredValue() const {
     return _runningSum / _windowSize;
 }
 

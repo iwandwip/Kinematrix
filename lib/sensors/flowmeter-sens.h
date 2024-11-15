@@ -207,10 +207,11 @@ private:
     const char *name;
 
     FlowMeter *sensorClass;
+    uint32_t sensorUpdateTimer;
     uint32_t sensorTimer;
 
 public:
-    explicit FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProperties _properties = UncalibratedSensor);
+    explicit FlowmeterSens(uint8_t _pin, void (*_callback)(), FlowSensorProperties _properties = UncalibratedSensor, uint32_t _sensorUpdateTimer = 1000);
     ~FlowmeterSens();
 
     bool init() override;

@@ -10,12 +10,10 @@
 #ifndef PH_SENS_H
 #define PH_SENS_H
 
-#pragma message("[COMPILED]: abstract-sens.h")
+#pragma message("[COMPILED]: ph-sens.h")
 
 #include "Arduino.h"
 #include "base/sensor-module.h"
-
-#define PH_SENS_BUFFER_SIZE 10
 
 class PhSens : public BaseSens {
 private:
@@ -25,13 +23,14 @@ private:
     float voltage;
     float resolution;
     float *calibrationValue;
-    uint32_t bufferAnalog[PH_SENS_BUFFER_SIZE];
+    uint32_t *bufferAnalog;
+    uint8_t bufferSize;
 
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
 public:
-    PhSens(uint8_t sensorPin, float voltage, float resolution, float* calibrationValue);
+    PhSens(uint8_t sensorPin, float voltage, float resolution, float* calibrationValue, uint8_t bufferSize);
     virtual ~PhSens();
     bool init() override;
     bool update() override;

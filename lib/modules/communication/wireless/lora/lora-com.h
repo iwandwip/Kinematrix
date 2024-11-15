@@ -64,6 +64,8 @@ public:
     void clearData();
     void sendData();
     void sendDataCb(void (*onReceive)(const String &));
+    String sendDataCbWaitData(void (*onSend)(const String &));
+    String sendDataCbWaitDataWithTimeout(void (*onSend)(const String &), unsigned long timeout, int maxRetries);
     void sendDataAsync(uint32_t _time = 500);
     void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)(const String &) = nullptr);
     void sendBytes(int next);

@@ -36,6 +36,8 @@ public:
     JsonDocument getDocument() override;
     JsonVariant getVariant(const char *searchName) override;
 
+    static String closestColorCustomRGB(int r, int g, int b, int distinctRGB[][3], String distinctColors[], int num_of_colors);
+
     float getValueTCS3200Sens() const;
     void setPins(uint8_t _pin);
 };

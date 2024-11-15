@@ -99,6 +99,58 @@ void LoRaModule::sendDataCb(void (*onReceive)(const String &)) {
     onReceive(dataSend);
 }
 
+String LoRaModule::sendDataCbWaitData(void (*onSend)(const String &)) {
+    LoRa.beginPacket();
+    LoRa.print(dataSend);
+    LoRa.endPacket();
+    onSend(dataSend);
+
+    int packetSize = 0;
+    while (packetSize == 0) {
+        packetSize = LoRa.parsePacket();
+    }
+    String data = LoRa.readStringUntil('\n');
+    return data;
+}
+
+String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &), unsigned long timeout, int maxRetries) {
+    int retryAttempts = 0;
+    String data;
+#ifdef ESP32
+    disableLoopWDT();
+#endif
+    while (retryAttempts < maxRetries) {
+        LoRa.beginPacket();
+        LoRa.print(dataSend);
+        LoRa.endPacket();
+        onSend(dataSend);
+
+        uint32_t startTime = millis();
+        while (millis() - startTime < timeout) {
+//            Serial.print("| time: ");
+//            Serial.print(time);
+//            Serial.print("| timeout: ");
+//            Serial.print(timeout);
+            int packetSize = LoRa.parsePacket();
+            if (packetSize > 0) {
+                data = LoRa.readStringUntil('\n');
+#ifdef ESP32
+                enableLoopWDT();
+#endif
+                return data;
+            }
+//            Serial.print("| packetSize: ");
+//            Serial.print(packetSize);
+//            Serial.println();
+        }
+        retryAttempts++;
+    }
+#ifdef ESP32
+    enableLoopWDT();
+#endif
+    return "";
+}
+
 void LoRaModule::sendDataAsync(uint32_t _time) {
     if (millis() - sendTime >= _time) {
         sendTime = millis();
