@@ -8,6 +8,7 @@
 #include "seven-segment-74hc595.h"
 
 const byte sevenSegmentMap74HC595[12] = { // MSB (Most Significant Bit)
+        //H, G, F, E, D, C, B, A, DOT
         B01111110, // 0
         B00001100, // 1
         B10110110, // 2
@@ -22,19 +23,25 @@ const byte sevenSegmentMap74HC595[12] = { // MSB (Most Significant Bit)
         B00000001,  // .,
 };
 
-SevenSegment74HC595::SevenSegment74HC595(int dataPin, int clockPin, const int *enablePins, int numDisplays, bool reverse) {
+SevenSegment74HC595::SevenSegment74HC595(int dataPin, int clockPin, const int *enablePins, int numDisplays, bool enableState, bool ledState) {
     this->dataPin = dataPin;
     this->clockPin = clockPin;
+    this->numDisplays = numDisplays;
+
+    this->enableState = enableState;
+    this->ledState = ledState;
 
     this->enablePins = new int[numDisplays];
     for (int i = 0; i < numDisplays; i++) {
         this->enablePins[i] = enablePins[i];
         pinMode(this->enablePins[i], OUTPUT);
-        digitalWrite(this->enablePins[i], LOW);
-    }
 
-    this->numDisplays = numDisplays;
-    this->reverse = reverse;
+        if (this->enableState == COMMON_ANODE) {
+            digitalWrite(this->enablePins[i], LOW);
+        } else {
+            digitalWrite(this->enablePins[i], HIGH);
+        }
+    }
 
     pinMode(dataPin, OUTPUT);
     pinMode(clockPin, OUTPUT);
@@ -72,9 +79,16 @@ void SevenSegment74HC595::processNumber(const String &_number, uint32_t _time) {
         char digit = i < length ? numberStr[i] : ' ';
 
         displayDigit(digit, thousand[i]);
-        digitalWrite(enablePins[i], HIGH);
-        delay(_time);
-        digitalWrite(enablePins[i], LOW);
+
+        if (this->enableState == COMMON_ANODE) {
+            digitalWrite(enablePins[i], HIGH);
+            delay(_time);
+            digitalWrite(enablePins[i], LOW);
+        } else {
+            digitalWrite(enablePins[i], LOW);
+            delay(_time);
+            digitalWrite(enablePins[i], HIGH);
+        }
     }
 }
 
@@ -88,13 +102,21 @@ void SevenSegment74HC595::displayDigit(char digit, bool isThousand) const {
     if (value >= 0 && value < 12) {
         byte displayValue = sevenSegmentMap74HC595[value];
         if (isThousand) displayValue = displayValue | sevenSegmentMap74HC595[11];
-
 //        displayValue = ~displayValue & 0xFF;
 //        displayValue = reverseByte(displayValue);
 
-        shiftOut(dataPin, clockPin, MSBFIRST, ~displayValue);
+        if (this->enableState == COMMON_ANODE) {
+            shiftOut(dataPin, clockPin, MSBFIRST, ~displayValue);
+        } else {
+            shiftOut(dataPin, clockPin, MSBFIRST, displayValue);
+        }
     } else {
-        shiftOut(dataPin, clockPin, MSBFIRST, B11111111);
+
+        if (this->enableState == COMMON_ANODE) {
+            shiftOut(dataPin, clockPin, MSBFIRST, B11111111);
+        } else {
+            shiftOut(dataPin, clockPin, MSBFIRST, B00000000);
+        }
     }
 }
 

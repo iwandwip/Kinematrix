@@ -135,6 +135,11 @@
 #include "../lib/sensors/ph-sens.cpp"
 #endif
 
+#ifdef ENABLE_SENSOR_HELPER_PZEM004T
+#include "../lib/sensors/pzem004t-sens.h"
+#include "../lib/sensors/pzem004t-sens.cpp"
+#endif
+
 #ifdef ENABLE_SENSOR_HELPER_RFID
 #include "../lib/sensors/rfid-sens.h"
 #include "../lib/sensors/rfid-sens.cpp"

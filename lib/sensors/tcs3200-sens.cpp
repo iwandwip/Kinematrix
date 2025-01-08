@@ -23,9 +23,9 @@ bool TCS3200Sens::init() {
 
 bool TCS3200Sens::update() {
     if (millis() - sensorTimer >= 200) {
-        (*doc)[name]["r"] = tcs3200::colorRead('r');
-        (*doc)[name]["g"] = tcs3200::colorRead('g');
-        (*doc)[name]["b"] = tcs3200::colorRead('b');
+        (*doc)[name]["r"] = tcs3200::colorRead('r', 100);
+        (*doc)[name]["g"] = tcs3200::colorRead('g', 100);
+        (*doc)[name]["b"] = tcs3200::colorRead('b', 100);
         sensorTimer = millis();
         return true;
     }
@@ -52,7 +52,7 @@ String TCS3200Sens::closestColorCustomRGB(int r, int g, int b, int distinctRGB[]
     int index = -1;
     int biggestDifference = 765;
     for (int i = 0; i < num_of_colors; i++) {
-        int difference = (int)sqrt(pow(r - distinctRGB[i][0], 2) + pow(g - distinctRGB[i][1], 2) + pow(b - distinctRGB[i][2], 2));
+        int difference = (int) sqrt(pow(r - distinctRGB[i][0], 2) + pow(g - distinctRGB[i][1], 2) + pow(b - distinctRGB[i][2], 2));
         if (difference < biggestDifference) {
             index = i;
             biggestDifference = difference;

@@ -127,10 +127,6 @@ String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &),
 
         uint32_t startTime = millis();
         while (millis() - startTime < timeout) {
-//            Serial.print("| time: ");
-//            Serial.print(time);
-//            Serial.print("| timeout: ");
-//            Serial.print(timeout);
             int packetSize = LoRa.parsePacket();
             if (packetSize > 0) {
                 data = LoRa.readStringUntil('\n');
@@ -139,9 +135,6 @@ String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &),
 #endif
                 return data;
             }
-//            Serial.print("| packetSize: ");
-//            Serial.print(packetSize);
-//            Serial.println();
         }
         retryAttempts++;
     }

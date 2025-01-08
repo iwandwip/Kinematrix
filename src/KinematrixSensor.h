@@ -132,10 +132,14 @@
 #include "../lib/sensors/mlx90614-sens.cpp"
 #endif
 
-
 #ifdef ENABLE_SENSOR_PH
 #include "../lib/sensors/ph-sens.h"
 #include "../lib/sensors/ph-sens.cpp"
+#endif
+
+#ifdef ENABLE_SENSOR_PZEM004T
+#include "../lib/sensors/pzem004t-sens.h"
+#include "../lib/sensors/pzem004t-sens.cpp"
 #endif
 
 #ifdef ENABLE_SENSOR_RFID
