@@ -16,21 +16,30 @@
 #include "base/sensor-module.h"
 #include "max6675.h"
 
-class MAX6675Sens : public BaseSens, public MAX6675 {
+class MAX6675Sens : public BaseSens, public MAX6675{
 private:
-    /*variables*/
-    float sensorValue;
+    JsonDocument *doc;
+    const char *name;
+
+    int enumRandomValue;
+    float dummyValue1;
+    float dummyValue2;
+
     uint8_t sensorPin;
     uint32_t sensorTimer;
 
     using MAX6675::MAX6675;
-
 public:
-    ~MAX6675Sens();
+    virtual ~MAX6675Sens();
     bool init() override;
     bool update() override;
-    void getValue(float *output) override;
-    float getValueTemperature() const;
+
+    void setDocument(const char *objName) override;
+    void setDocumentValue(JsonDocument *docBase) override;
+    JsonDocument getDocument() override;
+    JsonVariant getVariant(const char *searchName) override;
+
+    float getValueMAX6675Sens() const;
     void setPins(uint8_t _pin);
 };
 
