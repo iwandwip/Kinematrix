@@ -30,6 +30,11 @@ To use Kinematrix, include the required modules and sensors for your project:
 #### **Example 1: Sensor Integration**
 This example demonstrates how to use ultrasonic and soil moisture sensors:
 ```cpp
+#define ENABLE_SENSOR_MODULE
+#define ENABLE_SENSOR_MODULE_UTILITY
+#define ENABLE_SENSOR_ULTRASONIC
+#define ENABLE_SENSOR_SOIL
+
 SensorModule sensor;
 
 void setup() {
@@ -49,6 +54,9 @@ void loop() {
 #### **Example 2: Digital Input and Output**
 This example demonstrates controlling an LED with a button:
 ```cpp
+#define ENABLE_MODULE_DIGITAL_INPUT
+#define ENABLE_MODULE_DIGITAL_OUTPUT
+
 DigitalIn button(2);
 DigitalOut led(3);
 
@@ -59,6 +67,8 @@ void setup() {
 void loop() {
     if (button.isPressed()) {
         led.on();
+    } else {
+        led.off();
     }
     button.update();
 }

@@ -22,6 +22,16 @@
 #include "../lib/modules/communication/wired/i2c/io-expander.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_HELPER_MODBUS
+#include "../lib/modules/communication/wired/modbus/modbus.h"
+#include "../lib/modules/communication/wired/modbus/modbusDevice.h"
+#include "../lib/modules/communication/wired/modbus/modbusRegBank.h"
+#include "../lib/modules/communication/wired/modbus/modbusSlave.h"
+#include "../lib/modules/communication/wired/modbus/modbusDevice.cpp"
+#include "../lib/modules/communication/wired/modbus/modbusRegBank.cpp"
+#include "../lib/modules/communication/wired/modbus/modbusSlave.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_HELPER_SERIAL_HARD
 #include "../lib/modules/communication/wired/serial/hard-serial.h"
 #include "../lib/modules/communication/wired/serial/hard-serial.cpp"
