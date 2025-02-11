@@ -126,6 +126,11 @@
 #include "../lib/modules/file/EEPROMLib.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_HELPER_EEPROM_LIB_ESP8266
+#include "../lib/modules/file/EEPROMLibESP8266.h"
+#include "../lib/modules/file/EEPROMLibESP8266.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_HELPER_SD_ARDUINO
 #include "../lib/modules/file/SDArduino.h"
 #include "../lib/modules/file/SDArduino.cpp"

@@ -132,12 +132,19 @@
 #include "../lib/sensors/mlx90614-sens.cpp"
 #endif
 
+#ifdef ENABLE_SENSOR_MQ
+#include "../lib/sensors/mq-sens.h"
+#include "../lib/sensors/mq-sens.cpp"
+#endif
+
 #ifdef ENABLE_SENSOR_PH
 #include "../lib/sensors/ph-sens.h"
 #include "../lib/sensors/ph-sens.cpp"
 #endif
 
 #ifdef ENABLE_SENSOR_PZEM004T
+#include "../lib/sensors/lib/PZEM004t/PZEM004Tc30_custom.h"
+#include "../lib/sensors/lib/PZEM004t/PZEM004Tc30_custom.cpp"
 #include "../lib/sensors/pzem004t-sens.h"
 #include "../lib/sensors/pzem004t-sens.cpp"
 #endif

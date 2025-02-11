@@ -26,6 +26,10 @@ void SoftSerial::begin(uint8_t rxPin, uint8_t txPin, long baud) {
     serialPtr->println();
 }
 
+void SoftSerial::end() {
+    serialPtr->end();
+}
+
 void SoftSerial::clearData() {
     dataSend = "";
 }

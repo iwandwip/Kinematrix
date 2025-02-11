@@ -1,12 +1,11 @@
 #pragma once
 
-#ifndef EEPROM_LIB_ARDUINO
-#define EEPROM_LIB_ARDUINO
+#ifndef EEPROM_LIB_ESP8266
+#define EEPROM_LIB_ESP8266
 
-#if defined(ESP32) || defined(ESP8266)
-#else
+#if defined(ESP8266)
 
-#pragma message("[COMPILED]: EEPROMLib.h")
+#pragma message("[COMPILED]: EEPROMLibESP8266.h")
 
 #include "Arduino.h"
 #include "EEPROM.h"
@@ -19,10 +18,10 @@ struct EEPROMHealthReport {
     unsigned long writeCountUsed;
 };
 
-class EEPROMLib {
+class EEPROMLibESP8266 {
 public:
-    EEPROMLib();
-    void init();
+    EEPROMLibESP8266();
+    void init(size_t size = 512);
     uint32_t getWriteCount() const;
     int writeCountFunc(int address, uint32_t value);
     int writeByte(int address, byte value);
@@ -41,12 +40,14 @@ public:
     long readLong(int address);
     int writeUlong(int address, unsigned long value);
     unsigned long readUlong(int address);
-    int writeFloat(int address, float value); //////
-    float readFloat(int address); //////
+
+    int writeFloat(int address, float value);
+    float readFloat(int address);
+
     int writeDouble(int address, double value);
     double readDouble(int address);
-    int writeString(int address, const String &value); //////
-    String readString(int address); //////
+    int writeString(int address, const String &value);
+    String readString(int address);
     int writeChar(int address, char value);
     char readChar(int address);
     int writeBool(int address, bool value);
@@ -101,4 +102,4 @@ private:
 };
 
 #endif
-#endif  // EEPROM_LIB_ARDUINO
+#endif  // EEPROM_LIB_ESP8266

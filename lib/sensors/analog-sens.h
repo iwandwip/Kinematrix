@@ -30,7 +30,7 @@ private:
 
 public:
     AnalogSens(uint8_t _pin, float _vref, int _adcRange,
-               void (*_onCustomData)(JsonVariant sensorRef, int analogValue, float voltage) = nullptr);
+               void (*_onCustomData)(JsonVariant value, int analogValue, float voltage) = nullptr);
     virtual ~AnalogSens();
     bool init() override;
     bool update() override;

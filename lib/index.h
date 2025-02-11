@@ -41,6 +41,7 @@
 #include "modules/driver/servo/HCPCA9685.h"
 
 #include "modules/file/EEPROMLib.h"
+#include "modules/file/EEPROMLibESP8266.h"
 #include "modules/file/SDArduino.h"
 
 #include "modules/io/input-module.h"
@@ -75,6 +76,7 @@
 #include "sensors/max30100lib-sens.h"
 #include "sensors/max31865-sens.h"
 #include "sensors/mlx90614-sens.h"
+#include "sensors/mq-sens.h"
 #include "sensors/ph-sens.h"
 #include "sensors/pzem004t-sens.h"
 #include "sensors/rfid-sens.h"

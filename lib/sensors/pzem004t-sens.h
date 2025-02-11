@@ -14,7 +14,7 @@
 
 #include "Arduino.h"
 #include "base/sensor-module.h"
-#include "PZEM004Tv30.h"
+#include "lib/PZEM004t/PZEM004Tc30_custom.h"
 #if defined(ESP32)
 #include "HardwareSerial.h"
 #else

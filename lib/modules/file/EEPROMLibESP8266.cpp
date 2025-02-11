@@ -1,110 +1,124 @@
-#include "EEPROMLib.h"
+#include "EEPROMLibESP8266.h"
 
-#if defined(ESP32) || defined(ESP8266)
-#else
+#if defined(ESP8266)
 
-EEPROMLib::EEPROMLib() = default;
+EEPROMLibESP8266::EEPROMLibESP8266() = default;
 
-void EEPROMLib::init() {
+void EEPROMLibESP8266::init(size_t size) {
+    EEPROM.begin(size);
     writeCountAddress = EEPROM.length() - 8;
     writeCount = readUint32((int) writeCountAddress);
 }
 
-uint32_t EEPROMLib::getWriteCount() const {
+uint32_t EEPROMLibESP8266::getWriteCount() const {
     return writeCount;
 }
 
-int EEPROMLib::writeCountFunc(int address, uint32_t value) {
+int EEPROMLibESP8266::writeCountFunc(int address, uint32_t value) {
     byte b0 = value & 0xFF;
     byte b1 = (value >> 8) & 0xFF;
     byte b2 = (value >> 16) & 0xFF;
     byte b3 = (value >> 24) & 0xFF;
-    EEPROM.write(address, b0);
-    EEPROM.write(address + 1, b1);
-    EEPROM.write(address + 2, b2);
-    EEPROM.write(address + 3, b3);
+    EEPROM.put(address, b0);
+    EEPROM.commit();
+    EEPROM.put(address + 1, b1);
+    EEPROM.commit();
+    EEPROM.put(address + 2, b2);
+    EEPROM.commit();
+    EEPROM.put(address + 3, b3);
+    EEPROM.commit();
     return address + sizeof(value);
 }
 
-int EEPROMLib::writeByte(int address, byte value) {
-    EEPROM.write(address, value);
+int EEPROMLibESP8266::writeByte(int address, byte value) {
+    EEPROM.put(address, value);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return address + sizeof(value);
 }
 
-byte EEPROMLib::readByte(int address) {
+byte EEPROMLibESP8266::readByte(int address) {
     return EEPROM.read(address);
 }
 
-int EEPROMLib::writeInt(int address, int value) {
+int EEPROMLibESP8266::writeInt(int address, int value) {
     byte lowByte = value & 0xFF;
     byte highByte = (value >> 8) & 0xFF;
-    EEPROM.write(address, lowByte);
+    EEPROM.put(address, lowByte);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
-    EEPROM.write(address + 1, highByte);
+    EEPROM.put(address + 1, highByte);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return address + sizeof(value);
 }
 
-int EEPROMLib::readInt(int address) {
+int EEPROMLibESP8266::readInt(int address) {
     byte lowByte = EEPROM.read(address);
     byte highByte = EEPROM.read(address + 1);
     return (highByte << 8) | lowByte;
 }
 
-int EEPROMLib::writeUint8(int address, uint8_t value) {
-    EEPROM.write(address, value);
+int EEPROMLibESP8266::writeUint8(int address, uint8_t value) {
+    EEPROM.put(address, value);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return address + sizeof(value);
 }
 
-uint8_t EEPROMLib::readUint8(int address) {
+uint8_t EEPROMLibESP8266::readUint8(int address) {
     return EEPROM.read(address);
 }
 
-int EEPROMLib::writeUint16(int address, uint16_t value) {
+int EEPROMLibESP8266::writeUint16(int address, uint16_t value) {
     byte low = value & 0xFF;
     byte high = (value >> 8) & 0xFF;
-    EEPROM.write(address, low);
+    EEPROM.put(address, low);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
-    EEPROM.write(address + 1, high);
+    EEPROM.put(address + 1, high);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return address + sizeof(value);
 }
 
-uint16_t EEPROMLib::readUint16(int address) {
+uint16_t EEPROMLibESP8266::readUint16(int address) {
     byte low = EEPROM.read(address);
     byte high = EEPROM.read(address + 1);
     return (high << 8) | low;
 }
 
-int EEPROMLib::writeUint32(int address, uint32_t value) {
+int EEPROMLibESP8266::writeUint32(int address, uint32_t value) {
     byte b0 = value & 0xFF;
     byte b1 = (value >> 8) & 0xFF;
     byte b2 = (value >> 16) & 0xFF;
     byte b3 = (value >> 24) & 0xFF;
-    EEPROM.write(address, b0);
+    EEPROM.put(address, b0);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
-    EEPROM.write(address + 1, b1);
+    EEPROM.put(address + 1, b1);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
-    EEPROM.write(address + 2, b2);
+    EEPROM.put(address + 2, b2);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
-    EEPROM.write(address + 3, b3);
+    EEPROM.put(address + 3, b3);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return address + sizeof(value);
 }
 
-uint32_t EEPROMLib::readUint32(int address) {
+uint32_t EEPROMLibESP8266::readUint32(int address) {
     byte b0 = EEPROM.read(address);
     byte b1 = EEPROM.read(address + 1);
     byte b2 = EEPROM.read(address + 2);
@@ -112,17 +126,18 @@ uint32_t EEPROMLib::readUint32(int address) {
     return ((uint32_t) b3 << 24) | ((uint32_t) b2 << 16) | ((uint32_t) b1 << 8) | b0;
 }
 
-int EEPROMLib::writeInt32(int address, int32_t value) {
+int EEPROMLibESP8266::writeInt32(int address, int32_t value) {
     byte *bytePointer = (byte *) &value;
     for (int i = 0; i < sizeof(value); i++) {
-        EEPROM.write(address + i, bytePointer[i]);
+        EEPROM.put(address + i, bytePointer[i]);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
     return address + sizeof(value);
 }
 
-int32_t EEPROMLib::readInt32(int address) {
+int32_t EEPROMLibESP8266::readInt32(int address) {
     int32_t value;
     byte *bytePointer = (byte *) &value;
     for (int i = 0; i < sizeof(value); i++) {
@@ -131,17 +146,18 @@ int32_t EEPROMLib::readInt32(int address) {
     return value;
 }
 
-int EEPROMLib::writeLong(int address, long value) {
+int EEPROMLibESP8266::writeLong(int address, long value) {
     byte *bytePointer = (byte *) &value;
     for (int i = 0; i < sizeof(value); i++) {
-        EEPROM.write(address + i, bytePointer[i]);
+        EEPROM.put(address + i, bytePointer[i]);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
     return address + sizeof(value);
 }
 
-long EEPROMLib::readLong(int address) {
+long EEPROMLibESP8266::readLong(int address) {
     long value;
     byte *bytePointer = (byte *) &value;
     for (int i = 0; i < sizeof(value); i++) {
@@ -150,17 +166,18 @@ long EEPROMLib::readLong(int address) {
     return value;
 }
 
-int EEPROMLib::writeUlong(int address, unsigned long value) {
+int EEPROMLibESP8266::writeUlong(int address, unsigned long value) {
     byte *bytePointer = (byte *) &value;
     for (int i = 0; i < sizeof(value); i++) {
-        EEPROM.write(address + i, bytePointer[i]);
+        EEPROM.put(address + i, bytePointer[i]);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
     return address + sizeof(value);
 }
 
-unsigned long EEPROMLib::readUlong(int address) {
+unsigned long EEPROMLibESP8266::readUlong(int address) {
     unsigned long value;
     byte *bytePointer = (byte *) &value;
     for (int i = 0; i < sizeof(value); i++) {
@@ -169,12 +186,13 @@ unsigned long EEPROMLib::readUlong(int address) {
     return value;
 }
 
-int EEPROMLib::writeFloat(int address, float value) {
+int EEPROMLibESP8266::writeFloat(int address, float value) {
     float existingValue = readFloat(address);
     if (existingValue != value) {
         byte *bytePointer = (byte *) &value;
         for (int i = 0; i < sizeof(value); i++) {
-            EEPROM.write(address + i, bytePointer[i]);
+            EEPROM.put(address + i, bytePointer[i]);
+            EEPROM.commit();
             writeCount++;
             writeCountFunc((int) writeCountAddress, writeCount);
         }
@@ -182,7 +200,7 @@ int EEPROMLib::writeFloat(int address, float value) {
     return address + sizeof(value);
 }
 
-float EEPROMLib::readFloat(int address) {
+float EEPROMLibESP8266::readFloat(int address) {
     float value;
     byte *bytePointer = (byte *) (void *) &value;
     for (int i = 0; i < sizeof(value); i++) {
@@ -191,17 +209,18 @@ float EEPROMLib::readFloat(int address) {
     return value;
 }
 
-int EEPROMLib::writeDouble(int address, double value) {
+int EEPROMLibESP8266::writeDouble(int address, double value) {
     byte *bytePointer = (byte *) (void *) &value;
     for (int i = 0; i < sizeof(value); i++) {
-        EEPROM.write(address + i, bytePointer[i]);
+        EEPROM.put(address + i, bytePointer[i]);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
     return address + sizeof(value);
 }
 
-double EEPROMLib::readDouble(int address) {
+double EEPROMLibESP8266::readDouble(int address) {
     double value;
     byte *bytePointer = (byte *) (void *) &value;
     for (int i = 0; i < sizeof(value); i++) {
@@ -210,45 +229,46 @@ double EEPROMLib::readDouble(int address) {
     return value;
 }
 
-int EEPROMLib::writeChar(int address, char value) {
-    EEPROM.write(address, value);
+int EEPROMLibESP8266::writeChar(int address, char value) {
+    EEPROM.put(address, value);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return address + sizeof(value);
 }
 
-char EEPROMLib::readChar(int address) {
+char EEPROMLibESP8266::readChar(int address) {
     return (char) EEPROM.read(address);
 }
 
-int EEPROMLib::writeBool(int address, bool value) {
-    EEPROM.write(address, value ? 1 : 0);
+int EEPROMLibESP8266::writeBool(int address, bool value) {
+    EEPROM.put(address, value ? 1 : 0);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return address + sizeof(value);
 }
 
-bool EEPROMLib::readBool(int address) {
+bool EEPROMLibESP8266::readBool(int address) {
     return EEPROM.read(address) == 1;
 }
 
-int EEPROMLib::writeString(int address, const String &value) {
-    String existingValue = readString(address);
-    if (existingValue != value) {
-        int length = value.length();
-        EEPROM.write(address, length);
+int EEPROMLibESP8266::writeString(int address, const String &value) {
+    int length = value.length();
+    EEPROM.put(address, length);
+    EEPROM.commit();
+    writeCount++;
+    writeCountFunc((int) writeCountAddress, writeCount);
+    for (int i = 0; i < length; i++) {
+        EEPROM.put(address + 1 + i, value[i]);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
-        for (int i = 0; i < length; i++) {
-            EEPROM.write(address + 1 + i, value[i]);
-            writeCount++;
-            writeCountFunc((int) writeCountAddress, writeCount);
-        }
     }
-    return address + 1 + value.length();
+    return address + 1 + length;
 }
 
-String EEPROMLib::readString(int address) {
+String EEPROMLibESP8266::readString(int address) {
     int length = EEPROM.read(address);
     char data[length + 1];
     for (int i = 0; i < length; i++) {
@@ -258,21 +278,23 @@ String EEPROMLib::readString(int address) {
     return String(data);
 }
 
-void EEPROMLib::reset() {
+void EEPROMLibESP8266::reset() {
     for (int i = 0; i < EEPROM.length(); i++) {
-        EEPROM.write(i, 0);
+        EEPROM.put(i, 0);
+        EEPROM.commit();
     }
 }
 
-bool EEPROMLib::verifyWrite(int address, byte value) {
-    EEPROM.write(address, value);
+bool EEPROMLibESP8266::verifyWrite(int address, byte value) {
+    EEPROM.put(address, value);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     delay(5); // Give EEPROM time to write
     return EEPROM.read(address) == value;
 }
 
-int EEPROMLib::getChecksum(int startAddress, int endAddress) {
+int EEPROMLibESP8266::getChecksum(int startAddress, int endAddress) {
     int checksum = 0;
     for (int i = startAddress; i <= endAddress; i++) {
         checksum ^= EEPROM.read(i);
@@ -280,7 +302,7 @@ int EEPROMLib::getChecksum(int startAddress, int endAddress) {
     return checksum;
 }
 
-byte EEPROMLib::calculateChecksum(byte *data, int length) {
+byte EEPROMLibESP8266::calculateChecksum(byte *data, int length) {
     byte checksum = 0;
     for (int i = 0; i < length; i++) {
         checksum ^= data[i];
@@ -288,21 +310,22 @@ byte EEPROMLib::calculateChecksum(byte *data, int length) {
     return checksum;
 }
 
-void EEPROMLib::backup(int startAddress, int endAddress, byte *buffer) {
+void EEPROMLibESP8266::backup(int startAddress, int endAddress, byte *buffer) {
     for (int i = startAddress; i <= endAddress; i++) {
         buffer[i - startAddress] = EEPROM.read(i);
     }
 }
 
-void EEPROMLib::restore(int startAddress, int endAddress, byte *buffer) {
+void EEPROMLibESP8266::restore(int startAddress, int endAddress, byte *buffer) {
     for (int i = startAddress; i <= endAddress; i++) {
-        EEPROM.write(i, buffer[i - startAddress]);
+        EEPROM.put(i, buffer[i - startAddress]);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
 }
 
-int EEPROMLib::getFirstEmptyAddress() {
+int EEPROMLibESP8266::getFirstEmptyAddress() {
     for (int i = 0; i < EEPROM.length(); i++) {
         if (isAddressEmpty(i)) {
             return i;
@@ -311,11 +334,11 @@ int EEPROMLib::getFirstEmptyAddress() {
     return -1; // No empty address found
 }
 
-bool EEPROMLib::isAddressEmpty(int address) {
+bool EEPROMLibESP8266::isAddressEmpty(int address) {
     return EEPROM.read(address) == 0xFF;
 }
 
-int EEPROMLib::getFreeSpace() {
+int EEPROMLibESP8266::getFreeSpace() {
     int freeSpace = 0;
     for (int i = 0; i < EEPROM.length(); i++) {
         if (isAddressEmpty(i)) {
@@ -325,15 +348,16 @@ int EEPROMLib::getFreeSpace() {
     return freeSpace;
 }
 
-void EEPROMLib::copyBlock(int sourceAddress, int destAddress, int length) {
+void EEPROMLibESP8266::copyBlock(int sourceAddress, int destAddress, int length) {
     for (int i = 0; i < length; i++) {
-        EEPROM.write(destAddress + i, EEPROM.read(sourceAddress + i));
+        EEPROM.put(destAddress + i, EEPROM.read(sourceAddress + i));
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
 }
 
-void EEPROMLib::moveBlock(int sourceAddress, int destAddress, int length) {
+void EEPROMLibESP8266::moveBlock(int sourceAddress, int destAddress, int length) {
     byte *buffer = new byte[length];
     // Read source block to buffer
     for (int i = 0; i < length; i++) {
@@ -341,28 +365,31 @@ void EEPROMLib::moveBlock(int sourceAddress, int destAddress, int length) {
     }
     // Write buffer to destination
     for (int i = 0; i < length; i++) {
-        EEPROM.write(destAddress + i, buffer[i]);
+        EEPROM.put(destAddress + i, buffer[i]);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
     // Erase source block
     for (int i = 0; i < length; i++) {
-        EEPROM.write(sourceAddress + i, 0xFF);
+        EEPROM.put(sourceAddress + i, 0xFF);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
     delete[] buffer;
 }
 
-void EEPROMLib::eraseBlock(int startAddress, int length) {
+void EEPROMLibESP8266::eraseBlock(int startAddress, int length) {
     for (int i = 0; i < length; i++) {
-        EEPROM.write(startAddress + i, 0xFF);
+        EEPROM.put(startAddress + i, 0xFF);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
 }
 
-void EEPROMLib::printMemoryMap() {
+void EEPROMLibESP8266::printMemoryMap() {
     Serial.println(F("EEPROM Memory Map:"));
     for (int i = 0; i < EEPROM.length(); i++) {
         if (i % 16 == 0) {
@@ -381,7 +408,7 @@ void EEPROMLib::printMemoryMap() {
     Serial.println();
 }
 
-bool EEPROMLib::performTest() {
+bool EEPROMLibESP8266::performTest() {
     // Test pattern
     byte testPattern = 0xAA;
     int testAddress = EEPROM.length() - 1;
@@ -392,26 +419,29 @@ bool EEPROMLib::performTest() {
     // Write test pattern
     if (!verifyWrite(testAddress, testPattern)) {
         // Restore original value
-        EEPROM.write(testAddress, originalValue);
+        EEPROM.put(testAddress, originalValue);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
         return false;
     }
 
     // Restore original value
-    EEPROM.write(testAddress, originalValue);
+    EEPROM.put(testAddress, originalValue);
+    EEPROM.commit();
     writeCount++;
     writeCountFunc((int) writeCountAddress, writeCount);
     return true;
 }
 
-int EEPROMLib::checkMemoryHealth() {
+int EEPROMLibESP8266::checkMemoryHealth() {
     int badSectors = 0;
     byte testValue = 0xAA;
     byte verifyValue = 0x55;
     for (int i = 0; i < EEPROM.length(); i++) {
         byte original = EEPROM.read(i);
-        EEPROM.write(i, testValue);
+        EEPROM.put(i, testValue);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
         delay(5);
@@ -419,7 +449,8 @@ int EEPROMLib::checkMemoryHealth() {
             badSectors++;
         }
         // Write verify pattern
-        EEPROM.write(i, verifyValue);
+        EEPROM.put(i, verifyValue);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
         delay(5);
@@ -427,14 +458,15 @@ int EEPROMLib::checkMemoryHealth() {
             badSectors++;
         }
         // Restore original value
-        EEPROM.write(i, original);
+        EEPROM.put(i, original);
+        EEPROM.commit();
         writeCount++;
         writeCountFunc((int) writeCountAddress, writeCount);
     }
     return badSectors;
 }
 
-float EEPROMLib::checkMemoryHealthPercentage() {
+float EEPROMLibESP8266::checkMemoryHealthPercentage() {
     int badSectors = 0;
     int totalTests = 0;
     byte testValue = 0xAA;
@@ -445,7 +477,8 @@ float EEPROMLib::checkMemoryHealthPercentage() {
         byte original = EEPROM.read(i);
 
         // Test Pattern 1
-        EEPROM.write(i, testValue);
+        EEPROM.put(i, testValue);
+        EEPROM.commit();
         delay(5);
         if (EEPROM.read(i) != testValue) {
             badSectors++;
@@ -453,19 +486,21 @@ float EEPROMLib::checkMemoryHealthPercentage() {
         totalTests++;
 
         // Test Pattern 2
-        EEPROM.write(i, verifyValue);
+        EEPROM.put(i, verifyValue);
+        EEPROM.commit();
         delay(5);
         if (EEPROM.read(i) != verifyValue) {
             badSectors++;
         }
         totalTests++;
-        EEPROM.write(i, original);
+        EEPROM.put(i, original);
+        EEPROM.commit();
     }
     float healthPercentage = ((float) (totalTests - badSectors) / totalTests) * 100.0;
     return healthPercentage;
 }
 
-EEPROMHealthReport EEPROMLib::totalHealthCheck(unsigned long writeCount) {
+EEPROMHealthReport EEPROMLibESP8266::totalHealthCheck(unsigned long writeCount) {
     EEPROMHealthReport report;
     int memorySize = EEPROM.length();
     int badSectors = 0;
@@ -489,7 +524,7 @@ EEPROMHealthReport EEPROMLib::totalHealthCheck(unsigned long writeCount) {
     return report;
 }
 
-EEPROMHealthReport EEPROMLib::totalHealthCheck() {
+EEPROMHealthReport EEPROMLibESP8266::totalHealthCheck() {
     EEPROMHealthReport report;
     int totalTests = 0;
     int badSectors = 0;
@@ -520,7 +555,8 @@ EEPROMHealthReport EEPROMLib::totalHealthCheck() {
         bool sectorFailed = false;
 
         // Test Pattern 1
-        EEPROM.write(i, testValue);
+        EEPROM.put(i, testValue);
+        EEPROM.commit();
         delay(5);
         byte readValue1 = EEPROM.read(i);
         if (readValue1 != testValue) {
@@ -530,7 +566,8 @@ EEPROMHealthReport EEPROMLib::totalHealthCheck() {
         totalTests++;
 
         // Test Pattern 2
-        EEPROM.write(i, verifyValue);
+        EEPROM.put(i, verifyValue);
+        EEPROM.commit();
         delay(5);
         byte readValue2 = EEPROM.read(i);
         if (readValue2 != verifyValue) {
@@ -555,7 +592,8 @@ EEPROMHealthReport EEPROMLib::totalHealthCheck() {
         }
 
         // Restore original value
-        EEPROM.write(i, original);
+        EEPROM.put(i, original);
+        EEPROM.commit();
 
         // Progress indicator setiap 10%
         unsigned long currentProgress = ((unsigned long) i * TOTAL_STEPS) / memorySize;
