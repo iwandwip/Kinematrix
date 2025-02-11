@@ -22,6 +22,7 @@ To use Kinematrix, include the required modules and sensors for your project:
 #define ENABLE_SENSOR_MODULE_UTILITY
 #define ENABLE_SENSOR_ULTRASONIC
 #define ENABLE_SENSOR_SOIL
+
 #include "Kinematrix.h"
 ```
 
@@ -34,6 +35,8 @@ This example demonstrates how to use ultrasonic and soil moisture sensors:
 #define ENABLE_SENSOR_MODULE_UTILITY
 #define ENABLE_SENSOR_ULTRASONIC
 #define ENABLE_SENSOR_SOIL
+
+#include "Kinematrix.h"
 
 SensorModule sensor;
 
@@ -56,6 +59,8 @@ This example demonstrates controlling an LED with a button:
 ```cpp
 #define ENABLE_MODULE_DIGITAL_INPUT
 #define ENABLE_MODULE_DIGITAL_OUTPUT
+
+#include "Kinematrix.h"
 
 DigitalIn button(2);
 DigitalOut led(3);
@@ -101,6 +106,7 @@ Include only the necessary packages for your project to keep your code optimized
 #define ENABLE_MODULE_LCD_MENU
 #define ENABLE_SENSOR_DHT
 #define ENABLE_SENSOR_ULTRASONIC
+
 #include "Kinematrix.h"
 ```
 Available Packages
@@ -109,6 +115,8 @@ Available Packages
 #define ENABLE_MODULE_I2C_EXPANDER
 #define ENABLE_MODULE_I2C_SCANNER
 #define ENABLE_MODULE_IO_EXPANDER
+
+#define ENABLE_MODULE_MODBUS
 
 #define ENABLE_MODULE_SERIAL_HARD
 #define ENABLE_MODULE_SERIAL_SOFT
@@ -134,6 +142,7 @@ Available Packages
 #define ENABLE_MODULE_SERVO_HCPA9685
 
 #define ENABLE_MODULE_EEPROM_LIB
+#define ENABLE_MODULE_EEPROM_LIB_ESP8266
 #define ENABLE_MODULE_SD_ARDUINO
 
 #define ENABLE_MODULE_DIGITAL_INPUT
@@ -171,6 +180,7 @@ Available Packages
 #define ENABLE_SENSOR_MAX30100LIB
 #define ENABLE_SENSOR_MAX31865
 #define ENABLE_SENSOR_MLX90614
+#define ENABLE_SENSOR_MQ
 #define ENABLE_SENSOR_PH
 #define ENABLE_SENSOR_PZEM004T
 #define ENABLE_SENSOR_RFID
