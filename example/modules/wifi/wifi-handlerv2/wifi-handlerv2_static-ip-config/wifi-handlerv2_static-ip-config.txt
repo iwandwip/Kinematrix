@@ -1,0 +1,164 @@
+/*
+ * StaticIPConfiguration.ino
+ * 
+ * This example demonstrates how to configure a static IP address for your ESP32
+ * using the WiFiHandlerV2 class. This is useful for server applications
+ * where you need a consistent IP address to access your device.
+ */
+
+#include "wifi-handlerv2.h"
+
+// WiFi credentials
+const char* ssid = "YourWiFiSSID";
+const char* password = "YourWiFiPassword";
+
+// Static IP configuration
+IPAddress staticIP(192, 168, 1, 200);     // Choose an available IP in your network
+IPAddress gateway(192, 168, 1, 1);        // Your router IP address
+IPAddress subnet(255, 255, 255, 0);       // Subnet mask
+IPAddress dns1(8, 8, 8, 8);               // Primary DNS (Google DNS)
+IPAddress dns2(8, 8, 4, 4);               // Secondary DNS (Google DNS alternate)
+
+// Create WiFiHandler instance
+WiFiHandlerV2 wifi;
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  
+  Serial.println("Starting Static IP Configuration example");
+  
+  // Set a hostname for easier identification on your network
+  String chipId = String((uint32_t)(ESP.getEfuseMac() >> 32), HEX);
+  String hostname = "esp32-static-" + chipId;
+  wifi.setHostname(hostname.c_str());
+  Serial.print("Setting hostname: ");
+  Serial.println(hostname);
+  
+  // Configure static IP
+  Serial.println("Configuring static IP...");
+  Serial.print("IP: ");
+  Serial.println(staticIP);
+  Serial.print("Gateway: ");
+  Serial.println(gateway);
+  Serial.print("Subnet: ");
+  Serial.println(subnet);
+  Serial.print("DNS: ");
+  Serial.println(dns1);
+  
+  if (wifi.setStaticIP(staticIP, gateway, subnet, dns1)) {
+    Serial.println("Static IP configuration successful");
+  } else {
+    Serial.println("Static IP configuration failed");
+  }
+  
+  // Connect to WiFi
+  Serial.print("Connecting to WiFi network: ");
+  Serial.println(ssid);
+  
+  if (wifi.connect(ssid, password)) {
+    Serial.println("Connected successfully with static IP!");
+    printNetworkInfo();
+  } else {
+    Serial.println("Connection failed!");
+    Serial.println("Trying to connect with DHCP fallback...");
+    
+    // Try to connect with DHCP as fallback
+    wifi.setDHCP();
+    if (wifi.connect(ssid, password)) {
+      Serial.println("Connected with DHCP (fallback mode)!");
+      printNetworkInfo();
+    } else {
+      Serial.println("All connection attempts failed!");
+    }
+  }
+}
+
+void loop() {
+  // Run wifi handler loop to maintain connection
+  wifi.loop();
+  
+  // Check if we're still connected
+  if (wifi.isConnected()) {
+    // Print connection status every 30 seconds
+    static unsigned long lastCheck = 0;
+    if (millis() - lastCheck > 30000) {
+      Serial.println("WiFi still connected with configured IP");
+      Serial.print("Current IP: ");
+      Serial.println(wifi.getIP());
+      lastCheck = millis();
+    }
+  } else {
+    Serial.println("WiFi connection lost. Attempting to reconnect...");
+    if (wifi.reconnect()) {
+      Serial.println("Reconnected successfully!");
+      printNetworkInfo();
+    } else {
+      Serial.println("Reconnection failed!");
+      // Wait a bit before trying again
+      delay(5000);
+    }
+  }
+  
+  // Simulate a web server or other service running at the static IP
+  simulateServer();
+  
+  // Other loop code here
+  delay(1000);
+}
+
+void printNetworkInfo() {
+  Serial.println("===== Network Information =====");
+  Serial.print("SSID: ");
+  Serial.println(wifi.getSSID());
+  
+  Serial.print("IP Address: ");
+  Serial.println(wifi.getIP());
+  
+  // Check if we got our static IP
+  if (wifi.getIP() == staticIP) {
+    Serial.println("Successfully using configured static IP!");
+  } else {
+    Serial.println("Note: Using DHCP-assigned IP instead of configured static IP");
+  }
+  
+  Serial.print("MAC Address: ");
+  Serial.println(wifi.getMacAddress());
+  
+  Serial.print("Hostname: ");
+  Serial.println(WiFi.getHostname());
+  
+  Serial.print("Gateway IP: ");
+  Serial.println(WiFi.gatewayIP());
+  
+  Serial.print("Subnet Mask: ");
+  Serial.println(WiFi.subnetMask());
+  
+  Serial.print("DNS IP: ");
+  Serial.println(WiFi.dnsIP());
+  
+  Serial.print("Signal Strength (RSSI): ");
+  Serial.print(wifi.getSignalStrength());
+  Serial.println(" dBm");
+  
+  Serial.print("Signal Quality: ");
+  Serial.print(wifi.getSignalQuality());
+  Serial.println("%");
+  Serial.println("==============================");
+}
+
+void simulateServer() {
+  // This is a simple simulation of a server running at the static IP
+  // In a real application, you might run a web server, MQTT client, etc.
+  
+  static unsigned long lastServerActivity = 0;
+  if (millis() - lastServerActivity > 10000) {
+    Serial.println("\n----- Server Simulation -----");
+    Serial.print("Server running at: http://");
+    Serial.println(wifi.getIP());
+    Serial.println("Ready to accept connections");
+    Serial.println("-----------------------------");
+    
+    lastServerActivity = millis();
+  }
+}

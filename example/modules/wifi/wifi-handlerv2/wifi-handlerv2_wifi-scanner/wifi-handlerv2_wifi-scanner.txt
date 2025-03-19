@@ -1,0 +1,134 @@
+/*
+ * WiFiNetworkScanner.ino
+ * 
+ * This example demonstrates how to use the WiFiHandlerV2 class to scan
+ * for available WiFi networks and display their details. This can be
+ * useful for network diagnostics or for creating a web-based WiFi setup portal.
+ */
+
+#include "wifi-handlerv2.h"
+
+// Create WiFiHandler instance
+WiFiHandlerV2 wifi;
+
+// Scanning interval in milliseconds
+const unsigned long SCAN_INTERVAL = 30000; // 30 seconds
+
+// Last scan time
+unsigned long lastScanTime = 0;
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  
+  Serial.println("Starting WiFi Network Scanner example");
+  
+  // Perform initial scan
+  scanNetworks();
+}
+
+void loop() {
+  // Run wifi handler loop
+  wifi.loop();
+  
+  // Scan for networks periodically
+  if (millis() - lastScanTime > SCAN_INTERVAL) {
+    scanNetworks();
+    lastScanTime = millis();
+  }
+  
+  // Other loop code here
+  delay(1000);
+}
+
+void scanNetworks() {
+  Serial.println("\nScanning for WiFi networks...");
+  
+  int numNetworks = wifi.scanNetworks();
+  
+  if (numNetworks == 0) {
+    Serial.println("No networks found!");
+  } else {
+    Serial.print("Found ");
+    Serial.print(numNetworks);
+    Serial.println(" networks:");
+    
+    Serial.println("-------------------------------------------------------------");
+    Serial.println("| No. | SSID                        | RSSI  | Quality | Security |");
+    Serial.println("-------------------------------------------------------------");
+    
+    for (int i = 0; i < numNetworks; i++) {
+      // Get network details
+      String ssid = wifi.getScannedSSID(i);
+      int rssi = wifi.getScannedRSSI(i);
+      String encryption = wifi.getScannedEncryption(i);
+      
+      // Calculate signal quality percentage
+      int quality = 0;
+      if (rssi >= -50) {
+        quality = 100;
+      } else if (rssi <= -100) {
+        quality = 0;
+      } else {
+        quality = 2 * (rssi + 100);
+      }
+      
+      // Print in table format with proper padding
+      Serial.print("| ");
+      Serial.print(i + 1);
+      if (i + 1 < 10) Serial.print("  ");
+      else Serial.print(" ");
+      
+      Serial.print("| ");
+      Serial.print(ssid);
+      // Pad SSID with spaces to align the table (truncate if too long)
+      int padding = 28 - ssid.length();
+      if (padding < 0) {
+        // SSID is too long, truncate it
+        Serial.print("... ");
+      } else {
+        // Pad with spaces
+        for (int j = 0; j < padding; j++) {
+          Serial.print(" ");
+        }
+      }
+      
+      Serial.print("| ");
+      Serial.print(rssi);
+      Serial.print(" dBm");
+      if (rssi > -100) Serial.print(" ");
+      if (rssi > -10) Serial.print(" ");
+      
+      Serial.print("| ");
+      Serial.print(quality);
+      Serial.print("%");
+      if (quality < 100) Serial.print(" ");
+      if (quality < 10) Serial.print(" ");
+      
+      Serial.print("| ");
+      Serial.print(encryption);
+      for (int j = 0; j < 9 - encryption.length(); j++) {
+        Serial.print(" ");
+      }
+      Serial.println("|");
+    }
+    Serial.println("-------------------------------------------------------------");
+    
+    // Print channel congestion analysis
+    Serial.println("\nWiFi Channel Analysis:");
+    analyzeWiFiChannels(numNetworks);
+  }
+}
+
+void analyzeWiFiChannels(int numNetworks) {
+  // This is a simplified channel analysis
+  // In a real application, you would need to extract channel information
+  // from each network and calculate overlaps
+  
+  Serial.println("Note: For optimal WiFi performance, choose a less congested channel.");
+  Serial.println("Common recommendations:");
+  Serial.println("- For 2.4GHz: Use channel 1, 6, or 11 to avoid overlaps");
+  Serial.println("- For 5GHz: Higher channels generally have less interference");
+  
+  Serial.println("\nTo change your router's channel, log into your router's admin interface.");
+}

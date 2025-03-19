@@ -35,6 +35,11 @@
 #include "../lib/modules/communication/wired/modbus/modbusSlave.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_SERIAL_ENHANCED
+#include "../lib/modules/communication/wired/serial/enhanced-serial.h"
+#include "../lib/modules/communication/wired/serial/enhanced-serial.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_SERIAL_HARD
 #include "../lib/modules/communication/wired/serial/hard-serial.h"
 #include "../lib/modules/communication/wired/serial/hard-serial.cpp"
@@ -87,9 +92,39 @@
 #include "../lib/modules/wifi/datetime-ntp.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_DATETIME_NTP_V2
+#include "../lib/modules/wifi/datetime-ntpv2.h"
+#include "../lib/modules/wifi/datetime-ntpv2.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_GOOGLE_SHEETS
+#include "../lib/modules/wifi/google-sheets.h"
+#include "../lib/modules/wifi/google-sheets.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_FIREBASE_HANDLER
-#include "../lib/modules/wifi/firebase-handler.h"
-#include "../lib/modules/wifi/firebase-handler.cpp"
+#include "../lib/modules/wifi/firebase/firebasev1/firebase-handler.h"
+#include "../lib/modules/wifi/firebase/firebasev1/firebase-handler.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_FIRESTORE_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-firestorev2.h"
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-firestorev2.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_MESSAGING_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-messagingv2.h"
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-messagingv2.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_RTDB_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-rtdbv2.h"
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-rtdbv2.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_STORAGE_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-storagev2.h"
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-storagev2.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_TELEGRAM_BOT
@@ -107,11 +142,26 @@
 #include "../lib/modules/wifi/wifi-handler.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_WIFI_HANDLER_2
+#include "../lib/modules/wifi/wifi-handlerv2.h"
+#include "../lib/modules/wifi/wifi-handlerv2.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_LCD_MENU
 #include "../lib/modules/display/LiquidCrystal_I2C.h"
 #include "../lib/modules/display/LiquidCrystal_I2C.cpp"
 #include "../lib/modules/display/lcd-menu.h"
 #include "../lib/modules/display/lcd-menu.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_OLED_MENU
+#include "../lib/modules/display/oled-menu.h"
+#include "../lib/modules/display/oled-menu.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SH1106_MENU
+#include "../lib/modules/display/sh1106-menu.h"
+#include "../lib/modules/display/sh1106-menu.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_MOTOR_DRIVER

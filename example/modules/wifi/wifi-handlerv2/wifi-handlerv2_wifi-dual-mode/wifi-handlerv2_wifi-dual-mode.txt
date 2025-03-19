@@ -1,0 +1,128 @@
+/*
+ * WiFiDualMode.ino
+ * 
+ * This example demonstrates how to use the ESP32 in dual mode,
+ * operating as both a WiFi station (client) and an access point simultaneously.
+ * This is useful for creating a device that can connect to your home WiFi
+ * while also providing its own network for direct connection.
+ */
+
+#include "wifi-handlerv2.h"
+
+// Station Mode (client) credentials
+const char* sta_ssid = "YourHomeWiFi";
+const char* sta_password = "YourHomePassword";
+
+// Access Point Mode configuration
+const char* ap_ssid = "ESP32_DualMode";
+const char* ap_password = "setup1234";  // Must be at least 8 characters
+
+// Create WiFiHandler instance
+WiFiHandlerV2 wifi;
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  
+  Serial.println("Starting WiFi Dual Mode example");
+  
+  // Set custom hostname
+  wifi.setHostname("esp32-dual");
+  
+  // Start in dual mode
+  Serial.println("Starting in dual mode (Station + AP)...");
+  if (wifi.startDualMode(sta_ssid, sta_password, ap_ssid, ap_password)) {
+    Serial.println("Dual mode started!");
+    
+    // Check which modes are active
+    if (wifi.isConnected()) {
+      Serial.println("Successfully connected to home WiFi!");
+      printStationInfo();
+    } else {
+      Serial.println("Failed to connect to home WiFi, but AP is still active.");
+    }
+    
+    if (wifi.isAPActive()) {
+      printAPInfo();
+    }
+  } else {
+    Serial.println("Failed to start dual mode!");
+  }
+}
+
+void loop() {
+  // Run wifi handler loop to maintain connections
+  wifi.loop();
+  
+  // Monitor both network modes
+  static unsigned long lastCheck = 0;
+  if (millis() - lastCheck > 10000) {
+    Serial.println("\n===== Dual Mode Status =====");
+    
+    // Check station connection
+    if (wifi.isConnected()) {
+      Serial.println("Station Mode: Connected");
+      Serial.print("IP: ");
+      Serial.println(wifi.getIP());
+      Serial.print("Signal Quality: ");
+      Serial.print(wifi.getSignalQuality());
+      Serial.println("%");
+    } else {
+      Serial.println("Station Mode: Disconnected");
+      // Try to reconnect if needed
+      Serial.println("Attempting to reconnect to home WiFi...");
+      wifi.reconnect();
+    }
+    
+    // Check AP mode
+    if (wifi.isAPActive()) {
+      Serial.println("Access Point: Active");
+      Serial.print("AP IP: ");
+      Serial.println(wifi.getAPIP());
+      Serial.print("Connected clients: ");
+      Serial.println(WiFi.softAPgetStationNum());
+    } else {
+      Serial.println("Access Point: Inactive");
+    }
+    
+    lastCheck = millis();
+  }
+  
+  // Other loop code here
+  delay(1000);
+}
+
+void printStationInfo() {
+  Serial.println("===== Station Mode Information =====");
+  Serial.print("Connected to: ");
+  Serial.println(wifi.getSSID());
+  
+  Serial.print("IP Address: ");
+  Serial.println(wifi.getIP());
+  
+  Serial.print("MAC Address: ");
+  Serial.println(wifi.getMacAddress());
+  
+  Serial.print("Signal Strength (RSSI): ");
+  Serial.print(wifi.getSignalStrength());
+  Serial.println(" dBm");
+  
+  Serial.print("Signal Quality: ");
+  Serial.print(wifi.getSignalQuality());
+  Serial.println("%");
+  Serial.println("===================================");
+}
+
+void printAPInfo() {
+  Serial.println("===== Access Point Information =====");
+  Serial.print("SSID: ");
+  Serial.println(ap_ssid);
+  
+  Serial.print("AP IP Address: ");
+  Serial.println(wifi.getAPIP());
+  
+  Serial.println("For configuration, connect to the ESP32 WiFi network");
+  Serial.print("and navigate to http://");
+  Serial.println(wifi.getAPIP());
+  Serial.println("=====================================");
+}

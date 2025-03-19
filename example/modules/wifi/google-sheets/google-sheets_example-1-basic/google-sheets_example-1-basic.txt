@@ -1,0 +1,81 @@
+#include <Arduino.h>
+#if defined(ESP32)
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
+
+#include "google-sheets.h"
+
+// WiFi credentials
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// Google Sheets credentials - replace with your own
+#define PROJECT_ID "YOUR_PROJECT_ID"
+#define CLIENT_EMAIL "YOUR_CLIENT_EMAIL@your-project.iam.gserviceaccount.com"
+const char PRIVATE_KEY[] PROGMEM = "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n";
+
+// Create an instance of GoogleSheetClient
+GoogleSheetClient sheets;
+
+// Callback function for token status (optional but helpful for debugging)
+void tokenStatusCallback(TokenInfo info) {
+  if (info.status == token_status_error) {
+    Serial.printf("Token error: %s\n", GSheet.getTokenError(info).c_str());
+  }
+  else {
+    Serial.printf("Token status: %s\n", GSheet.getTokenStatus(info).c_str());
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Basic Google Sheets Connection Example");
+  
+  // Connect to WiFi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi...");
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(300);
+  }
+  
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  
+  // Initialize Google Sheets client
+  if (sheets.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY)) {
+    Serial.println("Google Sheets client initialized successfully!");
+  } else {
+    Serial.println("Failed to initialize Google Sheets client");
+  }
+  
+  // Set token callback for monitoring auth status
+  sheets.setTokenCallback(tokenStatusCallback);
+  
+  // Set token refresh time (optional)
+  sheets.setPrerefreshSeconds(300); // Refresh token 5 minutes before expiration
+}
+
+void loop() {
+  // Process Google Sheets client
+  sheets.loop();
+  
+  // Check if client is ready
+  if (sheets.ready()) {
+    static bool message_printed = false;
+    
+    if (!message_printed) {
+      Serial.println("Google Sheets client is ready and authenticated!");
+      Serial.println("Authentication successful - you can now perform operations with Google Sheets");
+      message_printed = true;
+    }
+  }
+  
+  // Wait a bit before next check
+  delay(5000);
+}

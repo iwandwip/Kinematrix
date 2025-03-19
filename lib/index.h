@@ -17,6 +17,7 @@
 
 #include "modules/communication/wired/modbus/modbus.h"
 
+#include "modules/communication/wired/serial/enhanced-serial.h"
 #include "modules/communication/wired/serial/hard-serial.h"
 #include "modules/communication/wired/serial/soft-serial.h"
 #include "modules/communication/wired/serial/swap-serial.h"
@@ -30,12 +31,21 @@
 #include "modules/control/KNN.h"
 
 #include "modules/wifi/datetime-ntp.h"
-#include "modules/wifi/firebase-handler.h"
+#include "modules/wifi/datetime-ntpv2.h"
+#include "modules/wifi/google-sheets.h"
+#include "modules/wifi/firebase/firebasev1/firebase-handler.h"
+#include "modules/wifi/firebase/firebasev2/firebase-firestorev2.h"
+#include "modules/wifi/firebase/firebasev2/firebase-messagingv2.h"
+#include "modules/wifi/firebase/firebasev2/firebase-rtdbv2.h"
+#include "modules/wifi/firebase/firebasev2/firebase-storagev2.h"
 #include "modules/wifi/telegram-bot.h"
 #include "modules/wifi/whatsapp-bot.h"
 #include "modules/wifi/wifi-handler.h"
+#include "modules/wifi/wifi-handlerv2.h"
 
 #include "modules/display/lcd-menu.h"
+#include "modules/display/oled-menu.h"
+#include "modules/display/sh1106-menu.h"
 
 #include "modules/driver/motor/motor-driver.h"
 #include "modules/driver/servo/HCPCA9685.h"
@@ -65,6 +75,7 @@
 #include "sensors/ds18b20-sens.h"
 #include "sensors/dust-sens.h"
 #include "sensors/flowmeter-sens.h"
+#include "sensors/flowmeterv2-sens.h"
 #include "sensors/gps-sens.h"
 #include "sensors/gm67-sens.h"
 #include "sensors/hx711-sens.h"

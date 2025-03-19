@@ -1,0 +1,249 @@
+#include <Arduino.h>
+#if defined(ESP32)
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
+
+#include "google-sheets.h"
+
+// WiFi credentials
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// Google Sheets credentials - replace with your own
+#define PROJECT_ID "YOUR_PROJECT_ID"
+#define CLIENT_EMAIL "YOUR_CLIENT_EMAIL@your-project.iam.gserviceaccount.com"
+const char PRIVATE_KEY[] PROGMEM = "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n";
+
+// Your existing spreadsheet ID
+#define SPREADSHEET_ID "YOUR_SPREADSHEET_ID"
+
+GoogleSheetClient sheets;
+bool operationComplete = false;
+int currentOperation = 0;
+unsigned long lastOperationTime = 0;
+const unsigned long operationDelay = 3000; // 3 seconds between operations
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Google Sheets: Batch Operations Example");
+  
+  // Connect to WiFi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi...");
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(300);
+  }
+  
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  
+  // Initialize Google Sheets client
+  if (sheets.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY)) {
+    Serial.println("Google Sheets client initialized successfully!");
+  } else {
+    Serial.println("Failed to initialize Google Sheets client");
+    while (1) delay(1000); // Halt if initialization fails
+  }
+}
+
+void loop() {
+  // Process Google Sheets client
+  sheets.loop();
+  
+  // Check if client is ready and it's time for the next operation
+  if (sheets.ready() && !operationComplete && (millis() - lastOperationTime > operationDelay)) {
+    lastOperationTime = millis();
+    
+    switch (currentOperation) {
+      case 0:
+        batchUpdateData();
+        currentOperation++;
+        break;
+      
+      case 1:
+        batchGetData();
+        currentOperation++;
+        break;
+      
+      case 2:
+        batchClearData();
+        operationComplete = true;
+        break;
+    }
+  }
+  
+  // Just wait if operations are complete
+  if (operationComplete) {
+    Serial.println("\nAll batch operations completed successfully!");
+    Serial.println("The example will restart all operations in 1 minute...");
+    delay(60000); // Wait 1 minute
+    
+    // Reset to start over
+    operationComplete = false;
+    currentOperation = 0;
+    Serial.println("\n--- Restarting batch operations ---\n");
+  }
+}
+
+void batchUpdateData() {
+  Serial.println("\n--- BATCH UPDATE OPERATION ---");
+  Serial.println("Updating multiple ranges in a single request");
+  
+  // Create a batch update array with multiple ranges
+  FirebaseJsonArray valueRangeArr;
+  
+  // First range - A1:B5 with timestamp data
+  FirebaseJson valueRange1;
+  valueRange1.add("range", "Data!A1:B5");
+  valueRange1.add("majorDimension", "ROWS");
+  
+  // Headers
+  valueRange1.set("values/[0]/[0]", "Timestamp");
+  valueRange1.set("values/[0]/[1]", "Date");
+  
+  // Data rows with timestamps
+  unsigned long timestamp = millis();
+  
+  for (int i = 1; i < 5; i++) {
+    valueRange1.set("values/[" + String(i) + "]/[0]", String(timestamp + i*1000));
+    valueRange1.set("values/[" + String(i) + "]/[1]", getFormattedDate(i));
+  }
+  
+  // Second range - D1:F5 with sensor data
+  FirebaseJson valueRange2;
+  valueRange2.add("range", "Data!D1:F5");
+  valueRange2.add("majorDimension", "ROWS");
+  
+  // Headers
+  valueRange2.set("values/[0]/[0]", "Temperature");
+  valueRange2.set("values/[0]/[1]", "Humidity");
+  valueRange2.set("values/[0]/[2]", "Pressure");
+  
+  // Data rows with random sensor values
+  for (int i = 1; i < 5; i++) {
+    valueRange2.set("values/[" + String(i) + "]/[0]", String(20.0 + random(10, 100) / 10.0)); // Temperature 21.0-29.9
+    valueRange2.set("values/[" + String(i) + "]/[1]", String(40.0 + random(0, 50) / 10.0));   // Humidity 40.0-44.9
+    valueRange2.set("values/[" + String(i) + "]/[2]", String(1000 + random(0, 50)));          // Pressure 1000-1049
+  }
+  
+  // Add both ranges to the array
+  valueRangeArr.add(valueRange1);
+  valueRangeArr.add(valueRange2);
+  
+  // Execute batch update
+  bool success = sheets.batchUpdateValues(SPREADSHEET_ID, &valueRangeArr);
+  
+  if (success) {
+    Serial.println("✓ Batch update successful!");
+  } else {
+    Serial.println("✗ Error in batch update: " + sheets.errorReason());
+  }
+}
+
+void batchGetData() {
+  Serial.println("\n--- BATCH GET OPERATION ---");
+  Serial.println("Reading multiple ranges in a single request");
+  
+  // Get values from multiple ranges in a single request
+  String ranges = "Data!A1:B5,Data!D1:F5";
+  String result = sheets.batchGetValues(SPREADSHEET_ID, ranges);
+  
+  if (!result.startsWith("Error:")) {
+    Serial.println("✓ Batch get successful!");
+    
+    // Parse and display the batch results
+    FirebaseJson json;
+    json.setJsonData(result);
+    
+    FirebaseJsonData valueRanges;
+    json.get(valueRanges, "valueRanges");
+    
+    if (valueRanges.success) {
+      Serial.println("Data from multiple ranges:");
+      
+      // Parse further to show individual ranges
+      FirebaseJson rangesJson;
+      rangesJson.setJsonData(valueRanges.stringValue);
+      
+      // Display first range
+      FirebaseJsonData range0;
+      rangesJson.get(range0, "[0]/values");
+      if (range0.success) {
+        Serial.println("\nFirst Range (Timestamps):");
+        Serial.println(range0.stringValue);
+      }
+      
+      // Display second range
+      FirebaseJsonData range1;
+      rangesJson.get(range1, "[1]/values");
+      if (range1.success) {
+        Serial.println("\nSecond Range (Sensor Data):");
+        Serial.println(range1.stringValue);
+      }
+    }
+  } else {
+    Serial.println("✗ Error in batch get: " + result);
+  }
+}
+
+void batchClearData() {
+  Serial.println("\n--- BATCH CLEAR OPERATION ---");
+  Serial.println("Clearing multiple ranges in a single request");
+  
+  // First, let's add some test data in a range we'll clear
+  FirebaseJson testRange;
+  testRange.add("range", "Data!H1:I3");
+  testRange.add("majorDimension", "ROWS");
+  testRange.set("values/[0]/[0]", "TO BE");
+  testRange.set("values/[0]/[1]", "CLEARED");
+  testRange.set("values/[1]/[0]", "THIS WILL");
+  testRange.set("values/[1]/[1]", "DISAPPEAR");
+  testRange.set("values/[2]/[0]", "BATCH");
+  testRange.set("values/[2]/[1]", "CLEAR");
+  
+  // Add test data first
+  sheets.updateValues(SPREADSHEET_ID, "Data!H1:I3", &testRange);
+  Serial.println("Added test data that will be cleared...");
+  delay(1000);
+  
+  // Now clear multiple ranges in batch
+  String rangesToClear = "Data!H1:I3,Data!A7:B8";
+  bool success = sheets.batchClearValues(SPREADSHEET_ID, rangesToClear);
+  
+  if (success) {
+    Serial.println("✓ Batch clear successful!");
+    
+    // Verify by reading the cleared areas
+    String clearedData = sheets.getValues(SPREADSHEET_ID, "Data!H1:I3");
+    Serial.println("Verification after clearing H1:I3:");
+    
+    // Check if the data is actually cleared
+    FirebaseJson json;
+    json.setJsonData(clearedData);
+    
+    FirebaseJsonData values;
+    json.get(values, "values");
+    
+    if (!values.success) {
+      Serial.println("Data successfully cleared - no values returned!");
+    } else {
+      Serial.println("Warning: Some data might still exist in the cleared range");
+    }
+  } else {
+    Serial.println("✗ Error in batch clear: " + sheets.errorReason());
+  }
+}
+
+// Helper function to get a formatted date string
+String getFormattedDate(int dayOffset) {
+  // In a real application, you would use NTP to get real time
+  // For this example, we'll just create a formatted date string
+  return String("2023-03-") + String(10 + dayOffset) + " " + 
+         String(random(10, 24)) + ":" + String(random(10, 60)) + ":" + String(random(10, 60));
+}

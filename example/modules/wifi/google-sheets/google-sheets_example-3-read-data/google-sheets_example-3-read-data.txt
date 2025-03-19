@@ -1,0 +1,208 @@
+#include <Arduino.h>
+#if defined(ESP32)
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
+
+#include "google-sheets.h"
+
+// WiFi credentials
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// Google Sheets credentials - replace with your own
+#define PROJECT_ID "YOUR_PROJECT_ID"
+#define CLIENT_EMAIL "YOUR_CLIENT_EMAIL@your-project.iam.gserviceaccount.com"
+const char PRIVATE_KEY[] PROGMEM = "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n";
+
+// Your existing spreadsheet ID - get this from the previous example or your Google Drive
+#define SPREADSHEET_ID "YOUR_SPREADSHEET_ID"
+
+GoogleSheetClient sheets;
+bool operationComplete = false;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Google Sheets: Read Data Example");
+  
+  // Connect to WiFi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi...");
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(300);
+  }
+  
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  
+  // Initialize Google Sheets client
+  if (sheets.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY)) {
+    Serial.println("Google Sheets client initialized successfully!");
+  } else {
+    Serial.println("Failed to initialize Google Sheets client");
+    while (1) delay(1000); // Halt if initialization fails
+  }
+}
+
+void loop() {
+  // Process Google Sheets client
+  sheets.loop();
+  
+  // Check if client is ready and we haven't completed our operations
+  if (sheets.ready() && !operationComplete) {
+    // Read data from the spreadsheet
+    readSpreadsheetData();
+    operationComplete = true;
+    
+    Serial.println("\nRead operations completed.");
+    Serial.println("The program will read data again in 30 seconds...");
+  }
+  
+  // Read data periodically
+  if (operationComplete) {
+    static unsigned long lastReadTime = 0;
+    if (millis() - lastReadTime > 30000) { // Read every 30 seconds
+      lastReadTime = millis();
+      readSpreadsheetData();
+    }
+  }
+}
+
+void readSpreadsheetData() {
+  Serial.println("\n--- Reading data from the spreadsheet ---");
+  
+  // Method 1: Read a single range
+  readSingleRange();
+  
+  delay(1000); // Small delay between operations
+  
+  // Method 2: Read multiple ranges in one request (batch)
+  readMultipleRanges();
+  
+  delay(1000); // Small delay between operations
+  
+  // Method 3: Get spreadsheet information
+  getSpreadsheetInfo();
+}
+
+void readSingleRange() {
+  Serial.println("\n1. Reading a single range (Data!A1:D5):");
+  
+  String values = sheets.getValues(SPREADSHEET_ID, "Data!A1:D5");
+  
+  if (!values.startsWith("Error:")) {
+    Serial.println("Data read successfully!");
+    
+    // Parse and display the data in a more readable format
+    parseAndDisplayData(values);
+  } else {
+    Serial.println("Error reading data: " + values);
+  }
+}
+
+void readMultipleRanges() {
+  Serial.println("\n2. Reading multiple ranges in one request:");
+  
+  // Define multiple ranges to read
+  String ranges = "Data!A1:B5,Data!D1:D5";
+  String values = sheets.batchGetValues(SPREADSHEET_ID, ranges);
+  
+  if (!values.startsWith("Error:")) {
+    Serial.println("Multiple ranges read successfully!");
+    
+    // Parse and process the batch data
+    FirebaseJson json;
+    json.setJsonData(values);
+    
+    FirebaseJsonData valueRanges;
+    json.get(valueRanges, "valueRanges");
+    
+    if (valueRanges.success) {
+      Serial.println("Batch data:");
+      Serial.println(valueRanges.stringValue);
+      
+      // You could further parse this to extract individual ranges
+      // For this example, we'll just show the raw batch data
+    }
+  } else {
+    Serial.println("Error reading multiple ranges: " + values);
+  }
+}
+
+void getSpreadsheetInfo() {
+  Serial.println("\n3. Getting spreadsheet information:");
+  
+  String info = sheets.getSpreadsheet(SPREADSHEET_ID);
+  
+  if (!info.startsWith("Error:")) {
+    Serial.println("Spreadsheet info retrieved successfully!");
+    
+    // Extract and display basic info
+    FirebaseJson json;
+    json.setJsonData(info);
+    
+    // Get spreadsheet title
+    FirebaseJsonData titleResult;
+    json.get(titleResult, "properties/title");
+    
+    if (titleResult.success) {
+      Serial.println("Spreadsheet Title: " + titleResult.stringValue);
+    }
+    
+    // Get sheets info
+    FirebaseJsonData sheetsResult;
+    json.get(sheetsResult, "sheets");
+    
+    if (sheetsResult.success) {
+      Serial.println("Sheets information available");
+      
+      // You could parse this further to get details about each sheet
+      // For this example, we'll just indicate that the info is available
+    }
+  } else {
+    Serial.println("Error getting spreadsheet info: " + info);
+  }
+}
+
+void parseAndDisplayData(String jsonData) {
+  FirebaseJson json;
+  json.setJsonData(jsonData);
+  
+  FirebaseJsonData values;
+  json.get(values, "values");
+  
+  if (values.success) {
+    Serial.println("Data rows:");
+    
+    FirebaseJson dataJson;
+    dataJson.setJsonData(values.stringValue);
+    
+    // Get the number of rows
+    size_t rows = dataJson.iteratorBegin();
+    Serial.print("Number of rows: ");
+    Serial.println(rows);
+    
+    // We can iterate through the rows and display them
+    for (size_t i = 0; i < min(rows, (size_t)5); i++) { // Display up to 5 rows
+      FirebaseJsonData rowData;
+      String rowIndex = "[" + String(i) + "]";
+      dataJson.get(rowData, rowIndex);
+      
+      if (rowData.success) {
+        Serial.print("Row ");
+        Serial.print(i);
+        Serial.print(": ");
+        Serial.println(rowData.stringValue);
+      }
+    }
+    
+    dataJson.iteratorEnd();
+  } else {
+    Serial.println("No values found in the response");
+  }
+}

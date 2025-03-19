@@ -16,3 +16,7 @@
 #ifdef ENABLE_ADDONS_AUTOLIGHT_V2
 #include "../lib/addons/AutoLightv2.h"
 #endif
+
+#ifdef ENABLE_ADDONS_AUTOLIGHT_V3
+#include "../lib/addons/AutoLightv3.h"
+#endif

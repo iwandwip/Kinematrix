@@ -1,0 +1,292 @@
+#include <Arduino.h>
+#if defined(ESP32)
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
+
+#include "google-sheets.h"
+#include "time.h"
+
+// Uncomment if using BME280 sensor
+// #include <Adafruit_Sensor.h>
+// #include <Adafruit_BME280.h>
+
+// WiFi credentials
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// Google Sheets credentials - replace with your own
+#define PROJECT_ID "YOUR_PROJECT_ID"
+#define CLIENT_EMAIL "YOUR_CLIENT_EMAIL@your-project.iam.gserviceaccount.com"
+const char PRIVATE_KEY[] PROGMEM = "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n";
+
+// The ID of your spreadsheet - create a new one or use an existing one
+const char* SPREADSHEET_ID = "YOUR_SPREADSHEET_ID";
+
+// Email to share the spreadsheet with
+#define USER_EMAIL "YOUR_EMAIL@gmail.com"
+
+// For new spreadsheets, these are the column headers
+const char* SHEET_HEADERS[] = {"Timestamp", "Date/Time", "Temperature", "Humidity", "Pressure", "Light"};
+const int NUM_HEADERS = 6;
+
+// NTP server to request epoch time
+const char* ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = 0;     // GMT offset in seconds (adjust for your timezone)
+const int daylightOffset_sec = 0; // Daylight savings time offset
+
+// Sensor pins/settings
+#define TEMP_SENSOR_PIN 34  // Analog pin for temperature sensor (if using analog)
+#define LIGHT_SENSOR_PIN 35 // Analog pin for light sensor (if using analog)
+
+// Uncomment if using BME280 sensor
+// Adafruit_BME280 bme;
+
+// Timer variables
+unsigned long lastTime = 0;  
+unsigned long timerDelay = 30000;  // Log data every 30 seconds
+
+GoogleSheetClient sheets;
+String spreadsheetId = SPREADSHEET_ID;
+bool isSpreadsheetSetup = false;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Google Sheets: Sensor Data Logger Example");
+  
+  // Initialize sensor pins
+  pinMode(TEMP_SENSOR_PIN, INPUT);
+  pinMode(LIGHT_SENSOR_PIN, INPUT);
+  
+  // Initialize BME280 if using it
+  // if (!bme.begin(0x76)) {
+  //   Serial.println("Could not find a valid BME280 sensor, check wiring!");
+  // } else {
+  //   Serial.println("BME280 sensor initialized successfully");
+  // }
+  
+  // Connect to WiFi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to WiFi...");
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(300);
+  }
+  
+  Serial.println();
+  Serial.print("Connected with IP: ");
+  Serial.println(WiFi.localIP());
+  
+  // Initialize time
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  Serial.println("Fetching NTP time...");
+  
+  // Wait for time to be set
+  int retry = 0;
+  while (time(nullptr) < 24 * 3600 && retry < 10) {
+    Serial.print(".");
+    delay(1000);
+    retry++;
+  }
+  Serial.println();
+  
+  if (time(nullptr) > 24 * 3600) {
+    Serial.println("Time synchronized with NTP server");
+  } else {
+    Serial.println("Failed to synchronize time - continuing with system time");
+  }
+  
+  // Initialize Google Sheets client
+  if (sheets.begin(CLIENT_EMAIL, PROJECT_ID, PRIVATE_KEY)) {
+    Serial.println("Google Sheets client initialized successfully!");
+  } else {
+    Serial.println("Failed to initialize Google Sheets client");
+    while (1) delay(1000); // Halt if initialization fails
+  }
+}
+
+void loop() {
+  // Process Google Sheets client
+  sheets.loop();
+  
+  // Check if client is ready
+  if (sheets.ready()) {
+    // First, check if we need to set up a new spreadsheet
+    if (spreadsheetId.length() == 0 && !isSpreadsheetSetup) {
+      createNewSpreadsheet();
+    }
+    
+    // If we have a spreadsheet ID and it's time to log data
+    if (spreadsheetId.length() > 0 && (millis() - lastTime > timerDelay)) {
+      lastTime = millis();
+      logSensorData();
+    }
+  }
+}
+
+void createNewSpreadsheet() {
+  Serial.println("\n--- Creating a new spreadsheet for sensor logging ---");
+  
+  // Create a unique name with timestamp
+  String spreadsheetName = "Sensor_Log_" + String(millis());
+  
+  String response = sheets.createSpreadsheet(
+    spreadsheetName.c_str(),
+    "Sensor_Data",
+    1000,  // Rows
+    NUM_HEADERS,  // Columns
+    USER_EMAIL
+  );
+  
+  // Extract the spreadsheet ID from the response
+  FirebaseJson json;
+  json.setJsonData(response);
+  
+  FirebaseJsonData result;
+  json.get(result, "spreadsheetId");
+  
+  if (result.success) {
+    spreadsheetId = result.stringValue;
+    Serial.println("New spreadsheet created successfully!");
+    Serial.println("Spreadsheet ID: " + spreadsheetId);
+    
+    // Get the spreadsheet URL
+    FirebaseJsonData urlResult;
+    json.get(urlResult, "spreadsheetUrl");
+    if (urlResult.success) {
+      Serial.println("Spreadsheet URL: " + urlResult.stringValue);
+    }
+    
+    // Set up headers
+    setupSpreadsheetHeaders();
+  } else {
+    Serial.println("Failed to create spreadsheet or extract ID. Response: " + response);
+  }
+}
+
+void setupSpreadsheetHeaders() {
+  Serial.println("Setting up spreadsheet headers...");
+  
+  FirebaseJson headerRange;
+  headerRange.add("range", "Sensor_Data!A1:" + String(char('A' + NUM_HEADERS - 1)) + "1");
+  headerRange.add("majorDimension", "ROWS");
+  
+  // Add all headers from the array
+  for (int i = 0; i < NUM_HEADERS; i++) {
+    headerRange.set("values/[0]/[" + String(i) + "]", SHEET_HEADERS[i]);
+  }
+  
+  bool success = sheets.updateValues(spreadsheetId.c_str(), 
+                                    headerRange.get("range").c_str(), 
+                                    &headerRange);
+  
+  if (success) {
+    Serial.println("Headers set up successfully!");
+    isSpreadsheetSetup = true;
+  } else {
+    Serial.println("Error setting up headers: " + sheets.errorReason());
+  }
+}
+
+void logSensorData() {
+  Serial.println("\n--- Logging sensor data ---");
+  
+  // Read sensor values
+  float temperature = readTemperature();
+  float humidity = readHumidity();
+  float pressure = readPressure();
+  float light = readLightLevel();
+  
+  // Get current time
+  time_t now = time(nullptr);
+  String formattedTime = getFormattedTime(now);
+  
+  // Display readings
+  Serial.println("Temperature: " + String(temperature) + " °C");
+  Serial.println("Humidity: " + String(humidity) + " %");
+  Serial.println("Pressure: " + String(pressure) + " hPa");
+  Serial.println("Light: " + String(light) + " lux");
+  Serial.println("Time: " + formattedTime);
+  
+  // Create value range for appending
+  FirebaseJson valueRange;
+  valueRange.add("majorDimension", "ROWS");
+  
+  // Set row data
+  valueRange.set("values/[0]/[0]", String(now));                 // Timestamp
+  valueRange.set("values/[0]/[1]", formattedTime);               // Formatted time
+  valueRange.set("values/[0]/[2]", String(temperature));         // Temperature
+  valueRange.set("values/[0]/[3]", String(humidity));            // Humidity
+  valueRange.set("values/[0]/[4]", String(pressure));            // Pressure
+  valueRange.set("values/[0]/[5]", String(light));               // Light level
+  
+  // Append to spreadsheet
+  bool success = sheets.appendValues(spreadsheetId.c_str(), "Sensor_Data!A:F", &valueRange);
+  
+  if (success) {
+    Serial.println("Data logged successfully!");
+  } else {
+    Serial.println("Error logging data: " + sheets.errorReason());
+  }
+}
+
+// Helper function to get formatted time string
+String getFormattedTime(time_t timestamp) {
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) {
+    return String(timestamp); // Return raw timestamp if time isn't available
+  }
+  
+  char buffer[30];
+  strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &timeinfo);
+  return String(buffer);
+}
+
+// Sensor reading functions - replace with actual sensor code
+float readTemperature() {
+  // If using BME280
+  // return bme.readTemperature();
+  
+  // Simulated or analog reading
+  #if defined(ESP32)
+  int adcValue = analogRead(TEMP_SENSOR_PIN);
+  // Example conversion for a typical analog temperature sensor
+  // float voltage = adcValue * (3.3 / 4095.0);
+  // return (voltage - 0.5) * 100.0; // Example LM35 formula
+  return 22.5 + random(-20, 20) / 10.0; // Simulated value around 22.5°C
+  #else
+  return 22.5 + random(-20, 20) / 10.0; // Simulated value
+  #endif
+}
+
+float readHumidity() {
+  // If using BME280
+  // return bme.readHumidity();
+  
+  // Simulated reading
+  return 45.0 + random(-50, 50) / 10.0; // Simulated value around 45%
+}
+
+float readPressure() {
+  // If using BME280
+  // return bme.readPressure() / 100.0F; // Convert to hPa
+  
+  // Simulated reading
+  return 1013.0 + random(-50, 50) / 10.0; // Simulated value around 1013 hPa
+}
+
+float readLightLevel() {
+  // If using a photoresistor or light sensor
+  #if defined(ESP32)
+  int adcValue = analogRead(LIGHT_SENSOR_PIN);
+  // Example conversion for a typical light sensor
+  // float voltage = adcValue * (3.3 / 4095.0);
+  // return voltage * 1000.0; // Simple conversion to lux (calibrate for your sensor)
+  return random(100, 1000); // Simulated value between 100-1000 lux
+  #else
+  return random(100, 1000); // Simulated value
+  #endif
+}
