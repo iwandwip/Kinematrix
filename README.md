@@ -1,7 +1,7 @@
 # **Kinematrix Beta**
 
 **Simplify Your Arduino Projects**  
-Kinematrix is a modular and comprehensive library for Arduino that streamlines project development by abstracting complex modules and sensor integrations. Whether you’re a beginner or a professional, Kinematrix helps you build faster, smarter, and more efficient projects.
+Kinematrix is a modular and comprehensive library for Arduino that streamlines project development by abstracting complex modules and sensor integrations. Whether you're a beginner or a professional, Kinematrix helps you build faster, smarter, and more efficient projects.
 
 ---
 
@@ -9,6 +9,15 @@ Kinematrix is a modular and comprehensive library for Arduino that streamlines p
 - Modular support for a wide range of **inputs and outputs**.
 - Pre-built utilities for **sensors**, **communication modules**, and **data handling**.
 - Beginner-friendly API with scalability for advanced use cases.
+
+---
+
+## **Compatibility**
+Kinematrix is designed to work with a wide range of microcontrollers:
+
+- **ESP32** - All variants of ESP32-based development boards
+- **ESP8266** - NodeMCU, Wemos D1 Mini, and other ESP8266-based boards
+- **AVR** - Arduino Uno, Nano, Mega, Mini, and other AVR-based Arduino boards
 
 ---
 
@@ -157,6 +166,9 @@ Available Packages
 
 #define ENABLE_MODULE_DIGITAL_INPUT
 #define ENABLE_MODULE_DIGITAL_OUTPUT
+#define ENABLE_MODULE_PCF8574_INPUT_MODULE
+#define ENABLE_MODULE_PCF8574_MODULE
+#define ENABLE_MODULE_PCF8574_OUTPUT_MODULE
 #define ENABLE_MODULE_ROTARY_ENCODER
 #define ENABLE_MODULE_SEVEN_SEGMENT
 #define ENABLE_MODULE_SEVEN_SEGMENT_PCF
@@ -213,6 +225,52 @@ Available Packages
 
 ---
 
+## **Library Structure**
+The library is organized into three main directories: addons, modules, and sensors.
+
+```
+│   enable.h
+│   index.h
+│   README
+│
+├───addons               # Add-on functionality like AutoLight systems
+│   │   AutoLight.h
+│   │   AutoLightv2.h
+│   │   AutoLightv3.h
+│   │
+│   ├───AutoLight        # Version 1 implementation
+│   ├───AutoLightv2      # Version 2 implementation
+│   └───AutoLightv3      # Version 3 implementation
+│
+├───modules              # Core functionality modules
+│   ├───communication    # Communication protocols
+│   │   ├───wired        # Wired communication (I2C, Modbus, Serial, SPI)
+│   │   └───wireless     # Wireless communication (LoRa, ESP-NOW)
+│   │
+│   ├───control          # Control algorithms (PID, KNN)
+│   ├───display          # Display modules (LCD, OLED)
+│   ├───driver           # Motor and servo drivers
+│   ├───file             # File operations (EEPROM, SD card)
+│   ├───io               # Input/output modules
+│   ├───task             # Task management
+│   ├───time             # Timing functions
+│   └───wifi             # WiFi connectivity and services
+│       └───firebase     # Firebase integration
+│
+└───sensors              # Sensor implementations
+    │   abstract-sens.cpp    # Base sensor classes
+    │   analog-sens.cpp      # Analog sensors
+    │   dht-sens.cpp         # Temperature/humidity
+    │   ultrasonic-sens.cpp  # Distance measurement
+    │   ...                  # Many other sensor implementations
+    │
+    ├───addons          # Sensor add-ons like filters and debugging
+    ├───base            # Base sensor functionality
+    └───lib             # External libraries needed for sensors
+```
+
+---
+
 ## **Contribution**
 We welcome contributions to enhance Kinematrix! If you'd like to contribute:
 1. Fork the repository.
@@ -233,15 +291,3 @@ If you have suggestions or issues, feel free to reach out via email: [mcclawsher
 
 ## **License**
 This library is distributed under the [MIT License](https://choosealicense.com/licenses/mit/).
-
----
-
-### **Improvements Made:**
-1. **Clearer Introduction**:
-    - Simplified the description for a stronger first impression.
-2. **Structured Features and Examples**:
-    - Organized into clear sections (Installation, Usage, Modules).
-3. **Enhanced Visual Appeal**:
-    - Used markdown headers and consistent formatting for better readability.
-4. **Call to Action**:
-    - Encouraged contributions and feedback with clear instructions.

@@ -18,7 +18,7 @@ reference to HobbyComponents.com in your comments if you redistribute this code.
 This software may not be used directly for the purpose of selling products that
 directly compete with Hobby Components Ltd's own range of products.
 
-THIS SOFTWARE IS PROVIDED "AS IS". HOBBY COMPONENTS MAKES NO WARRANTIES, WHETHER
+THIS SOFTWARE IS PROVIDED "AS IS". HOBBY COMPONENTS MAKE NO WARRANTIES, WHETHER
 EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE, ACCURACY OR LACK OF NEGLIGENCE.
 HOBBY COMPONENTS SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR ANY DAMAGES,
@@ -42,13 +42,13 @@ HCPCA9685::HCPCA9685(byte I2CAdd) {
 void HCPCA9685::Init(boolean Mode) {
     Wire.begin();
 
-    /* If not already, put device to sleep. This is required to change the Prescaller value */
+    /* If not already, put a device to sleep. This is required to change the Prescaller value */
     Sleep(true);
 
-    /* Set register addressing mode to auto increment to speed up writing to 		 multiple registers */
+    /* Set register addressing mode to auto increment to speed up writing to	multiple registers */
     _AutoIncrement(true);
 
-    /* If the library has been initialised for driving servos set the period
+    /* If the library has been initialised for driving, servos set the period
        frequency (prescaller) for 50Hz (2ms) period. */
     if (Mode == SERVO_MODE) {
         OutputOnTime(0, 0);
@@ -61,17 +61,17 @@ void HCPCA9685::Init(boolean Mode) {
 /* Sets the sleep state of the device where:
 
    Mode is the required state. Valid values are:
-		true 	(puts the device to sleep)
-		false 	(brings the device out of sleep mode)
+		true	(puts the device to sleep)
+		false	(brings the device out of sleep mode)
    
-   If the device is woken up from a previously set sleep state then this function will wait 500us for the oscillator to stabilise. */
+   If the device is woken up from a previously set sleep state, then this function will wait 500th for the oscillator to stabilise. */
 void HCPCA9685::Sleep(boolean Mode) {
     byte Data = I2CReadReg(MODE1);
 
     Data = (Data & MODE1_SLEEP_MASK) | (Mode << MODE1_SLEEP_BIT);
     I2CWriteReg(MODE1, Data);
 
-    /* Check if device was put in to sleep mode and if so give the oscillator time to restart */
+    /* Check if a device was put in to sleep mode and if so give the oscillator time to restart */
     if (Data & ~MODE1_RESTART_MASK) {
         delayMicroseconds(500);
         Data |= (1 << MODE1_RESTART_BIT);
@@ -84,7 +84,7 @@ void HCPCA9685::Sleep(boolean Mode) {
 		24 (24Hz) to 1526 (1.526KHz)
    
    These values are based on the devices internal 25MHz oscillator (default). 
-   If using an external clock you will need to adjust the value for OSC_FREQ found in
+   If using an external clock, you will need to adjust the value for OSC_FREQ found in
    the HCPCA9685.h header file */
 void HCPCA9685::SetPeriodFreq(unsigned int Freq) {
     byte Data = (OSC_FREQ / (4096L * Freq)) - 1;
@@ -104,7 +104,7 @@ void HCPCA9685::SetPreScaller(byte Period) {
 }
 
 
-/* When the library has been initiliased to servo mode this function sets the
+/* When the library has been initiliased to servo mode, this function sets the
    on time for the servo where:
    
    Chan is the PWM output pin to change. Valid values are
@@ -113,9 +113,9 @@ void HCPCA9685::SetPreScaller(byte Period) {
    Pos is the required position of the servo. Valid values are
 		0 (servo fully anti-clockwise) to 480 (servo fully clockwise)
 		
-	The maximum value is based in the default servo SERVO_TRIM_MAX and SERVO_TRIM_MIN trim settings found in the HCPCA9685.h header file.
-	These default to 590 for SERVO_TRIM_MAX and 110 for SERVO_TRIM_MIN.
-	Thay can be adjusted to match the minimum and maximum end-stop positions for your servo(s). If these values are changed then the new max value for Pos can 
+	The maximum value is based on the default servo SERVO_TRIM_MAX and SERVO_TRIM_MIN trim settings found in the HCPCA9685.h header file.
+	These defaults to 590 for SERVO_TRIM_MAX and 110 for SERVO_TRIM_MIN.
+	They can be adjusted to match the minimum and maximum end-stop positions for your servo(s). If these values are changed, then the new max value for Pos can
 	be calculated as (SERVO_TRIM_MAX - SERVO_TRIM_MIN) */
 void HCPCA9685::Servo(byte Chan, unsigned int Pos) {
     //unsigned int Offset = (unsigned int)Chan << 8;
@@ -191,7 +191,7 @@ void HCPCA9685::OutputOnTime(byte Chan, unsigned int Time) {
 }
 
 
-/* Sets the turn OFF time for one of the 15 PWM outputs where:
+/* Sets the turn-OFF time for one of the 15 PWM outputs where:
    
    Chan is the PWM output channel pin to change. Valid values are
 		0 (PWM output pin 0) to 15 (PWM output pin 15)
@@ -214,9 +214,9 @@ void HCPCA9685::OutputOffTime(byte Chan, unsigned int Time) {
 /* Sets the state of the 16 PWM outputs when the OE pin is driven high where:
 	
 	State is the required state of the output pins. Valid values are:
-		OUTNE_LOW				Output pins are pulled low when OE = 1
-		OUTNE_HIGH 				Output pins are pulled high when OE = 1
-		OUTNE_HIGH_IMPEDANCE 	Output pins are high-impedance when OE = 1 */
+		OUTNE_LOW	Output pins are pulled low when OE = 1
+		OUTNE_HIGH	Output pins are pulled high when OE = 1
+		OUTNE_HIGH_IMPEDANCE	Output pins are high-impedance when OE = 1 */
 void HCPCA9685::OutputNotEnableState(byte State) {
     byte Data = I2CReadReg(MODE2);
     Data = (Data & MODE2_OUTNE_MASK) | (State << MODE2_OUTNE_BIT);
@@ -239,8 +239,8 @@ void HCPCA9685::OutputDrivers(boolean Mode) {
 /* Sets the point at which the 16 PWM outputs change state where:
 	
 	Mode is the required state. Valid values are:
-		OCH_STOP		Outputs change on I2C STOP command.
-		OCH_ACK			Outputs change on I2C ACK. */
+		OCH_STOP	Outputs change on I2C STOP command.
+		OCH_ACK	Outputs change on I2C ACK. */
 void HCPCA9685::OCH(boolean Mode) {
     byte Data = I2CReadReg(MODE2);
     Data = (Data & MODE2_OCH_MASK) | (Mode << MODE2_OCH_BIT);
@@ -250,9 +250,9 @@ void HCPCA9685::OCH(boolean Mode) {
 
 /* Inverts the state of the PWM output pins where:
 	
-	Mode is the require state. Valid values are:
+	Mode is the requirement state. Valid values are:
 		false	The PWM output pins are not inverted.
-		true	The PWM output pins are inverted. */
+		true,	The PWM output pins are inverted. */
 void HCPCA9685::Invert(boolean Mode) {
     byte Data = I2CReadReg(MODE2);
     Data = (Data & MODE2_INVRT_MASK) | (Mode << MODE2_INVRT_BIT);
@@ -260,11 +260,11 @@ void HCPCA9685::Invert(boolean Mode) {
 }
 
 
-/* Sets whether or not the device will respond the I2C sub address 1 where:
+/* Sets whether or not the device will respond I2C sub address 1 where:
 
 	Mode sets the required state. Valid values are:
-		false		The device will not respond to I2C sub address 1.
-		true		The device will respond to I2C sub address 1. */
+		false	The device will not respond to I2C sub address 1.
+		true,	The device will respond to I2C sub address 1. */
 void HCPCA9685::Enable_Sub1(boolean Mode) {
     byte Data = I2CReadReg(MODE1);
     Data = (Data & MODE1_SUB1_MASK) | (Mode << MODE1_SUB1_BIT);
@@ -272,11 +272,11 @@ void HCPCA9685::Enable_Sub1(boolean Mode) {
 }
 
 
-/* Sets whether or not the device will respond the I2C sub address 2 where:
+/* Sets whether or not the device will respond I2C sub address 2 where:
 
 	Mode sets the required state. Valid values are:
-		false		The device will not respond to I2C sub address 2.
-		true		The device will respond to I2C sub address 2. */
+		false	The device will not respond to I2C sub address 2.
+		true,	The device will respond to I2C sub address 2. */
 void HCPCA9685::Enable_Sub2(boolean Mode) {
     byte Data = I2CReadReg(MODE1);
     Data = (Data & MODE1_SUB2_MASK) | (Mode << MODE1_SUB2_BIT);
@@ -284,11 +284,11 @@ void HCPCA9685::Enable_Sub2(boolean Mode) {
 }
 
 
-/* Sets whether or not the device will respond the I2C sub address 3 where:
+/* Sets whether or not the device will respond I2C sub address 3 where:
 
 	Mode sets the required state. Valid values are:
-		false		The device will not respond to I2C sub address 3.
-		true		The device will respond to I2C sub address 3. */
+		false	The device will not respond to I2C sub address 3.
+		true,	The device will respond to I2C sub address 3. */
 void HCPCA9685::Enable_Sub3(boolean Mode) {
     byte Data = I2CReadReg(MODE1);
     Data = (Data & MODE1_SUB3_MASK) | (Mode << MODE1_SUB3_BIT);
@@ -299,8 +299,8 @@ void HCPCA9685::Enable_Sub3(boolean Mode) {
 /* Sets whether or not the device will respond the I2C ALLCALL address where:
 
 	Mode sets the required state. Valid values are:
-		false		The device will not respond to I2C ALLCALL address.
-		true		The device will respond to I2C ALLCALL address. */
+		false	The device will not respond to I2C ALLCALL address.
+		true,	The device will respond to I2C ALLCALL address. */
 void HCPCA9685::Enable_AllCall(boolean Mode) {
     byte Data = I2CReadReg(MODE1);
     Data = (Data & MODE1_ALLCALL_MASK) | (Mode << MODE1_ALLCALL_BIT);
@@ -311,11 +311,11 @@ void HCPCA9685::Enable_AllCall(boolean Mode) {
 /* Sets the I2C address for one of the 3 sub addresses where:
 	
 	SubAddress is one of the 3 sub addresses to set the I2C address for. Valid values are:
-		SUBADR1		Selects sub address 1.
-		SUBADR2		Selects sub address 2.
-		SUBADR3		Selects sub address 3.
+		SUBADR1	Selects sub address 1.
+		SUBADR2	Selects sub address 2.
+		SUBADR3	Selects sub address 3.
 		
-	Address is and 8 bit byte representing the I2C address to set the selected sub address too. Only the 7 LSBs representing the I2C-bus sub address are valid. */
+	Address is and 8-bit byte representing the I2C address to set the selected sub address too. Only the 7 LSBs representing the I2C-bus sub address are valid. */
 void HCPCA9685::SetSubAddress(byte SubAddress, byte Address) {
     I2CWriteReg(SubAddress, ((0x7F & Address) << 1));
 }
@@ -323,7 +323,7 @@ void HCPCA9685::SetSubAddress(byte SubAddress, byte Address) {
 
 /* Sets the I2C address for the ALLCALL address where:
 		
-	Address is and 8 bit byte representing the I2C address to set the ALLCALL  address too. Only the 7 LSBs representing the I2C-bus ALLCALL address are valid. */
+	Address is and 8-bit byte representing the I2C address to set the ALLCALL address too. Only the 7 LSBs representing the I2C-bus ALLCALL address are valid. */
 void HCPCA9685::SetAllCallAddress(byte Address) {
     I2CWriteReg(ALLCALLADR, ((0x7F & Address) << 1));
 }
@@ -343,7 +343,7 @@ void HCPCA9685::ExtClk(void) {
 
 	Register is the address of the register to write to.
 	
-	Data is the 8 bit data to write to the register */
+	Data is the 8-bit data to write to the register */
 void HCPCA9685::I2CWriteReg(byte Register, byte Data) {
     Wire.beginTransmission(_I2CAdd);
     Wire.write(Register);
@@ -356,7 +356,7 @@ void HCPCA9685::I2CWriteReg(byte Register, byte Data) {
 
 	Register is the address of the register to read from.
 	
-	Returns an 8 bit byte containing the contents of the specified register */
+	Returns an 8-bit byte containing the contents of the specified register */
 byte HCPCA9685::I2CReadReg(byte Register) {
     byte Data;
     Wire.beginTransmission(_I2CAdd);
@@ -371,7 +371,7 @@ byte HCPCA9685::I2CReadReg(byte Register) {
 }
 
 
-/* Enables the devices register address auto increment mode */
+/* Enables the device register address auto increment mode */
 void HCPCA9685::_AutoIncrement(boolean Mode) {
     byte Data = I2CReadReg(MODE1);
     Data = (Data & MODE1_AI_MASK) | (Mode << MODE1_AI_BIT);

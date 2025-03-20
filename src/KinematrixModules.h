@@ -72,6 +72,13 @@
 #include "../lib/modules/communication/wireless/lora/lora-com.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_LORA_COM_V2
+#include "../lib/modules/communication/wireless/lora/lora-base.h"
+#include "../lib/modules/communication/wireless/lora/lora-base.cpp"
+#include "../lib/modules/communication/wireless/lora/lora-comv2.h"
+#include "../lib/modules/communication/wireless/lora/lora-comv2.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_ESP_NOW
 #include "../lib/modules/communication/wireless/now/esp-now.h"
 #include "../lib/modules/communication/wireless/now/esp-now.cpp"
@@ -197,6 +204,21 @@
 #ifdef ENABLE_MODULE_DIGITAL_OUTPUT
 #include "../lib/modules/io/output-module.h"
 #include "../lib/modules/io/output-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PCF8574_INPUT_MODULE
+#include "../lib/modules/io/pcf8574-input-module.h"
+#include "../lib/modules/io/pcf8574-input-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PCF8574_MODULE
+#include "../lib/modules/io/pcf8574-module.h"
+#include "../lib/modules/io/pcf8574-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PCF8574_OUTPUT_MODULE
+#include "../lib/modules/io/pcf8574-output-module.h"
+#include "../lib/modules/io/pcf8574-output-module.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_ROTARY_ENCODER

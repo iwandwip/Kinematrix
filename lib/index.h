@@ -25,6 +25,7 @@
 #include "modules/communication/wired/spi/spi-serial.h"
 #include "modules/communication/wired/spi/dot-matrix.h"
 #include "modules/communication/wireless/lora/lora-com.h"
+#include "modules/communication/wireless/lora/lora-comv2.h"
 #include "modules/communication/wireless/now/esp-now.h"
 
 #include "modules/control/PID.h"
@@ -56,6 +57,9 @@
 
 #include "modules/io/input-module.h"
 #include "modules/io/output-module.h"
+#include "modules/io/pcf8574-input-module.h"
+#include "modules/io/pcf8574-module.h"
+#include "modules/io/pcf8574-output-module.h"
 #include "modules/io/rotary-module.h"
 #include "modules/io/seven-segment.h"
 #include "modules/io/seven-segment-pcf.h"

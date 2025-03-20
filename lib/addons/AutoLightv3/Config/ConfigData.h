@@ -26,11 +26,11 @@ namespace AutoLight {
     typedef struct {
         uint8_t version_;           // version of the board
         uint8_t channel_;           // total channel
-        uint8_t io_size_;           // number of io expander size
-        uint8_t pin_size_;          // number of pin size
-        uint8_t *pin_ptr_;          // array of all pin
+        uint8_t io_size_;           // number of io expander sizes
+        uint8_t pin_size_;          // number of pin sizes
+        uint8_t *pin_ptr_;          // array of all pins
         uint8_t *i2c_ptr_;          // array of i2c address
-        uint8_t *pin_sequence_;     // array of sequence
+        uint8_t *pin_sequence_;     // array of a sequence
     } ConfigHeader;
 
     typedef struct {

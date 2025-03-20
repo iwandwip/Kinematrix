@@ -1,10 +1,3 @@
-/*
- *  lcd-menu.h
- *
- *  lcd menu header
- *  Created on: 2023. 4. 3
- */
-
 #ifndef KADITA_LCD_MENU_H
 #define KADITA_LCD_MENU_H
 
@@ -13,6 +6,15 @@
 #include "Arduino.h"
 #include "LiquidCrystal_I2C.h"
 #include "SPI.h"
+
+#if defined(ESP32) || defined(ESP8266)
+#define WIFI_SUPPORTED
+#if defined(ESP32)
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
+#endif
 
 const uint8_t MAX_BUFF_LEN = 24;
 
@@ -70,6 +72,12 @@ public:
     void debugPrint(const char *format, ...);
     void debug(MenuProperties *properties, uint8_t index);
     void wait(uint32_t time);
+
+#ifdef WIFI_SUPPORTED
+    bool connectToWiFi(const char *ssid, const char *password, int timeoutSeconds = 10);
+    String getWiFiStatus();
+    String getIPAddress();
+#endif
 };
 
-#endif  // KADITA_LCD_MENU_H
+#endif

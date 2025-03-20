@@ -55,6 +55,11 @@
 #include "../lib/modules/communication/wireless/lora/lora-com.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_LORA_COM_V2
+#include "../lib/modules/communication/wireless/lora/lora-base.h"
+#include "../lib/modules/communication/wireless/lora/lora-comv2.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_ESP_NOW
 #include "../lib/modules/communication/wireless/now/esp-now.h"
 #endif
@@ -154,6 +159,18 @@
 
 #ifdef ENABLE_MODULE_NODEF_DIGITAL_OUTPUT
 #include "../lib/modules/io/output-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PCF8574_INPUT_MODULE
+#include "../lib/modules/io/pcf8574-input-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PCF8574_MODULE
+#include "../lib/modules/io/pcf8574-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PCF8574_OUTPUT_MODULE
+#include "../lib/modules/io/pcf8574-output-module.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_ROTARY_ENCODER

@@ -1,10 +1,3 @@
-/*
- *  lcd-menu.cpp
- *
- *  lcd menu c
- *  Created on: 2023. 4. 3
- */
-
 #include "lcd-menu.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -109,7 +102,7 @@ void LcdMenu::onCursor(MenuProperties *properties) {
         } else {
             properties->index = properties->len - 1;
             properties->upCount = lcdTotalCol - 1;
-            properties->select = properties->len - lcdTotalCol; // (properties->len - 1) - 1
+            properties->select = properties->len - lcdTotalCol;
         }
     }
 
@@ -381,3 +374,99 @@ void LcdMenu::debug(MenuProperties *properties, uint8_t index) {
 void LcdMenu::wait(uint32_t time) {
     delay(time);
 }
+
+#if defined(ESP32) || defined(ESP8266)
+
+bool LcdMenu::connectToWiFi(const char *ssid, const char *password, int timeoutSeconds) {
+    Serial.println("Connecting to WiFi...");
+    WiFi.begin(ssid, password);
+
+    clear();
+    setCursor(0, 0);
+    print("Connecting to");
+    setCursor(0, 1);
+    print(ssid);
+
+    if (lcdTotalCol > 2) {
+        setCursor(0, 2);
+        print("Please wait...");
+    }
+
+    int timeout = timeoutSeconds * 2;
+    int tries = 0;
+
+    while (WiFi.status() != WL_CONNECTED && tries < timeout) {
+        delay(500);
+        setCursor(tries % lcdTotalRow, lcdTotalCol > 2 ? 3 : 1);
+        print(".");
+        Serial.print(".");
+        tries++;
+    }
+    Serial.println();
+
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.println("WiFi connected");
+        Serial.print("IP address: ");
+        Serial.println(WiFi.localIP());
+
+        clear();
+        setCursor(0, 0);
+        print("WiFi Connected!");
+        setCursor(0, 1);
+        print("IP Address:");
+
+        if (lcdTotalCol > 2) {
+            setCursor(0, 2);
+            print(WiFi.localIP().toString());
+        } else {
+            String ipStr = WiFi.localIP().toString();
+            for (int i = 0; i < ipStr.length() + lcdTotalRow; i++) {
+                setCursor(0, 1);
+                if (i < ipStr.length()) {
+                    print(ipStr.substring(i, min(i + lcdTotalRow, (int) ipStr.length())));
+                }
+                delay(300);
+            }
+        }
+
+        delay(2000);
+        return true;
+    } else {
+        Serial.println("WiFi connection failed");
+
+        clear();
+        setCursor(0, 0);
+        print("WiFi Connection");
+        setCursor(0, 1);
+        print("Failed!");
+        delay(2000);
+        return false;
+    }
+}
+
+String LcdMenu::getWiFiStatus() {
+    switch (WiFi.status()) {
+        case WL_CONNECTED:
+            return "Connected to " + String(WiFi.SSID());
+        case WL_CONNECT_FAILED:
+            return "Connection Failed";
+        case WL_IDLE_STATUS:
+            return "Idle";
+        case WL_NO_SSID_AVAIL:
+            return "No SSID Available";
+        case WL_DISCONNECTED:
+            return "Disconnected";
+        default:
+            return "Status: " + String(WiFi.status());
+    }
+}
+
+String LcdMenu::getIPAddress() {
+    if (WiFi.status() == WL_CONNECTED) {
+        return WiFi.localIP().toString();
+    } else {
+        return "0.0.0.0";
+    }
+}
+
+#endif
