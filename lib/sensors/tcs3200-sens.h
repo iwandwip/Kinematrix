@@ -27,6 +27,8 @@ private:
     using tcs3200::tcs3200;
 
 public:
+    TCS3200Sens(uint8_t S0, uint8_t S1, uint8_t S2, uint8_t S3, uint8_t output);
+    TCS3200Sens(uint8_t S2, uint8_t S3, uint8_t output);
     virtual ~TCS3200Sens();
     bool init() override;
     bool update() override;

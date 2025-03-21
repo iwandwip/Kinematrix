@@ -8,6 +8,14 @@
 #include "tcs3200-sens.h"
 #include "Arduino.h"
 
+TCS3200Sens::TCS3200Sens(uint8_t S0, uint8_t S1, uint8_t S2, uint8_t S3, uint8_t output)
+        : tcs3200(S0, S1, S2, S3, output) {
+}
+
+TCS3200Sens::TCS3200Sens(uint8_t S2, uint8_t S3, uint8_t output)
+        : tcs3200(S2, S2, S2, S3, output) {
+}
+
 TCS3200Sens::~TCS3200Sens() = default;
 
 bool TCS3200Sens::init() {

@@ -1,30 +1,14 @@
-/*
- *  lora-com.h
- *
- *  lora communication c
- *  Created on: 2023. 4. 3
- *
- *  These are the parameters you can change in the library:
- *
- *  txPower - TX power in dB, defaults to 17
- *  spreadingFactor - spreading factor, defaults to 7
- *  signalBandwidth - signal bandwidth in Hz, defaults to 125E3
- *  codingRateDenominator - denominator of the coding rate, defaults to 5
- *  preambleLength - preamble length in symbols, defaults to 8
- *  syncWord - byte value to use as the sync word, defaults to 0x34
- *  Enable or disable CRC usage, by default a CRC is not used.
- *  In the "Testing and comparing transmitters, receivers and antennas" part of Sr net's guide he mentioned these parameters:
- *
- *  10 mw Power
- *  62.5 kHz bandwidth
- *  Spread factor 12
- *  Code rate 4:5
- *
- */
-
 #include "lora-com.h"
 
 LoRaModule::LoRaModule() {
+    isLoRaReady = 0;
+    waitingForResponse = false;
+    responseStartTime = 0;
+    responseTimeout = 0;
+    responseRetries = 0;
+    currentResponseRetry = 0;
+    responseCallback = nullptr;
+    timeoutCallback = nullptr;
 }
 
 LoRaModule::~LoRaModule() {
@@ -96,14 +80,14 @@ void LoRaModule::sendDataCb(void (*onReceive)(const String &)) {
     LoRa.beginPacket();
     LoRa.print(dataSend);
     LoRa.endPacket();
-    onReceive(dataSend);
+    if (onReceive != nullptr) onReceive(dataSend);
 }
 
 String LoRaModule::sendDataCbWaitData(void (*onSend)(const String &)) {
     LoRa.beginPacket();
     LoRa.print(dataSend);
     LoRa.endPacket();
-    onSend(dataSend);
+    if (onSend != nullptr) onSend(dataSend);
 
     int packetSize = 0;
     while (packetSize == 0) {
@@ -123,7 +107,7 @@ String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &),
         LoRa.beginPacket();
         LoRa.print(dataSend);
         LoRa.endPacket();
-        onSend(dataSend);
+        if (onSend != nullptr) onSend(dataSend);
 
         uint32_t startTime = millis();
         while (millis() - startTime < timeout) {
@@ -144,6 +128,91 @@ String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &),
     return "";
 }
 
+void LoRaModule::sendDataAndExpectResponse(void (*onSend)(const String &), void (*onResponse)(const String &)) {
+    cancelResponseWait();
+
+    LoRa.beginPacket();
+    LoRa.print(dataSend);
+    LoRa.endPacket();
+
+    if (onSend != nullptr) onSend(dataSend);
+
+    waitingForResponse = true;
+    responseCallback = onResponse;
+    responseStartTime = millis();
+    responseTimeout = 0;
+    responseRetries = 0;
+}
+
+void LoRaModule::sendDataAndExpectResponseWithTimeout(void (*onSend)(const String &), void (*onResponse)(const String &), void (*onTimeout)(), unsigned long timeout, int maxRetries) {
+    cancelResponseWait();
+
+    LoRa.beginPacket();
+    LoRa.print(dataSend);
+    LoRa.endPacket();
+
+    if (onSend != nullptr) onSend(dataSend);
+
+    waitingForResponse = true;
+    responseCallback = onResponse;
+    timeoutCallback = onTimeout;
+    responseStartTime = millis();
+    responseTimeout = timeout;
+    responseRetries = maxRetries;
+    currentResponseRetry = 1;
+}
+
+void LoRaModule::update() {
+    if (!waitingForResponse) return;
+
+    int packetSize = LoRa.parsePacket();
+    if (packetSize > 0) {
+        String response = "";
+        while (LoRa.available()) {
+            response += (char) LoRa.read();
+        }
+
+        waitingForResponse = false;
+
+        if (responseCallback != nullptr) {
+            responseCallback(response);
+        }
+
+        return;
+    }
+
+    if (responseTimeout == 0) return;
+
+    if (millis() - responseStartTime >= responseTimeout) {
+        if (currentResponseRetry < responseRetries) {
+            LoRa.beginPacket();
+            LoRa.print(dataSend);
+            LoRa.endPacket();
+
+            responseStartTime = millis();
+            currentResponseRetry++;
+        } else {
+            waitingForResponse = false;
+
+            if (timeoutCallback != nullptr) {
+                timeoutCallback();
+            }
+        }
+    }
+}
+
+void LoRaModule::cancelResponseWait() {
+    if (waitingForResponse) {
+        waitingForResponse = false;
+        responseCallback = nullptr;
+        timeoutCallback = nullptr;
+    }
+}
+
+bool LoRaModule::isWaitingForResponse() {
+    return waitingForResponse;
+}
+
 void LoRaModule::sendDataAsync(uint32_t _time) {
     if (millis() - sendTime >= _time) {
         sendTime = millis();
@@ -159,7 +228,7 @@ void LoRaModule::sendDataAsyncCb(uint32_t _time, void (*onReceive)(const String 
         LoRa.beginPacket();
         LoRa.print(dataSend);
         LoRa.endPacket();
-        onReceive(dataSend);
+        if (onReceive != nullptr) onReceive(dataSend);
     }
 }
 
@@ -195,6 +264,7 @@ void LoRaModule::receiveAsync(uint32_t _time, void (*onReceive)(const String &))
 }
 
 void LoRaModule::receiveString(void (*onReceive)(const String &)) {
+    if (onReceive == nullptr) return;
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
         String data = LoRa.readStringUntil('\n');

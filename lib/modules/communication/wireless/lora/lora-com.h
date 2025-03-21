@@ -1,10 +1,3 @@
-/*
- *  lora-com.h
- *
- *  lora communication handler
- *  Created on: 2023. 4. 3
- */
-
 #pragma once
 
 #ifndef LORA_COM_H
@@ -20,10 +13,9 @@
 #define SEPARATOR ";"
 
 typedef struct {
-    uint8_t cs;  // ns ss
+    uint8_t cs;
     uint8_t rst;
     uint8_t irq;
-
     uint8_t count;
     uint8_t addr;
     uint8_t destination;
@@ -36,7 +28,17 @@ private:
     String dataSend;
     uint32_t sendTime;
     uint32_t receiveTime;
+
+    bool waitingForResponse;
+    unsigned long responseStartTime;
+    unsigned long responseTimeout;
+    int responseRetries;
+    int currentResponseRetry;
+    void (*responseCallback)(const String &);
+    void (*timeoutCallback)();
+
     String parseStr(String data, char separator[], int index);
+
 public:
     LoRaModule();
     ~LoRaModule();
@@ -66,6 +68,14 @@ public:
     void sendDataCb(void (*onReceive)(const String &));
     String sendDataCbWaitData(void (*onSend)(const String &));
     String sendDataCbWaitDataWithTimeout(void (*onSend)(const String &), unsigned long timeout, int maxRetries);
+
+    void sendDataAndExpectResponse(void (*onSend)(const String &), void (*onResponse)(const String &));
+    void sendDataAndExpectResponseWithTimeout(void (*onSend)(const String &), void (*onResponse)(const String &), void (*onTimeout)() = nullptr, unsigned long timeout = 1000, int maxRetries = 3);
+
+    void update();
+    void cancelResponseWait();
+    bool isWaitingForResponse();
+
     void sendDataAsync(uint32_t _time = 500);
     void sendDataAsyncCb(uint32_t _time = 500, void (*onReceive)(const String &) = nullptr);
     void sendBytes(int next);
@@ -76,4 +86,4 @@ public:
     String getStrData(String data, uint8_t index, char separator[]);
 };
 
-#endif  // LORA_COM_H
+#endif

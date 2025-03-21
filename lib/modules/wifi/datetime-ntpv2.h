@@ -22,14 +22,14 @@ uint8_t daysInMonth(uint16_t year, uint8_t month);
 uint16_t date2days(uint16_t y, uint8_t m, uint8_t d);
 uint32_t time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s);
 
-class TimeSpan {
+class TimeSpanNTPV2 {
 private:
     int32_t _seconds;
 
 public:
-    explicit TimeSpan(int32_t seconds = 0);
-    TimeSpan(int16_t days, int8_t hours, int8_t minutes, int8_t seconds);
-    TimeSpan(const TimeSpan &copy);
+    explicit TimeSpanNTPV2(int32_t seconds = 0);
+    TimeSpanNTPV2(int16_t days, int8_t hours, int8_t minutes, int8_t seconds);
+    TimeSpanNTPV2(const TimeSpanNTPV2 &copy);
 
     int16_t days() const;
     int8_t hours() const;
@@ -124,11 +124,11 @@ public:
         TIMESTAMP_TIME,
         TIMESTAMP_DATE
     };
-    String timestamp(timestampOpt opt = TIMESTAMP_FULL) const;
+    String timestamp(timestampOpt opt = TIMESTAMP_FULL);
 
-    DateTimeNTPV2 operator+(const TimeSpan &span) const;
-    DateTimeNTPV2 operator-(const TimeSpan &span) const;
-    TimeSpan operator-(const DateTimeNTPV2 &right) const;
+    DateTimeNTPV2 operator+(const TimeSpanNTPV2 &span) const;
+    DateTimeNTPV2 operator-(const TimeSpanNTPV2 &span) const;
+    TimeSpanNTPV2 operator-(const DateTimeNTPV2 &right) const;
     bool operator<(const DateTimeNTPV2 &right) const;
     bool operator>(const DateTimeNTPV2 &right) const;
     bool operator<=(const DateTimeNTPV2 &right) const;

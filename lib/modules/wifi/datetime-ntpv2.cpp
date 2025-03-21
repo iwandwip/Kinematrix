@@ -21,33 +21,33 @@ uint32_t time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
     return ((days * 24L + h) * 60 + m) * 60 + s;
 }
 
-// TimeSpan class implementations
-TimeSpan::TimeSpan(int32_t seconds)
+// TimeSpanNTPV2 class implementations
+TimeSpanNTPV2::TimeSpanNTPV2(int32_t seconds)
         : _seconds(seconds) {}
 
-TimeSpan::TimeSpan(int16_t days, int8_t hours, int8_t minutes, int8_t seconds)
+TimeSpanNTPV2::TimeSpanNTPV2(int16_t days, int8_t hours, int8_t minutes, int8_t seconds)
         : _seconds((int32_t) days * 86400L + (int32_t) hours * 3600 + (int32_t) minutes * 60 + seconds) {}
 
-TimeSpan::TimeSpan(const TimeSpan &copy)
+TimeSpanNTPV2::TimeSpanNTPV2(const TimeSpanNTPV2 &copy)
         : _seconds(copy._seconds) {}
 
-int16_t TimeSpan::days() const {
+int16_t TimeSpanNTPV2::days() const {
     return _seconds / 86400L;
 }
 
-int8_t TimeSpan::hours() const {
+int8_t TimeSpanNTPV2::hours() const {
     return (_seconds / 3600) % 24;
 }
 
-int8_t TimeSpan::minutes() const {
+int8_t TimeSpanNTPV2::minutes() const {
     return (_seconds / 60) % 60;
 }
 
-int8_t TimeSpan::seconds() const {
+int8_t TimeSpanNTPV2::seconds() const {
     return _seconds % 60;
 }
 
-int32_t TimeSpan::totalseconds() const {
+int32_t TimeSpanNTPV2::totalseconds() const {
     return _seconds;
 }
 
@@ -426,7 +426,8 @@ uint32_t DateTimeNTPV2::unixtime() const {
     return t;
 }
 
-String DateTimeNTPV2::timestamp(timestampOpt opt) const {
+String DateTimeNTPV2::timestamp(timestampOpt opt) {
+    update();
     char buffer[30];
     switch (opt) {
         case TIMESTAMP_TIME:
@@ -439,19 +440,19 @@ String DateTimeNTPV2::timestamp(timestampOpt opt) const {
             sprintf(buffer, "%04u-%02u-%02uT%02u:%02u:%02u", year(), month(), day(), hour(), minute(), second());
             break;
     }
-    return String(buffer);
+    return {buffer};
 }
 
-DateTimeNTPV2 DateTimeNTPV2::operator+(const TimeSpan &span) const {
+DateTimeNTPV2 DateTimeNTPV2::operator+(const TimeSpanNTPV2 &span) const {
     return DateTimeNTPV2(unixtime() + span.totalseconds());
 }
 
-DateTimeNTPV2 DateTimeNTPV2::operator-(const TimeSpan &span) const {
+DateTimeNTPV2 DateTimeNTPV2::operator-(const TimeSpanNTPV2 &span) const {
     return DateTimeNTPV2(unixtime() - span.totalseconds());
 }
 
-TimeSpan DateTimeNTPV2::operator-(const DateTimeNTPV2 &right) const {
-    return TimeSpan(unixtime() - right.unixtime());
+TimeSpanNTPV2 DateTimeNTPV2::operator-(const DateTimeNTPV2 &right) const {
+    return TimeSpanNTPV2(unixtime() - right.unixtime());
 }
 
 bool DateTimeNTPV2::operator<(const DateTimeNTPV2 &right) const {
