@@ -79,6 +79,7 @@ public:
     void setTimezone(long gmtOffset_sec, int daylightOffset_sec);
     void setSyncInterval(unsigned long interval);
     unsigned long getTime();
+    time_t now();
 
     String getISO8601Time();
     time_t getUnixTime();
@@ -95,7 +96,7 @@ public:
 
     bool isTimeInitialized();
     bool isValid() const;
-    char *toString(char *buffer) const;
+    char *toString(char *buffer);
 
     uint16_t getYear();
     uint8_t getMonth();

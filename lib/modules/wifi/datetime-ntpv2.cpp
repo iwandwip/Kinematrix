@@ -21,7 +21,6 @@ uint32_t time2long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
     return ((days * 24L + h) * 60 + m) * 60 + s;
 }
 
-// TimeSpanNTPV2 class implementations
 TimeSpanNTPV2::TimeSpanNTPV2(int32_t seconds)
         : _seconds(seconds) {}
 
@@ -51,7 +50,6 @@ int32_t TimeSpanNTPV2::totalseconds() const {
     return _seconds;
 }
 
-// DateTimeNTPV2 class implementation
 String DateTimeNTPV2::leadingZeros(int value, int width) {
     String result = String(value);
     while (result.length() < width) {
@@ -156,7 +154,6 @@ DateTimeNTPV2::DateTimeNTPV2(const DateTimeNTPV2 &copy) {
 
 bool DateTimeNTPV2::begin() {
     if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("WiFi not connected. Cannot synchronize time.");
         return false;
     }
 
@@ -177,7 +174,6 @@ bool DateTimeNTPV2::update() {
         return begin();
     }
 
-    // Periksa koneksi WiFi terlebih dahulu
     if (WiFi.status() != WL_CONNECTED) {
         return false;
     }
@@ -196,7 +192,6 @@ bool DateTimeNTPV2::update() {
 }
 
 bool DateTimeNTPV2::forceUpdate() {
-    // Periksa koneksi WiFi terlebih dahulu
     if (WiFi.status() != WL_CONNECTED) {
         return false;
     }
@@ -237,10 +232,22 @@ unsigned long DateTimeNTPV2::getTime() {
     return now;
 }
 
+time_t DateTimeNTPV2::now() {
+    update();
+    time_t current_time;
+    time(&current_time);
+    return current_time;
+}
+
 String DateTimeNTPV2::getISO8601Time() {
     update();
 
-    String iso8601 = String(year()) + "-" + leadingZeros(month(), 2) + "-" + leadingZeros(day(), 2) + "T" + leadingZeros(hour(), 2) + ":" + leadingZeros(minute(), 2) + ":" + leadingZeros(second(), 2);
+    String iso8601 = String(getYear()) + "-" +
+                     leadingZeros(getMonth(), 2) + "-" +
+                     leadingZeros(getDay(), 2) + "T" +
+                     leadingZeros(getHour(), 2) + ":" +
+                     leadingZeros(getMinute(), 2) + ":" +
+                     leadingZeros(getSecond(), 2);
 
     if (_gmtOffset_sec == 0 && _daylightOffset_sec == 0) {
         iso8601 += "Z";
@@ -287,6 +294,7 @@ String DateTimeNTPV2::getRFC2822Time() {
 }
 
 String DateTimeNTPV2::getRFC3339Time() {
+    update();
     String base = getFormattedTime("%Y-%m-%dT%H:%M:%S");
 
     if (_gmtOffset_sec == 0 && _daylightOffset_sec == 0) {
@@ -329,8 +337,9 @@ bool DateTimeNTPV2::isValid() const {
     return true;
 }
 
-char *DateTimeNTPV2::toString(char *buffer) const {
-    sprintf(buffer, "%04u-%02u-%02u %02u:%02u:%02u", year(), month(), day(), hour(), minute(), second());
+char *DateTimeNTPV2::toString(char *buffer) {
+    update();
+    sprintf(buffer, "%04u-%02u-%02u %02u:%02u:%02u", getYear(), getMonth(), getDay(), getHour(), getMinute(), getSecond());
     return buffer;
 }
 
@@ -422,7 +431,7 @@ uint32_t DateTimeNTPV2::secondstime() const {
 uint32_t DateTimeNTPV2::unixtime() const {
     uint32_t t;
     t = secondstime();
-    t += 946684800;  // Seconds from 1970-01-01T00:00:00 to 2000-01-01T00:00:00
+    t += 946684800;
     return t;
 }
 
@@ -431,13 +440,13 @@ String DateTimeNTPV2::timestamp(timestampOpt opt) {
     char buffer[30];
     switch (opt) {
         case TIMESTAMP_TIME:
-            sprintf(buffer, "%02u:%02u:%02u", hour(), minute(), second());
+            sprintf(buffer, "%02u:%02u:%02u", getHour(), getMinute(), getSecond());
             break;
         case TIMESTAMP_DATE:
-            sprintf(buffer, "%04u-%02u-%02u", year(), month(), day());
+            sprintf(buffer, "%04u-%02u-%02u", getYear(), getMonth(), getDay());
             break;
         default:
-            sprintf(buffer, "%04u-%02u-%02uT%02u:%02u:%02u", year(), month(), day(), hour(), minute(), second());
+            sprintf(buffer, "%04u-%02u-%02uT%02u:%02u:%02u", getYear(), getMonth(), getDay(), getHour(), getMinute(), getSecond());
             break;
     }
     return {buffer};
@@ -486,8 +495,8 @@ void DateTimeNTPV2::syncWithUnixTime() {
     }
 
     struct tm *timeinfo = localtime(&now);
-    _yOff = timeinfo->tm_year - 100;  // tm_year is years since 1900, we need years since 2000
-    _m = timeinfo->tm_mon + 1;        // tm_mon is 0-11
+    _yOff = timeinfo->tm_year - 100;
+    _m = timeinfo->tm_mon + 1;
     _d = timeinfo->tm_mday;
     _hh = timeinfo->tm_hour;
     _mm = timeinfo->tm_min;

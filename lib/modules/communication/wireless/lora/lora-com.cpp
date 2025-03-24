@@ -97,11 +97,11 @@ String LoRaModule::sendDataCbWaitData(void (*onSend)(const String &)) {
     return data;
 }
 
-String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &), unsigned long timeout, int maxRetries) {
+String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &), unsigned long timeout, int maxRetries, bool wdtTimeout) {
     int retryAttempts = 0;
     String data;
 #ifdef ESP32
-    disableLoopWDT();
+    if (wdtTimeout) disableLoopWDT();
 #endif
     while (retryAttempts < maxRetries) {
         LoRa.beginPacket();
@@ -115,7 +115,7 @@ String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &),
             if (packetSize > 0) {
                 data = LoRa.readStringUntil('\n');
 #ifdef ESP32
-                enableLoopWDT();
+                if (wdtTimeout) enableLoopWDT();
 #endif
                 return data;
             }
@@ -123,7 +123,7 @@ String LoRaModule::sendDataCbWaitDataWithTimeout(void (*onSend)(const String &),
         retryAttempts++;
     }
 #ifdef ESP32
-    enableLoopWDT();
+    if (wdtTimeout) enableLoopWDT();
 #endif
     return "";
 }

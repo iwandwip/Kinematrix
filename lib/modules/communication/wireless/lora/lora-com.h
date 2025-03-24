@@ -67,7 +67,7 @@ public:
     void sendData();
     void sendDataCb(void (*onReceive)(const String &));
     String sendDataCbWaitData(void (*onSend)(const String &));
-    String sendDataCbWaitDataWithTimeout(void (*onSend)(const String &), unsigned long timeout, int maxRetries);
+    String sendDataCbWaitDataWithTimeout(void (*onSend)(const String &), unsigned long timeout, int maxRetries, bool wdtTimeout = false);
 
     void sendDataAndExpectResponse(void (*onSend)(const String &), void (*onResponse)(const String &));
     void sendDataAndExpectResponseWithTimeout(void (*onSend)(const String &), void (*onResponse)(const String &), void (*onTimeout)() = nullptr, unsigned long timeout = 1000, int maxRetries = 3);

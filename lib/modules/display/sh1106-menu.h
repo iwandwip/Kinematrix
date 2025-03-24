@@ -52,6 +52,9 @@ private:
     int16_t displayHeight;
     void (*listenerCallback)();
 
+    void drawRoundedRect(int x, int y, int width, int height, int radius);
+    void fillRoundedRect(int x, int y, int width, int height, int radius);
+
 public:
     SH1106Menu(uint8_t address = 0x3C, int sda = -1, int scl = -1, OLEDDISPLAY_GEOMETRY g = GEOMETRY_128_64)
             : SH1106Wire(address, sda, scl, g),
@@ -59,7 +62,7 @@ public:
               cursorWidth(8), displayRows(3), displayWidth(128), displayHeight(64),
               listenerCallback(nullptr) {}
 
-    void initialize(bool _debug = false, void (*initCallback)() = nullptr);
+    void initialize(bool _debug = false, void (*initCallback)() = nullptr, bool flipVertical = false, bool flipHorizontal = false);
     void setDisplayParams(int itemHeight = 16, int startY = 10, int cursorW = 10, int rows = 3);
     void onListen(MenuCursor *menuCursor, void (*listenCallback)());
     void setListenerCallback(void (*callback)());
@@ -103,6 +106,29 @@ public:
     void showScrollableText(const char *title, const char *text);
     int showSlider(const char *title, int minValue, int maxValue, int currentValue);
     void showTextInput(const char *title, char *buffer, int maxLength);
+
+    void flipVertical(bool flip);
+    void flipHorizontal(bool flip);
+    void setFlip(bool horizontalFlip, bool verticalFlip);
+
+    void renderLargeText(const char *text, int fontSize = 24, bool withBox = false);
+    void renderSplashScreen(const char *title, const char *subtitle = nullptr, const uint8_t *logo = nullptr);
+    void renderStatusScreen(const char *title, const char *status, bool isOk = true);
+    void renderDualValueScreen(const char *title, const char *label1, const char *value1, const char *label2, const char *value2);
+    void renderCountdownScreen(const char *title, int seconds, bool showProgress = true);
+    void renderIconTextRow(int y, const uint8_t *icon, const char *text, int iconWidth = 16, int iconHeight = 16);
+    void renderCenteredText(const char *text1, const char *text2 = nullptr, const char *text3 = nullptr);
+    void renderMetricScreen(const char *title, const char *value, const char *unit, const char *subtitle = nullptr);
+    void renderBoxedText(const char *lines[], int numLines);
+
+    void renderBatteryStatus(int percentage, bool charging = false);
+    void renderSignalStrength(int strength, const char *networkName = nullptr); // strength 0-4
+    void renderClock(int hour, int minute, int second = -1, bool isAnalog = false);
+    void renderPercentageCircle(int percentage, const char *text = nullptr);
+    void renderScrollingText(const char *text, int speed = 50, int scrollCount = 1);
+    void renderAnimatedLoading(int frame);
+    void renderToggleSwitch(const char *label, bool state);
+    void renderNotification(const char *message, int timeMs = 3000);
 };
 
 #endif

@@ -104,6 +104,26 @@
 #include "../lib/modules/wifi/firebase/firebasev2/firebase-storagev2.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_APPLICATION_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-applicationv3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_FIRESTORE_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-firestorev3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_MESSAGING_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-messagingv3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_RTDB_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-rtdbv3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_STORAGE_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-storagev3.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_TELEGRAM_BOT
 #include "../lib/modules/wifi/telegram-bot.h"
 #endif

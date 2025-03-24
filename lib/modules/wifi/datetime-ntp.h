@@ -30,7 +30,7 @@ class DateTimeNTP {
 public:
     DateTimeNTP(const char *ssid, const char *password, long gmtOffset_sec, int daylightOffset_sec);
     DateTimeNTP(long gmtOffset_sec, int daylightOffset_sec);
-    DateTimeNTP(uint32_t t = 0);
+    explicit DateTimeNTP(uint32_t t = 0);
     DateTimeNTP(uint16_t year, uint8_t month, uint8_t day, uint8_t hour = 0, uint8_t min = 0, uint8_t sec = 0);
     DateTimeNTP(const DateTimeNTP &copy);
     void begin();

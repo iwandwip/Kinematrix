@@ -134,6 +134,31 @@
 #include "../lib/modules/wifi/firebase/firebasev2/firebase-storagev2.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_FIREBASE_APPLICATION_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-applicationv3.h"
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-applicationv3.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_FIRESTORE_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-firestorev3.h"
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-firestorev3.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_MESSAGING_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-messagingv3.h"
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-messagingv3.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_RTDB_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-rtdbv3.h"
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-rtdbv3.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FIREBASE_STORAGE_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-storagev3.h"
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-storagev3.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_TELEGRAM_BOT
 #include "../lib/modules/wifi/telegram-bot.h"
 #include "../lib/modules/wifi/telegram-bot.cpp"
