@@ -34,6 +34,10 @@
 #include "../lib/modules/communication/wired/serial/hard-serial.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_SERIAL_NEMA
+#include "../lib/modules/communication/wired/serial/nema-serial.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_SERIAL_SOFT
 #include "../lib/modules/communication/wired/serial/soft-serial.h"
 #endif
@@ -64,12 +68,32 @@
 #include "../lib/modules/communication/wireless/now/esp-now.h"
 #endif
 
-#ifdef ENABLE_MODULE_NODEF_PID
-#include "../lib/modules/control/PID.h"
+#ifdef ENABLE_MODULE_NODEF_DECISION_TREE
+#include "../lib/modules/control/DecisionTree.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FUZZY_MAMDANI
+#include "../lib/modules/control/FuzzyMamdani.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FUZZY_SUGENO
+#include "../lib/modules/control/FuzzySugeno.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FUZZY_TSUKAMOTO
+#include "../lib/modules/control/FuzzyTsukamoto.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_KNN
 #include "../lib/modules/control/KNN.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PID
+#include "../lib/modules/control/PID.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PID_CONTROLLER
+#include "../lib/modules/control/PIDController.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_DATETIME_NTP
@@ -81,7 +105,11 @@
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_GOOGLE_SHEETS
-#include "../lib/modules/wifi/datetime-ntpv2.h"
+#include "../lib/modules/wifi/google-sheets.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_MQTT_MANAGER
+#include "../lib/modules/wifi/mqtt-manager.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_FIREBASE_HANDLER
@@ -215,6 +243,10 @@
 
 #ifdef ENABLE_MODULE_NODEF_TIMER_DURATION
 #include "../lib/modules/time/timer-duration.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_TIMER_MANAGER
+#include "../lib/modules/time/timer-manager.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_TIMER_TASK

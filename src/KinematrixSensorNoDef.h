@@ -58,6 +58,10 @@
 #include "../lib/sensors/flowmeterv2-sens.h"
 #endif
 
+#ifdef ENABLE_SENSOR_NODEF_FLOWMETERV3
+#include "../lib/sensors/flowmeterv3-sens.h"
+#endif
+
 #ifdef ENABLE_SENSOR_NODEF_GPS
 #include "../lib/sensors/gps-sens.h"
 #endif

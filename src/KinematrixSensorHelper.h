@@ -74,6 +74,11 @@
 #include "../lib/sensors/flowmeterv2-sens.cpp"
 #endif
 
+#ifdef ENABLE_SENSOR_HELPER_FLOWMETERV3
+#include "../lib/sensors/flowmeterv3-sens.h"
+#include "../lib/sensors/flowmeterv3-sens.cpp"
+#endif
+
 #ifdef ENABLE_SENSOR_HELPER_GPS
 #include "../lib/sensors/gps-sens.h"
 #include "../lib/sensors/gps-sens.cpp"

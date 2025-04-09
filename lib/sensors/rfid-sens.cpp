@@ -5,8 +5,9 @@
  *  Created on: 2023. 4. 3
  */
 
-#include "rfid-sens.h"
 #include "Arduino.h"
+#include "rfid-sens.h"
+#include "SPI.h"
 
 RFID_Mfrc522::~RFID_Mfrc522() = default;
 

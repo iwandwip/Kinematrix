@@ -1,5 +1,5 @@
-#ifndef KADITA_LCD_MENU_H
-#define KADITA_LCD_MENU_H
+#ifndef KINEMATRIX_LCD_MENU_H
+#define KINEMATRIX_LCD_MENU_H
 
 #pragma message("[COMPILED]: lcd-menu.h")
 
@@ -37,6 +37,7 @@ struct MenuProperties {
     int select;
     int index;
     int upCount;
+    int *itemState;
 };
 
 class LcdMenu : public LiquidCrystal_I2C {
@@ -54,11 +55,23 @@ public:
     void showMenu(MenuProperties *properties, bool forced = false, uint32_t showTime = 250);
     void onCursor(MenuProperties *properties);
     void showCursor(MenuProperties *properties);
+
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)());
     void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)());
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor));
-    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(),
-                  void (*optionCallback)(MenuCursor *cursor));
+    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(MenuCursor *cursor));
+
+    void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(int state));
+    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(int state));
+    void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor, int state));
+    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(MenuCursor *cursor, int state));
+
+    int getState(MenuProperties *properties, uint8_t index);
+    int getState(MenuProperties *properties, const char *options);
+    void setState(MenuProperties *properties, uint8_t index, int state);
+    void setState(MenuProperties *properties, const char *options, int state);
+    void updateMenuText(MenuProperties *properties, uint8_t index, int state, const char *format, ...);
+
     void formatMenu(MenuProperties *properties, uint8_t index, const char *format, ...);
     void clearMenu(MenuProperties *firstMenu, ...);
     int begin(int nums);

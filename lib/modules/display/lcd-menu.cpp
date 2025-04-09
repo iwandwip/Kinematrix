@@ -237,6 +237,174 @@ void LcdMenu::onSelect(MenuProperties *properties, const char *options, void (*o
     }
 }
 
+void LcdMenu::onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
+void LcdMenu::onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(),
+                       void (*optionCallback)(int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+            properties->callbackMenu[i] = onClickCallback;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
+void LcdMenu::onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor, int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(cursor_, properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
+void LcdMenu::onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(),
+                       void (*optionCallback)(MenuCursor *cursor, int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+            properties->callbackMenu[i] = onClickCallback;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(cursor_, properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
+int LcdMenu::getState(MenuProperties *properties, uint8_t index) {
+    if (index >= properties->len) {
+        return -1;
+    }
+    return properties->itemState[index];
+}
+
+int LcdMenu::getState(MenuProperties *properties, const char *options) {
+    for (uint8_t i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            return properties->itemState[i];
+        }
+    }
+    return -1;
+}
+
+void LcdMenu::setState(MenuProperties *properties, uint8_t index, int state) {
+    if (index < properties->len) {
+        properties->itemState[index] = state;
+    }
+}
+
+void LcdMenu::setState(MenuProperties *properties, const char *options, int state) {
+    for (uint8_t i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            setState(properties, i, state);
+            return;
+        }
+    }
+}
+
+void LcdMenu::updateMenuText(MenuProperties *properties, uint8_t index, int state, const char *format, ...) {
+    if (index >= properties->len) {
+        return;
+    }
+
+    properties->itemState[index] = state;
+
+    va_list args;
+    va_start(args, format);
+    vsnprintf(properties->text[index], MAX_BUFF_LEN, format, args);
+    va_end(args);
+}
+
 void LcdMenu::formatMenu(MenuProperties *properties, uint8_t index, const char *format, ...) {
     va_list args;
     va_start(args, format);
@@ -299,6 +467,8 @@ MenuProperties *LcdMenu::createMenu(int menuSize, ...) {
         properties->text = new char *[menuSize];
         properties->isHasCb = new bool[menuSize];
         properties->callbackMenu = new CallbackMenu[menuSize];
+        properties->itemState = new int[menuSize];
+
         for (uint8_t i = 0; i < menuSize; ++i) {
             const char *menuItem = va_arg(args, const char *);
             properties->text[i] = new char[MAX_BUFF_LEN];
@@ -306,10 +476,13 @@ MenuProperties *LcdMenu::createMenu(int menuSize, ...) {
             if (menuItem != nullptr) strcpy(properties->text[i], menuItem);
             properties->isHasCb[i] = false;
             properties->callbackMenu[i] = nullptr;
+            properties->itemState[i] = 0;
         }
     } else {
         properties->text = nullptr;
         properties->isHasCb = nullptr;
+        properties->callbackMenu = nullptr;
+        properties->itemState = nullptr;
     }
 
     va_end(args);
@@ -329,15 +502,22 @@ MenuProperties *LcdMenu::createEmptyMenu(int menuSize, const char *text) {
     if (menuSize > 0) {
         properties->text = new char *[menuSize];
         properties->isHasCb = new bool[menuSize];
+        properties->callbackMenu = new CallbackMenu[menuSize];
+        properties->itemState = new int[menuSize];
+
         for (uint8_t i = 0; i < menuSize; ++i) {
             properties->text[i] = new char[MAX_BUFF_LEN];
             strcpy(properties->text[i], "default");
             if (text != nullptr) strcpy(properties->text[i], text);
             properties->isHasCb[i] = false;
+            properties->callbackMenu[i] = nullptr;
+            properties->itemState[i] = 0;
         }
     } else {
         properties->text = nullptr;
         properties->isHasCb = nullptr;
+        properties->callbackMenu = nullptr;
+        properties->itemState = nullptr;
     }
     return properties;
 }
@@ -351,6 +531,7 @@ void LcdMenu::freeMenu(MenuProperties *menuProperties) {
     }
     delete[] menuProperties->isHasCb;
     delete[] menuProperties->callbackMenu;
+    delete[] menuProperties->itemState;
     delete menuProperties;
 }
 

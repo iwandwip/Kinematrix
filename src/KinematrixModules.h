@@ -45,6 +45,11 @@
 #include "../lib/modules/communication/wired/serial/hard-serial.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_SERIAL_NEMA
+#include "../lib/modules/communication/wired/serial/nema-serial.h"
+#include "../lib/modules/communication/wired/serial/nema-serial.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_SERIAL_SOFT
 #include "../lib/modules/communication/wired/serial/soft-serial.h"
 #include "../lib/modules/communication/wired/serial/soft-serial.cpp"
@@ -84,14 +89,39 @@
 #include "../lib/modules/communication/wireless/now/esp-now.cpp"
 #endif
 
-#ifdef ENABLE_MODULE_PID
-#include "../lib/modules/control/PID.h"
-#include "../lib/modules/control/PID.cpp"
+#ifdef ENABLE_MODULE_DECISION_TREE
+#include "../lib/modules/control/DecisionTree.h"
+#include "../lib/modules/control/DecisionTree.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FUZZY_MAMDANI
+#include "../lib/modules/control/FuzzyMamdani.h"
+#include "../lib/modules/control/FuzzyMamdani.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FUZZY_SUGENO
+#include "../lib/modules/control/FuzzySugeno.h"
+#include "../lib/modules/control/FuzzySugeno.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FUZZY_TSUKAMOTO
+#include "../lib/modules/control/FuzzyTsukamoto.h"
+#include "../lib/modules/control/FuzzyTsukamoto.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_KNN
 #include "../lib/modules/control/KNN.h"
 #include "../lib/modules/control/KNN.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PID
+#include "../lib/modules/control/PID.h"
+#include "../lib/modules/control/PID.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PID_CONTROLLER
+#include "../lib/modules/control/PIDController.h"
+#include "../lib/modules/control/PIDController.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_DATETIME_NTP
@@ -107,6 +137,11 @@
 #ifdef ENABLE_MODULE_GOOGLE_SHEETS
 #include "../lib/modules/wifi/google-sheets.h"
 #include "../lib/modules/wifi/google-sheets.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_MQTT_MANAGER
+#include "../lib/modules/wifi/mqtt-manager.h"
+#include "../lib/modules/wifi/mqtt-manager.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_FIREBASE_HANDLER
@@ -274,6 +309,11 @@
 #ifdef ENABLE_MODULE_TIMER_DURATION
 #include "../lib/modules/time/timer-duration.h"
 #include "../lib/modules/time/timer-duration.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_TIMER_MANAGER
+#include "../lib/modules/time/timer-manager.h"
+#include "../lib/modules/time/timer-manager.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_TIMER_TASK

@@ -19,6 +19,7 @@
 
 #include "modules/communication/wired/serial/enhanced-serial.h"
 #include "modules/communication/wired/serial/hard-serial.h"
+#include "modules/communication/wired/serial/nema-serial.h"
 #include "modules/communication/wired/serial/soft-serial.h"
 #include "modules/communication/wired/serial/swap-serial.h"
 
@@ -28,12 +29,18 @@
 #include "modules/communication/wireless/lora/lora-comv2.h"
 #include "modules/communication/wireless/now/esp-now.h"
 
-#include "modules/control/PID.h"
+#include "modules/control/DecisionTree.h"
+#include "modules/control/FuzzyMamdani.h"
+#include "modules/control/FuzzySugeno.h"
+#include "modules/control/FuzzyTsukamoto.h"
 #include "modules/control/KNN.h"
+#include "modules/control/PID.h"
+#include "modules/control/PIDController.h"
 
 #include "modules/wifi/datetime-ntp.h"
 #include "modules/wifi/datetime-ntpv2.h"
 #include "modules/wifi/google-sheets.h"
+#include "modules/wifi/mqtt-manager.h"
 #include "modules/wifi/firebase/firebasev1/firebase-handler.h"
 #include "modules/wifi/firebase/firebasev2/firebase-firestorev2.h"
 #include "modules/wifi/firebase/firebasev2/firebase-messagingv2.h"
@@ -72,6 +79,7 @@
 
 #include "modules/task/Task.h"
 #include "modules/time/timer-duration.h"
+#include "modules/time/timer-manager.h"
 #include "modules/time/timer-task.h"
 
 // sensor
@@ -85,6 +93,7 @@
 #include "sensors/dust-sens.h"
 #include "sensors/flowmeter-sens.h"
 #include "sensors/flowmeterv2-sens.h"
+#include "sensors/flowmeterv3-sens.h"
 #include "sensors/gps-sens.h"
 #include "sensors/gm67-sens.h"
 #include "sensors/hx711-sens.h"
