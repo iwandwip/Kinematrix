@@ -84,6 +84,12 @@
 #include "../lib/modules/communication/wireless/lora/lora-comv2.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_LORA_EBYTE_E220
+#include "../lib/modules/communication/wireless/lora/lora-ebyte-e220.h"
+#include "../lib/modules/communication/wireless/lora/lora-ebyte-e220.cpp"
+#endif
+
+
 #ifdef ENABLE_MODULE_ESP_NOW
 #include "../lib/modules/communication/wireless/now/esp-now.h"
 #include "../lib/modules/communication/wireless/now/esp-now.cpp"
@@ -122,6 +128,16 @@
 #ifdef ENABLE_MODULE_PID_CONTROLLER
 #include "../lib/modules/control/PIDController.h"
 #include "../lib/modules/control/PIDController.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SERIAL_DEBUGGER
+#include "../lib/modules/control/SerialDebugger.h"
+#include "../lib/modules/control/SerialDebugger.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SERIAL_DEBUGGER_LITE
+#include "../lib/modules/control/SerialDebuggerLite.h"
+#include "../lib/modules/control/SerialDebuggerLite.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_DATETIME_NTP
@@ -229,6 +245,7 @@
 #ifdef ENABLE_MODULE_SH1106_MENU
 #include "../lib/modules/display/sh1106-menu.h"
 #include "../lib/modules/display/sh1106-menu.cpp"
+#include "../lib/modules/display/sh1106-render.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_MOTOR_DRIVER
@@ -254,6 +271,11 @@
 #ifdef ENABLE_MODULE_SD_ARDUINO
 #include "../lib/modules/file/SDArduino.h"
 #include "../lib/modules/file/SDArduino.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SD_CARD_MODULE_ESP32
+#include "../lib/modules/file/SDCardModuleESP32.h"
+#include "../lib/modules/file/SDCardModuleESP32.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_DIGITAL_INPUT
@@ -299,6 +321,11 @@
 #ifdef ENABLE_MODULE_SEVEN_SEGMENT_74HC595
 #include "../lib/modules/io/seven-segment-74hc595.h"
 #include "../lib/modules/io/seven-segment-74hc595.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FREE_RTOS_HANDLER
+#include "../lib/modules/task/FreeRTOSHandler.h"
+#include "../lib/modules/task/FreeRTOSHandler.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_TASK_HANDLER

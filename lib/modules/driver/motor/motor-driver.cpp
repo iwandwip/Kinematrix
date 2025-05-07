@@ -1,9 +1,12 @@
 #include "motor-driver.h"
 
-namespace BTS8960 {
-    MotorDriver::MotorDriver(int EN, int L_PWM, int R_PWM)
-            : MotorDriver(EN, 0, L_PWM, R_PWM) {
+namespace BTS7960 {
+    MotorDriver::MotorDriver(int L_PWM, int R_PWM)
+            : MotorDriver(NC, NC, L_PWM, R_PWM) {
+    }
 
+    MotorDriver::MotorDriver(int EN, int L_PWM, int R_PWM)
+            : MotorDriver(EN, EN, L_PWM, R_PWM) {
     }
 
     MotorDriver::MotorDriver(int L_EN, int R_EN, int L_PWM, int R_PWM) {
@@ -11,58 +14,105 @@ namespace BTS8960 {
         pwmRight = R_PWM;
         enableLeft = L_EN;
         enableRight = R_EN;
-        pinMode(pwmRight, OUTPUT);
+#if defined(ESP32)
         pinMode(pwmLeft, OUTPUT);
-        if (enableLeft == -1 || enableRight == 1) return;
-        pinMode(enableLeft, OUTPUT);
-        pinMode(enableRight, OUTPUT);
+        pinMode(pwmRight, OUTPUT);
+#else
+        pinMode(pwmLeft, OUTPUT);
+        pinMode(pwmRight, OUTPUT);
+#endif
+        if (enableLeft != NC) {
+            pinMode(enableLeft, OUTPUT);
+        }
+        if (enableRight != NC) {
+            pinMode(enableRight, OUTPUT);
+        }
+    }
+
+#if defined(ESP32)
+
+    void MotorDriver::setup(int freq, int chLeft, int chRight, int resolution) {
+        pwmChannelLeft = chLeft;
+        pwmChannelRight = chRight;
+        ledcSetup(pwmChannelLeft, freq, resolution);
+        ledcSetup(pwmChannelRight, freq, resolution);
+        ledcAttachPin(pwmLeft, pwmChannelLeft);
+        ledcAttachPin(pwmRight, pwmChannelRight);
+    }
+
+#endif
+
+    void MotorDriver::turnLeft(int pwm) {
+#if defined(ESP32)
+        ledcWrite(pwmChannelLeft, pwm);
+        ledcWrite(pwmChannelRight, 0);
+#else
+        analogWrite(pwmLeft, pwm);
+        analogWrite(pwmRight, 0);
+#endif
     }
 
     void MotorDriver::turnRight(int pwm) {
+#if defined(ESP32)
+        ledcWrite(pwmChannelLeft, 0);
+        ledcWrite(pwmChannelRight, pwm);
+#else
         analogWrite(pwmLeft, 0);
         analogWrite(pwmRight, pwm);
-    }
-
-    void MotorDriver::turnLeft(int pwm) {
-        analogWrite(pwmLeft, pwm);
-        analogWrite(pwmRight, 0);
+#endif
     }
 
     void MotorDriver::enable() {
-        if (enableLeft == -1 || enableRight == 1) return;
-        digitalWrite(enableLeft, HIGH);
-        if (enableRight != 0) digitalWrite(enableRight, HIGH);
+        if (enableLeft != NC) {
+            digitalWrite(enableLeft, HIGH);
+        }
+        if (enableRight != NC) {
+            digitalWrite(enableRight, HIGH);
+        }
     }
 
     void MotorDriver::disable() {
-        if (enableLeft == -1 || enableRight == 1) return;
-        digitalWrite(enableLeft, LOW);
-        if (enableRight != 0) digitalWrite(enableRight, LOW);
+        if (enableLeft != NC) {
+            digitalWrite(enableLeft, LOW);
+        }
+        if (enableRight != NC) {
+            digitalWrite(enableRight, LOW);
+        }
     }
 
     void MotorDriver::stop() {
-        analogWrite(pwmLeft, LOW);
-        analogWrite(pwmRight, LOW);
+#if defined(ESP32)
+        ledcWrite(pwmChannelLeft, 0);
+        ledcWrite(pwmChannelRight, 0);
+#else
+        analogWrite(pwmLeft, 0);
+        analogWrite(pwmRight, 0);
+#endif
     }
-
 }
 
 namespace L298N {
+    MotorDriver::MotorDriver(int IN1, int IN2)
+            : MotorDriver(NC, IN1, IN2) {
+    }
+
     MotorDriver::MotorDriver(int EN, int IN1, int IN2) {
         enablePin = EN;
         inputLeftPin = IN1;
         inputRightPin = IN2;
 
-        if (enablePin != -1) pinMode(enablePin, OUTPUT);
-        if (inputLeftPin != -1) pinMode(inputLeftPin, OUTPUT);
-        if (inputRightPin != -1) pinMode(inputRightPin, OUTPUT);
+        if (enablePin != NC) pinMode(enablePin, OUTPUT);
+        if (inputLeftPin != NC) pinMode(inputLeftPin, OUTPUT);
+        if (inputRightPin != NC) pinMode(inputRightPin, OUTPUT);
     }
 
 #if defined(ESP32)
 
     void MotorDriver::setup(int freq, int ch, int resolution) {
-        if (enablePin == -1) return;
+        if (enablePin == NC) return;
         pwmChannel = ch;
+        pwmFreq = freq;
+        pwmResolution = resolution;
         ledcSetup(pwmChannel, freq, resolution);
         ledcAttachPin(enablePin, pwmChannel);
     }
@@ -70,9 +120,9 @@ namespace L298N {
 #endif
 
     void MotorDriver::turnLeft(int pwm) {
-        if (inputLeftPin != -1) digitalWrite(inputLeftPin, HIGH);
-        if (inputRightPin != -1) digitalWrite(inputRightPin, LOW);
-        if (enablePin == -1) return;
+        if (inputLeftPin != NC) digitalWrite(inputLeftPin, HIGH);
+        if (inputRightPin != NC) digitalWrite(inputRightPin, LOW);
+        if (enablePin == NC) return;
 #if defined(ESP32)
         ledcWrite(pwmChannel, pwm);
 #else
@@ -81,9 +131,9 @@ namespace L298N {
     }
 
     void MotorDriver::turnRight(int pwm) {
-        if (inputLeftPin != -1) digitalWrite(inputLeftPin, LOW);
-        if (inputRightPin != -1) digitalWrite(inputRightPin, HIGH);
-        if (enablePin == -1) return;
+        if (inputLeftPin != NC) digitalWrite(inputLeftPin, LOW);
+        if (inputRightPin != NC) digitalWrite(inputRightPin, HIGH);
+        if (enablePin == NC) return;
 #if defined(ESP32)
         ledcWrite(pwmChannel, pwm);
 #else
@@ -92,9 +142,9 @@ namespace L298N {
     }
 
     void MotorDriver::stop() {
-        if (inputLeftPin != -1) digitalWrite(inputLeftPin, LOW);
-        if (inputRightPin != -1) digitalWrite(inputRightPin, LOW);
-        if (enablePin == -1) return;
+        if (inputLeftPin != NC) digitalWrite(inputLeftPin, LOW);
+        if (inputRightPin != NC) digitalWrite(inputRightPin, LOW);
+        if (enablePin == NC) return;
 #if defined(ESP32)
         ledcWrite(pwmChannel, 0);
 #else

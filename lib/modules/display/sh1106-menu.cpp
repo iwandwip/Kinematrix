@@ -240,6 +240,174 @@ void SH1106Menu::onSelect(MenuProperties *properties, const char *options, void 
     }
 }
 
+int SH1106Menu::getState(MenuProperties *properties, uint8_t index) {
+    if (index >= properties->len) {
+        return -1;
+    }
+    return properties->itemState[index];
+}
+
+int SH1106Menu::getState(MenuProperties *properties, const char *options) {
+    for (uint8_t i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            return properties->itemState[i];
+        }
+    }
+    return -1;
+}
+
+void SH1106Menu::setState(MenuProperties *properties, uint8_t index, int state) {
+    if (index < properties->len) {
+        properties->itemState[index] = state;
+    }
+}
+
+void SH1106Menu::setState(MenuProperties *properties, const char *options, int state) {
+    for (uint8_t i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            setState(properties, i, state);
+            return;
+        }
+    }
+}
+
+void SH1106Menu::updateMenuText(MenuProperties *properties, uint8_t index, int state, const char *format, ...) {
+    if (index >= properties->len) {
+        return;
+    }
+
+    properties->itemState[index] = state;
+
+    va_list args;
+    va_start(args, format);
+    vsnprintf(properties->text[index], MAX_BUFF_LEN, format, args);
+    va_end(args);
+}
+
+void SH1106Menu::onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
+void SH1106Menu::onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(),
+                          void (*optionCallback)(int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+            properties->callbackMenu[i] = onClickCallback;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
+void SH1106Menu::onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor, int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(cursor_, properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
+void SH1106Menu::onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(),
+                          void (*optionCallback)(MenuCursor *cursor, int state)) {
+    for (int i = 0; i < properties->len; ++i) {
+        if (strcmp(properties->text[i], options) == 0) {
+            properties->isHasCb[i] = true;
+            properties->callbackMenu[i] = onClickCallback;
+        }
+    }
+
+    if (strcmp(properties->option, options) == 0 && optionCallback != nullptr) {
+        int itemIndex = -1;
+        for (int i = 0; i < properties->len; ++i) {
+            if (strcmp(properties->text[i], options) == 0) {
+                itemIndex = i;
+                break;
+            }
+        }
+
+        if (itemIndex >= 0) {
+            optionCallback(cursor_, properties->itemState[itemIndex]);
+        }
+
+        if (cursor_->back) {
+            cursor_->back = 0;
+            freeCharArray(properties->option);
+            properties->select = 0;
+            properties->index = 0;
+            properties->upCount = 0;
+        }
+    }
+}
+
 void SH1106Menu::formatMenu(MenuProperties *properties, uint8_t index, const char *format, ...) {
     va_list args;
     va_start(args, format);
@@ -302,6 +470,8 @@ MenuProperties *SH1106Menu::createMenu(int menuSize, ...) {
         properties->text = new char *[menuSize];
         properties->isHasCb = new bool[menuSize];
         properties->callbackMenu = new CallbackMenu[menuSize];
+        properties->itemState = new int[menuSize];
+
         for (uint8_t i = 0; i < menuSize; ++i) {
             const char *menuItem = va_arg(args, const char *);
             properties->text[i] = new char[MAX_BUFF_LEN];
@@ -309,11 +479,13 @@ MenuProperties *SH1106Menu::createMenu(int menuSize, ...) {
             if (menuItem != nullptr) strcpy(properties->text[i], menuItem);
             properties->isHasCb[i] = false;
             properties->callbackMenu[i] = nullptr;
+            properties->itemState[i] = 0;
         }
     } else {
         properties->text = nullptr;
         properties->isHasCb = nullptr;
         properties->callbackMenu = nullptr;
+        properties->itemState = nullptr;
     }
 
     va_end(args);
@@ -334,17 +506,21 @@ MenuProperties *SH1106Menu::createEmptyMenu(int menuSize, const char *text) {
         properties->text = new char *[menuSize];
         properties->isHasCb = new bool[menuSize];
         properties->callbackMenu = new CallbackMenu[menuSize];
+        properties->itemState = new int[menuSize];
+
         for (uint8_t i = 0; i < menuSize; ++i) {
             properties->text[i] = new char[MAX_BUFF_LEN];
             strcpy(properties->text[i], "default");
             if (text != nullptr) strcpy(properties->text[i], text);
             properties->isHasCb[i] = false;
             properties->callbackMenu[i] = nullptr;
+            properties->itemState[i] = 0;
         }
     } else {
         properties->text = nullptr;
         properties->isHasCb = nullptr;
         properties->callbackMenu = nullptr;
+        properties->itemState = nullptr;
     }
     return properties;
 }
@@ -358,6 +534,7 @@ void SH1106Menu::freeMenu(MenuProperties *menuProperties) {
     }
     delete[] menuProperties->isHasCb;
     delete[] menuProperties->callbackMenu;
+    delete[] menuProperties->itemState;
     delete menuProperties;
 }
 
@@ -380,25 +557,6 @@ void SH1106Menu::debug(MenuProperties *properties, uint8_t index) {
 
 void SH1106Menu::wait(uint32_t time) {
     delay(time);
-}
-
-void SH1106Menu::renderInfoScreen(const char *title, const char *line1, const char *line2, const char *line3) {
-    clear();
-
-    setColor(WHITE);
-    fillRect(0, 0, 128, 15);
-    setColor(BLACK);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(64, 3, title);
-
-    setColor(WHITE);
-    drawRect(0, 15, 128, 49);
-
-    setTextAlignment(TEXT_ALIGN_LEFT);
-    drawString(8, 20, line1);
-    drawString(8, 32, line2);
-    drawString(8, 44, line3);
-    display();
 }
 
 #ifdef WIFI_SUPPORTED
@@ -600,7 +758,6 @@ bool SH1106Menu::showConfirmation(const char *title, const char *message) {
 
         clear();
 
-        // Draw header
         setColor(WHITE);
         fillRect(0, 0, displayWidth, 15);
         setColor(BLACK);
@@ -610,18 +767,15 @@ bool SH1106Menu::showConfirmation(const char *title, const char *message) {
         setColor(WHITE);
         setTextAlignment(TEXT_ALIGN_CENTER);
 
-        // Draw a message with position adjustment
         drawString(displayWidth / 2, 20, message);
 
-        // Horizontal layout for buttons to fit better on screen
         int btnWidth = 40;
         int btnHeight = 15;
         int btnGap = 10;
         int yesX = (displayWidth / 2) - btnWidth - (btnGap / 2);
         int noX = (displayWidth / 2) + (btnGap / 2);
-        int btnY = 38;  // Move buttons higher up
+        int btnY = 38;
 
-        // Draw Yes button
         if (selected) {
             setColor(WHITE);
             fillRect(yesX, btnY, btnWidth, btnHeight);
@@ -633,7 +787,6 @@ bool SH1106Menu::showConfirmation(const char *title, const char *message) {
             drawString(yesX + btnWidth / 2, btnY + 3, "Ya");
         }
 
-        // Draw No button
         if (!selected) {
             setColor(WHITE);
             fillRect(noX, btnY, btnWidth, btnHeight);
@@ -950,7 +1103,6 @@ void SH1106Menu::showTextInput(const char *title, char *buffer, int maxLength) {
 
         clear();
 
-        // Draw header
         setColor(WHITE);
         fillRect(0, 0, displayWidth, 15);
         setColor(BLACK);
@@ -959,7 +1111,6 @@ void SH1106Menu::showTextInput(const char *title, char *buffer, int maxLength) {
 
         setColor(WHITE);
 
-        // Display current text
         String currentText = String(buffer);
         if (getStringWidth(currentText.c_str()) > displayWidth - 10) {
             int visibleLength = 0;
@@ -976,7 +1127,6 @@ void SH1106Menu::showTextInput(const char *title, char *buffer, int maxLength) {
         setTextAlignment(TEXT_ALIGN_CENTER);
         drawString(displayWidth / 2, 18, currentText);
 
-        // Show text cursor at current position
         if (millis() % 1000 < 500) {
             int cursorX = (displayWidth / 2) - (getStringWidth(currentText.c_str()) / 2);
             for (int i = 0; i < cursorPos; i++) {
@@ -987,7 +1137,6 @@ void SH1106Menu::showTextInput(const char *title, char *buffer, int maxLength) {
             drawLine(cursorX, 18, cursorX, 26);
         }
 
-        // Character selection UI
         if (modeSelectChar) {
             setTextAlignment(TEXT_ALIGN_CENTER);
 
@@ -995,10 +1144,8 @@ void SH1106Menu::showTextInput(const char *title, char *buffer, int maxLength) {
             char currChar = charset[currentChar];
             char nextChar = charset[(currentChar + 1) % charsetLength];
 
-            // Display current character with up/down arrows
             drawString(displayWidth / 2, 30, "^");
 
-            // Make the selected character more prominent
             String charStr = String(currChar);
             fillRect(displayWidth / 2 - 6, 36, 12, 12);
             setColor(BLACK);
@@ -1007,11 +1154,9 @@ void SH1106Menu::showTextInput(const char *title, char *buffer, int maxLength) {
 
             drawString(displayWidth / 2, 50, "v");
 
-            // Display instructions at the bottom
             setTextAlignment(TEXT_ALIGN_CENTER);
             drawString(displayWidth / 2, 56, "Select: pilih");
         } else {
-            // Confirmation mode UI
             setTextAlignment(TEXT_ALIGN_CENTER);
             drawString(displayWidth / 2, 38, "Select: tambah");
             drawString(displayWidth / 2, 48, "Back: selesai");
@@ -1042,7 +1187,6 @@ void SH1106Menu::showTextInput(const char *title, char *buffer, int maxLength) {
             }
 
             if (cursor_->select && cursorPos < maxLength - 1) {
-                // Insert character at cursor position
                 for (int i = strlen(buffer) + 1; i > cursorPos; i--) {
                     buffer[i] = buffer[i - 1];
                 }
@@ -1092,682 +1236,4 @@ void SH1106Menu::setFlip(bool horizontalFlip, bool verticalFlip) {
     } else if (verticalFlip) {
         flipScreenVertically();
     }
-}
-
-void SH1106Menu::renderLargeText(const char *text, int fontSize, bool withBox) {
-    clear();
-    if (fontSize == 24) {
-        setFont(ArialMT_Plain_24);
-    } else if (fontSize == 16) {
-        setFont(ArialMT_Plain_16);
-    } else {
-        setFont(ArialMT_Plain_10);
-    }
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    int textWidth = getStringWidth(text);
-    int yPos = (displayHeight - fontSize) / 2;
-    if (withBox) {
-        int boxPadding = 6;
-        int boxWidth = textWidth + (2 * boxPadding);
-        int boxHeight = fontSize + (2 * boxPadding);
-        int boxX = (displayWidth - boxWidth) / 2;
-        int boxY = yPos - boxPadding;
-        drawRect(boxX, boxY, boxWidth, boxHeight);
-    }
-    drawString(displayWidth / 2, yPos, text);
-    display();
-}
-
-void SH1106Menu::renderSplashScreen(const char *title, const char *subtitle, const uint8_t *logo) {
-    clear();
-    int yPos = 10;
-    if (logo != nullptr) {
-        int logoWidth = 32;
-        int logoHeight = 32;
-        int logoX = (displayWidth - logoWidth) / 2;
-        drawFastImage(logoX, yPos, logoWidth, logoHeight, logo);
-        yPos += logoHeight + 5;
-    }
-    setFont(ArialMT_Plain_16);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, yPos, title);
-
-    if (subtitle != nullptr) {
-        setFont(ArialMT_Plain_10);
-        drawString(displayWidth / 2, yPos + 18, subtitle);
-    }
-    display();
-}
-
-void SH1106Menu::renderStatusScreen(const char *title, const char *status, bool isOk) {
-    clear();
-    setColor(WHITE);
-    fillRect(0, 0, displayWidth, 15);
-    setColor(BLACK);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, 2, title);
-
-    setColor(WHITE);
-    int centerX = displayWidth / 2;
-    int centerY = 30;
-    int radius = 10;
-
-    if (isOk) {
-        drawCircle(centerX, centerY, radius);
-        drawLine(centerX - 5, centerY, centerX - 2, centerY + 3);
-        drawLine(centerX - 2, centerY + 3, centerX + 5, centerY - 4);
-    } else {
-        drawCircle(centerX, centerY, radius);
-        drawLine(centerX - 5, centerY - 5, centerX + 5, centerY + 5);
-        drawLine(centerX + 5, centerY - 5, centerX - 5, centerY + 5);
-    }
-
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(centerX, centerY + 15, status);
-    display();
-}
-
-void SH1106Menu::renderDualValueScreen(const char *title, const char *label1, const char *value1, const char *label2, const char *value2) {
-    clear();
-    setColor(WHITE);
-    fillRect(0, 0, displayWidth, 15);
-    setColor(BLACK);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, 2, title);
-
-    setColor(WHITE);
-    setTextAlignment(TEXT_ALIGN_LEFT);
-
-    int yPos1 = 20;
-    drawString(5, yPos1, label1);
-    setFont(ArialMT_Plain_16);
-    drawString(5, yPos1 + 12, value1);
-
-    int yPos2 = 40;
-    setFont(ArialMT_Plain_10);
-    drawString(5, yPos2, label2);
-    setFont(ArialMT_Plain_16);
-    drawString(5, yPos2 + 12, value2);
-
-    setFont(ArialMT_Plain_10);
-    display();
-}
-
-void SH1106Menu::renderCountdownScreen(const char *title, int seconds, bool showProgress) {
-    clear();
-    setColor(WHITE);
-    fillRect(0, 0, displayWidth, 15);
-    setColor(BLACK);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, 2, title);
-
-    setColor(WHITE);
-
-    int minutes = seconds / 60;
-    int remainingSeconds = seconds % 60;
-    char timeString[10];
-    sprintf(timeString, "%02d:%02d", minutes, remainingSeconds);
-
-    setFont(ArialMT_Plain_24);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, 20, timeString);
-
-    if (showProgress) {
-        int barWidth = 100;
-        int barHeight = 6;
-        int barX = (displayWidth - barWidth) / 2;
-        int barY = 52;
-
-        drawRect(barX, barY, barWidth, barHeight);
-
-        // Calculate progress (assuming 60 seconds = full bar)
-        int maxSeconds = 60;  // Change this to match your use case
-        int progress = map(seconds, 0, maxSeconds, 0, barWidth);
-        if (progress > 0) {
-            fillRect(barX, barY, progress, barHeight);
-        }
-    }
-
-    setFont(ArialMT_Plain_10);  // Reset font
-    display();
-}
-
-void SH1106Menu::renderIconTextRow(int y, const uint8_t *icon, const char *text, int iconWidth, int iconHeight) {
-    if (icon != nullptr) {
-        drawFastImage(5, y, iconWidth, iconHeight, icon);
-        drawString(10 + iconWidth, y + (iconHeight - 10) / 2, text);
-    } else {
-        drawString(5, y, text);
-    }
-}
-
-void SH1106Menu::renderCenteredText(const char *text1, const char *text2, const char *text3) {
-    clear();
-
-    int yPos = displayHeight / 2;
-    int spacing = 12;
-    int totalHeight = 0;
-
-    if (text1) totalHeight += spacing;
-    if (text2) totalHeight += spacing;
-    if (text3) totalHeight += spacing;
-
-    yPos = (displayHeight - totalHeight) / 2;
-    setTextAlignment(TEXT_ALIGN_CENTER);
-
-    if (text1) {
-        drawString(displayWidth / 2, yPos, text1);
-        yPos += spacing;
-    }
-    if (text2) {
-        drawString(displayWidth / 2, yPos, text2);
-        yPos += spacing;
-    }
-    if (text3) {
-        drawString(displayWidth / 2, yPos, text3);
-    }
-    display();
-}
-
-void SH1106Menu::renderMetricScreen(const char *title, const char *value, const char *unit, const char *subtitle) {
-    clear();
-
-    setColor(WHITE);
-    fillRect(0, 0, displayWidth, 15);
-    setColor(BLACK);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, 2, title);
-
-    setColor(WHITE);
-    setFont(ArialMT_Plain_24);
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, 20, value);
-
-    setFont(ArialMT_Plain_10);
-    drawString(displayWidth / 2, 46, unit);
-
-    if (subtitle != nullptr) {
-        drawString(displayWidth / 2, 56, subtitle);
-    }
-    display();
-}
-
-void SH1106Menu::renderBoxedText(const char *lines[], int numLines) {
-    clear();
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawRect(0, 0, displayWidth, displayHeight);
-
-    int centerX = displayWidth / 2;
-    int totalHeight = 0;
-    int lineHeight = 0;
-    int topMargin = 4; // Margin from top of screen
-    switch (numLines) {
-        case 1:
-            setFont(ArialMT_Plain_24);
-            lineHeight = 24;
-            totalHeight = lineHeight;
-            break;
-        case 2:
-            setFont(ArialMT_Plain_16);
-            lineHeight = 16;
-            totalHeight = lineHeight * 2;
-            break;
-        case 3:
-            setFont(ArialMT_Plain_10);
-            lineHeight = 12;
-            totalHeight = lineHeight * 3;
-            break;
-        case 4:
-            setFont(ArialMT_Plain_10);
-            lineHeight = 10;
-            totalHeight = lineHeight * 4;
-            break;
-        default:
-            setFont(ArialMT_Plain_10);
-            lineHeight = 10;
-            totalHeight = lineHeight * numLines;
-    }
-    int startY = topMargin + ((displayHeight - 2 * topMargin - totalHeight) / 2);
-    for (int i = 0; i < numLines && i < 4; i++) {
-        if (lines[i] != nullptr) {
-            int yPos = startY + (i * lineHeight);
-            drawString(centerX, yPos, lines[i]);
-        }
-    }
-    setFont(ArialMT_Plain_10);
-    display();
-}
-
-void SH1106Menu::renderBatteryStatus(int percentage, bool charging) {
-    clear();
-    setTextAlignment(TEXT_ALIGN_CENTER);
-
-    // Ensure percentage is between 0-100
-    percentage = constrain(percentage, 0, 100);
-
-    // Draw battery outline
-    int batteryWidth = 40;
-    int batteryHeight = 20;
-    int batteryX = (displayWidth - batteryWidth) / 2;
-    int batteryY = 10;
-
-    // Battery body
-    drawRect(batteryX, batteryY, batteryWidth, batteryHeight);
-
-    // Battery terminal
-    int terminalWidth = 4;
-    int terminalHeight = 8;
-    drawRect(batteryX + batteryWidth, batteryY + (batteryHeight - terminalHeight) / 2,
-             terminalWidth, terminalHeight);
-
-    // Battery fill level
-    int fillWidth = map(percentage, 0, 100, 0, batteryWidth - 4);
-    if (fillWidth > 0) {
-        fillRect(batteryX + 2, batteryY + 2, fillWidth, batteryHeight - 4);
-    }
-
-    // Charging symbol if charging
-    if (charging) {
-        setColor(BLACK);
-        drawLine(batteryX + batteryWidth / 2 - 3, batteryY + batteryHeight / 2,
-                 batteryX + batteryWidth / 2 - 6, batteryY + batteryHeight / 2 + 5);
-        drawLine(batteryX + batteryWidth / 2 - 3, batteryY + batteryHeight / 2,
-                 batteryX + batteryWidth / 2 + 3, batteryY + batteryHeight / 2);
-        drawLine(batteryX + batteryWidth / 2 + 3, batteryY + batteryHeight / 2,
-                 batteryX + batteryWidth / 2, batteryY + batteryHeight / 2 - 5);
-        setColor(WHITE);
-    }
-
-    // Draw percentage text
-    String percentText = String(percentage) + "%";
-    drawString(displayWidth / 2, batteryY + batteryHeight + 5, percentText);
-
-    // Draw charging text if needed
-    if (charging) {
-        drawString(displayWidth / 2, batteryY + batteryHeight + 20, "Charging");
-    }
-
-    display();
-}
-
-void SH1106Menu::renderSignalStrength(int strength, const char *networkName) {
-    clear();
-
-    // Ensure strength is between 0-4
-    strength = constrain(strength, 0, 4);
-
-    int barWidth = 6;
-    int barGap = 2;
-    int maxBarHeight = 20;
-    int baseX = (displayWidth - (barWidth * 4 + barGap * 3)) / 2;
-    int baseY = 20;
-
-    // Draw signal bars
-    for (int i = 0; i < 4; i++) {
-        int barHeight = map(i + 1, 1, 4, 5, maxBarHeight);
-
-        if (i < strength) {
-            // Filled bar for active signal level
-            fillRect(baseX + i * (barWidth + barGap),
-                     baseY + maxBarHeight - barHeight,
-                     barWidth, barHeight);
-        } else {
-            // Empty bar for inactive signal level
-            drawRect(baseX + i * (barWidth + barGap),
-                     baseY + maxBarHeight - barHeight,
-                     barWidth, barHeight);
-        }
-    }
-
-    // Draw signal text
-    String signalText;
-    if (strength == 0) {
-        signalText = "No Signal";
-    } else if (strength == 1) {
-        signalText = "Weak";
-    } else if (strength == 2) {
-        signalText = "Fair";
-    } else if (strength == 3) {
-        signalText = "Good";
-    } else {
-        signalText = "Excellent";
-    }
-
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, baseY + maxBarHeight + 5, signalText);
-
-    // Draw network name if provided
-    if (networkName != nullptr) {
-        drawString(displayWidth / 2, baseY + maxBarHeight + 20, networkName);
-    }
-
-    display();
-}
-
-void SH1106Menu::renderClock(int hour, int minute, int second, bool isAnalog) {
-    clear();
-
-    if (isAnalog) {
-        // Draw an analog clock
-        int centerX = displayWidth / 2;
-        int centerY = displayHeight / 2;
-        int radius = min(displayWidth, displayHeight) / 2 - 10;
-
-        // Draw clock face
-        drawCircle(centerX, centerY, radius);
-
-        // Draw hour markers
-        for (int i = 0; i < 12; i++) {
-            float angle = i * 30 * 3.14159 / 180;
-            int markerStartX = centerX + (radius - 4) * sin(angle);
-            int markerStartY = centerY - (radius - 4) * cos(angle);
-            int markerEndX = centerX + radius * sin(angle);
-            int markerEndY = centerY - radius * cos(angle);
-
-            drawLine(markerStartX, markerStartY, markerEndX, markerEndY);
-        }
-
-        // Calculate angles for hands
-        float hourAngle = ((hour % 12) * 30 + minute / 2) * 3.14159 / 180;
-        float minuteAngle = minute * 6 * 3.14159 / 180;
-        float secondAngle = second * 6 * 3.14159 / 180;
-
-        // Draw hour hand
-        int hourHandLength = radius * 0.5;
-        int hourHandX = centerX + hourHandLength * sin(hourAngle);
-        int hourHandY = centerY - hourHandLength * cos(hourAngle);
-        drawLine(centerX, centerY, hourHandX, hourHandY);
-
-        // Draw minute hand
-        int minuteHandLength = radius * 0.7;
-        int minuteHandX = centerX + minuteHandLength * sin(minuteAngle);
-        int minuteHandY = centerY - minuteHandLength * cos(minuteAngle);
-        drawLine(centerX, centerY, minuteHandX, minuteHandY);
-
-        // Draw second hand if seconds specified
-        if (second >= 0) {
-            int secondHandLength = radius * 0.8;
-            int secondHandX = centerX + secondHandLength * sin(secondAngle);
-            int secondHandY = centerY - secondHandLength * cos(secondAngle);
-            drawLine(centerX, centerY, secondHandX, secondHandY);
-        }
-
-        // Draw center dot
-        fillCircle(centerX, centerY, 2);
-    } else {
-        // Draw a digital clock
-        setTextAlignment(TEXT_ALIGN_CENTER);
-
-        // Format time string
-        char timeStr[9];
-        if (second >= 0) {
-            sprintf(timeStr, "%02d:%02d:%02d", hour, minute, second);
-        } else {
-            sprintf(timeStr, "%02d:%02d", hour, minute);
-        }
-
-        // Draw time with larger font
-        setFont(ArialMT_Plain_24);
-        drawString(displayWidth / 2, (displayHeight - 24) / 2, timeStr);
-
-        // Reset font
-        setFont(ArialMT_Plain_10);
-    }
-
-    display();
-}
-
-void SH1106Menu::renderPercentageCircle(int percentage, const char *text) {
-    clear();
-
-    // Ensure percentage is between 0-100
-    percentage = constrain(percentage, 0, 100);
-
-    int centerX = displayWidth / 2;
-    int centerY = displayHeight / 2;
-    int radius = min(displayWidth, displayHeight) / 2 - 10;
-
-    // Draw empty circle
-    drawCircle(centerX, centerY, radius);
-
-    // Draw filled arc for percentage
-    float startAngle = -90 * 3.14159 / 180; // Start at 12 o'clock positions
-    float endAngle = (percentage * 3.6 - 90) * 3.14159 / 180;
-
-    if (percentage > 0) {
-        for (int i = 0; i < radius; i++) {
-            float r = i;
-            for (float angle = startAngle; angle <= endAngle; angle += 0.05) {
-                int x = centerX + r * cos(angle);
-                int y = centerY + r * sin(angle);
-                setPixel(x, y);
-            }
-        }
-    }
-
-    // Draw percentage text in a center
-    setTextAlignment(TEXT_ALIGN_CENTER);
-
-    String percentText = String(percentage) + "%";
-
-    if (text != nullptr) {
-        // If an additional text is provided, show percentage larger
-        setFont(ArialMT_Plain_16);
-        drawString(centerX, centerY - 12, percentText);
-
-        setFont(ArialMT_Plain_10);
-        drawString(centerX, centerY + 8, text);
-    } else {
-        // Just show percentage big
-        setFont(ArialMT_Plain_24);
-        drawString(centerX, centerY - 12, percentText);
-    }
-
-    // Reset font
-    setFont(ArialMT_Plain_10);
-
-    display();
-}
-
-void SH1106Menu::renderScrollingText(const char *text, int speed, int scrollCount) {
-    int textWidth = getStringWidth(text);
-
-    // Only scroll if a text is wider than the screen
-    if (textWidth <= displayWidth) {
-        // Just center the text if it fits
-        clear();
-        setTextAlignment(TEXT_ALIGN_CENTER);
-        drawString(displayWidth / 2, (displayHeight - 10) / 2, text);
-        display();
-        delay(speed * 10); // Show static text for a while
-        return;
-    }
-
-    // Calculate total travel distance
-    int totalScroll = displayWidth + textWidth;
-
-    setTextAlignment(TEXT_ALIGN_LEFT);
-
-    for (int count = 0; count < scrollCount; count++) {
-        // Scroll text from right to left
-        for (int offset = displayWidth; offset > -textWidth; offset -= 2) {
-            clear();
-            drawString(offset, (displayHeight - 10) / 2, text);
-            display();
-            delay(speed);
-        }
-
-        // Pause at the end of each scroll
-        delay(speed * 5);
-    }
-}
-
-void SH1106Menu::renderAnimatedLoading(int frame) {
-    clear();
-
-    int centerX = displayWidth / 2;
-    int centerY = displayHeight / 2;
-    int radius = 15;
-
-    // Draw loading text
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(centerX, centerY - 25, "Loading...");
-
-    // Normalize frame to 0-7 range for 8 animation frames
-    frame = frame % 8;
-
-    // Draw segments with different intensities based on frame
-    for (int i = 0; i < 8; i++) {
-        // Calculate an angle for this segment
-        float startAngle = i * 45 * 3.14159 / 180;
-
-        // Calculate segment brightness based on distance from the current frame
-        int distance = (i - frame + 8) % 8;
-        bool isActive = (distance < 3); // Active segments are the current and next 2
-
-        // Draw segment
-        int x1 = centerX + radius * cos(startAngle);
-        int y1 = centerY + radius * sin(startAngle);
-        int x2 = centerX + (radius - 5) * cos(startAngle);
-        int y2 = centerY + (radius - 5) * sin(startAngle);
-
-        if (isActive) {
-            // Active segment - draw thicker
-            drawLine(x1, y1, x2, y2);
-            // Draw adjacent pixels for thickness
-            drawLine(x1 + 1, y1, x2 + 1, y2);
-            drawLine(x1, y1 + 1, x2, y2 + 1);
-        } else {
-            // Inactive segment - draw thinner
-            drawLine(x1, y1, x2, y2);
-        }
-    }
-
-    display();
-}
-
-void SH1106Menu::renderToggleSwitch(const char *label, bool state) {
-    clear();
-
-    // Draw label
-    setTextAlignment(TEXT_ALIGN_CENTER);
-    drawString(displayWidth / 2, 10, label);
-
-    // Draw toggle switch
-    int switchWidth = 30;
-    int switchHeight = 15;
-    int switchX = (displayWidth - switchWidth) / 2;
-    int switchY = 30;
-
-    // Draw a switch background
-    drawRoundedRect(switchX, switchY, switchWidth, switchHeight, switchHeight / 2);
-
-    // Draw switch state
-    int knobSize = switchHeight - 4;
-    int knobX = state ? (switchX + switchWidth - knobSize - 2) : (switchX + 2);
-
-    // Fill background based on state
-    if (state) {
-        // Fill a switch background when on
-        fillRoundedRect(switchX, switchY, switchWidth, switchHeight, switchHeight / 2);
-
-        // Draw knob (contrasting color)
-        setColor(BLACK);
-        fillCircle(knobX + knobSize / 2, switchY + switchHeight / 2, knobSize / 2);
-        setColor(WHITE);
-    } else {
-        // Just draw the knob for off state
-        fillCircle(knobX + knobSize / 2, switchY + switchHeight / 2, knobSize / 2);
-    }
-
-    // Draw state text
-    drawString(displayWidth / 2, switchY + switchHeight + 10, state ? "ON" : "OFF");
-
-    display();
-}
-
-void SH1106Menu::renderNotification(const char *message, int timeMs) {
-    // Store current display buffer to restore after notification
-    uint8_t *tempBuffer = new uint8_t[displayBufferSize];
-    memcpy(tempBuffer, buffer, displayBufferSize);
-
-    // Prepare notification
-    int notificationHeight = 20;
-    int notificationY = 0;
-
-    // Animation - slide in
-    for (int i = -notificationHeight; i <= 0; i += 2) {
-        clear();
-
-        // Restore original content below notification
-        memcpy(buffer, tempBuffer, displayBufferSize);
-
-        // Draw notification box
-        fillRect(0, i, displayWidth, notificationHeight);
-
-        // Draw notification text
-        setColor(BLACK);
-        setTextAlignment(TEXT_ALIGN_CENTER);
-        drawString(displayWidth / 2, i + 5, message);
-        setColor(WHITE);
-
-        display();
-        delay(10);
-    }
-
-    // Wait for specified duration
-    delay(timeMs);
-
-    // Animation - slide out
-    for (int i = 0; i >= -notificationHeight; i -= 2) {
-        clear();
-
-        // Restore original content below notification
-        memcpy(buffer, tempBuffer, displayBufferSize);
-
-        // Draw notification box
-        fillRect(0, i, displayWidth, notificationHeight);
-
-        // Draw notification text
-        setColor(BLACK);
-        setTextAlignment(TEXT_ALIGN_CENTER);
-        drawString(displayWidth / 2, i + 5, message);
-        setColor(WHITE);
-
-        display();
-        delay(10);
-    }
-
-    // Restore original display
-    memcpy(buffer, tempBuffer, displayBufferSize);
-    display();
-
-    delete[] tempBuffer;
-}
-
-// Helper function for rounded rectangles (for toggle switch)
-void SH1106Menu::drawRoundedRect(int x, int y, int width, int height, int radius) {
-    // Draw straight edges
-    drawLine(x + radius, y, x + width - radius, y);
-    drawLine(x + radius, y + height, x + width - radius, y + height);
-    drawLine(x, y + radius, x, y + height - radius);
-    drawLine(x + width, y + radius, x + width, y + height - radius);
-
-    // Draw rounded corners
-    drawCircleQuads(x + radius, y + radius, radius, 1);
-    drawCircleQuads(x + width - radius, y + radius, radius, 2);
-    drawCircleQuads(x + width - radius, y + height - radius, radius, 4);
-    drawCircleQuads(x + radius, y + height - radius, radius, 8);
-}
-
-void SH1106Menu::fillRoundedRect(int x, int y, int width, int height, int radius) {
-    // Fill the middle
-    fillRect(x + radius, y, width - 2 * radius, height);
-    fillRect(x, y + radius, width, height - 2 * radius);
-
-    // Fill rounded corners using fillCircle instead
-    fillCircle(x + radius, y + radius, radius);
-    fillCircle(x + width - radius, y + radius, radius);
-    fillCircle(x + width - radius, y + height - radius, radius);
-    fillCircle(x + radius, y + height - radius, radius);
 }

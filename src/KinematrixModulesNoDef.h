@@ -64,6 +64,10 @@
 #include "../lib/modules/communication/wireless/lora/lora-comv2.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_LORA_EBYTE_E220
+#include "../lib/modules/communication/wireless/lora/lora-ebyte-e220.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_ESP_NOW
 #include "../lib/modules/communication/wireless/now/esp-now.h"
 #endif
@@ -94,6 +98,14 @@
 
 #ifdef ENABLE_MODULE_NODEF_PID_CONTROLLER
 #include "../lib/modules/control/PIDController.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SERIAL_DEBUGGER
+#include "../lib/modules/control/SerialDebugger.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SERIAL_DEBUGGER_LITE
+#include "../lib/modules/control/SerialDebuggerLite.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_DATETIME_NTP
@@ -201,6 +213,10 @@
 #include "../lib/modules/file/SDArduino.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_SD_CARD_MODULE_ESP32
+#include "../lib/modules/file/SDCardModuleESP32.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_DIGITAL_INPUT
 #include "../lib/modules/io/input-module.h"
 #endif
@@ -235,6 +251,10 @@
 
 #ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT_74HC595
 #include "../lib/modules/io/seven-segment-74hc595.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FREE_RTOS_HANDLER
+#include "../lib/modules/task/FreeRTOSHandler.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_TASK_HANDLER

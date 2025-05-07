@@ -1,20 +1,35 @@
-/*
- *  hx711-sens.cpp
- *
- *  hx711 sensor c
- *  Created on: 2023. 4. 3
- */
-
 #include "hx711-sens.h"
 #include "Arduino.h"
 
-HX711Sens::HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin, float _format)
+HX711Sens::HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin, float _format,
+                     float _stabilityTolerance, uint8_t _sampleCount,
+                     uint32_t _stabilityTime, float _resetThreshold)
         : name(""),
           sensorTimer{0, 0},
           sensorDOUTPin(_sensorDOUTPin),
           sensorSCKPin(_sensorSCKPin),
           format(_format),
-          sensorFilterCb(nullptr) {
+          sensorFilterCb(nullptr),
+          stabilityTolerance(_stabilityTolerance),
+          sampleCount(_sampleCount),
+          stabilityTime(_stabilityTime),
+          resetThreshold(_resetThreshold),
+          lastWeights(nullptr),
+          weightIndex(0),
+          isLocked(false),
+          lockedWeight(0.0),
+          stabilityTimer(0) {
+    lastWeights = new float[sampleCount];
+    for (uint8_t i = 0; i < sampleCount; i++) {
+        lastWeights[i] = 0.0;
+    }
+}
+
+HX711Sens::~HX711Sens() {
+    if (lastWeights != nullptr) {
+        delete[] lastWeights;
+        lastWeights = nullptr;
+    }
 }
 
 bool HX711Sens::init() {
@@ -33,10 +48,47 @@ bool HX711Sens::update() {
             float units = this->get_units();
             if (units < 0) units = 0.0;
             units = units / format;
-            if (sensorFilterCb != nullptr) {
-                units = sensorFilterCb(units);
+
+            if (lastWeights == nullptr) {
+                lastWeights = new float[sampleCount];
+                for (uint8_t i = 0; i < sampleCount; i++) {
+                    lastWeights[i] = 0.0;
+                }
             }
-            (*doc)[name] = units;
+
+            lastWeights[weightIndex] = units;
+            weightIndex = (weightIndex + 1) % sampleCount;
+
+            bool isStable = true;
+            float firstWeight = lastWeights[0];
+            for (uint8_t i = 1; i < sampleCount; i++) {
+                if (abs(lastWeights[i] - firstWeight) > stabilityTolerance) {
+                    isStable = false;
+                    break;
+                }
+            }
+
+            if (units < resetThreshold) {
+                isLocked = false;
+                lockedWeight = 0.0;
+            } else if (isStable && !isLocked) {
+                if (stabilityTimer == 0) {
+                    stabilityTimer = millis();
+                } else if (millis() - stabilityTimer > stabilityTime) {
+                    isLocked = true;
+                    lockedWeight = units;
+                }
+            } else if (!isStable) {
+                stabilityTimer = 0;
+            }
+
+            float finalValue = isLocked ? lockedWeight : units;
+
+            if (sensorFilterCb != nullptr) {
+                finalValue = sensorFilterCb(finalValue);
+            }
+
+            (*doc)[name] = finalValue;
             return true;
         }
         sensorTimer[0] = millis();
@@ -125,4 +177,34 @@ float HX711Sens::getValueWeight(bool isCanZero) const {
 void HX711Sens::setPins(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin) {
     this->sensorDOUTPin = _sensorDOUTPin;
     this->sensorSCKPin = _sensorSCKPin;
+}
+
+void HX711Sens::setStabilityTolerance(float tolerance) {
+    stabilityTolerance = tolerance;
+}
+
+void HX711Sens::setSampleCount(uint8_t count) {
+    if (lastWeights != nullptr) {
+        delete[] lastWeights;
+    }
+    sampleCount = count;
+    lastWeights = new float[sampleCount];
+    for (uint8_t i = 0; i < sampleCount; i++) {
+        lastWeights[i] = 0.0;
+    }
+    weightIndex = 0;
+}
+
+void HX711Sens::setStabilityTime(uint32_t time) {
+    stabilityTime = time;
+}
+
+void HX711Sens::setResetThreshold(float threshold) {
+    resetThreshold = threshold;
+}
+
+void HX711Sens::resetLock() {
+    isLocked = false;
+    lockedWeight = 0.0;
+    stabilityTimer = 0;
 }

@@ -93,20 +93,21 @@ public:
     PIDController(float p, float i, float d, float timeStep, float minOut, float maxOut);
     ~PIDController();
     void setSetPoint(float sp);
-    float getSetPoint();
+    float getSetPoint() const;
+    void setTunings(float kp, float ki, float kd);
     void setKp(float p);
     void setKi(float i);
     void setKd(float d);
-    float getKp();
-    float getKi();
-    float getKd();
+    float getKp() const;
+    float getKi() const;
+    float getKd() const;
     void setIntegralLimit(float limit);
-    float getIntegralLimit();
+    float getIntegralLimit() const;
     void calculateOptimalIntegralLimit();
     void reset();
-    float getProportionalComponent();
-    float getIntegralComponent();
-    float getDerivativeComponent();
+    float getProportionalComponent() const;
+    float getIntegralComponent() const;
+    float getDerivativeComponent() const;
     float compute(float currentInput);
 
     void enableDerivativeFilter(float alpha);
@@ -114,38 +115,38 @@ public:
     float filterDerivative(float rawDerivative);
 
     void setDeadband(float band);
-    float getDeadband();
+    float getDeadband() const;
 
     void enableSetpointRamping(float ratePerSecond);
     void disableSetpointRamping();
-    float getSetpointRampRate();
-    float getCurrentRampedSetpoint();
+    float getSetpointRampRate() const;
+    float getCurrentRampedSetpoint() const;
 
     void setOutputRateLimit(float maxChangePerSecond);
     void disableOutputRateLimit();
-    float getOutputRateLimit();
+    float getOutputRateLimit() const;
 
     void setControllerDirection(bool reverse);
-    bool getControllerDirection();
+    bool getControllerDirection() const;
 
     void resetPerformanceMetrics();
     void setSettlingThreshold(float threshold);
-    float getSettlingTime();
-    float getOvershoot();
-    bool isSystemSettled();
+    float getSettlingTime() const;
+    float getOvershoot() const;
+    bool isSystemSettled() const;
 
     // Auto-tuning methods
     bool autoTuneZN1(float testInput, float stepAmplitude, unsigned long maxTuningTime);
     bool autoTuneZN2(float testInput, float initialKp, float kpStep, unsigned long maxTuningTime);
     bool autoTuneCohenCoon(float testInput, float stepAmplitude, unsigned long maxTuningTime);
-    bool isTuning();
+    bool isTuning() const;
     void cancelTuning();
-    float getUltimateGain();
-    float getUltimatePeriod();
+    float getUltimateGain() const;
+    float getUltimatePeriod() const;
 
     // EEPROM operations
     void setEEPROMAddress(int address);
-    bool saveParametersToEEPROM();
+    bool saveParametersToEEPROM() const;
     bool loadParametersFromEEPROM();
 };
 

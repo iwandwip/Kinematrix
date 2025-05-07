@@ -37,6 +37,9 @@
 #include "modules/control/PID.h"
 #include "modules/control/PIDController.h"
 
+#include "modules/control/SerialDebugger.h"
+#include "modules/control/SerialDebuggerLite.h"
+
 #include "modules/wifi/datetime-ntp.h"
 #include "modules/wifi/datetime-ntpv2.h"
 #include "modules/wifi/google-sheets.h"
@@ -66,6 +69,7 @@
 #include "modules/file/EEPROMLib.h"
 #include "modules/file/EEPROMLibESP8266.h"
 #include "modules/file/SDArduino.h"
+#include "modules/file/SDCardESP32.h"
 
 #include "modules/io/input-module.h"
 #include "modules/io/output-module.h"
@@ -77,6 +81,7 @@
 #include "modules/io/seven-segment-pcf.h"
 #include "modules/io/seven-segment-74hc595.h"
 
+#include "modules/task/FreeRTOSHandler.h"
 #include "modules/task/Task.h"
 #include "modules/time/timer-duration.h"
 #include "modules/time/timer-manager.h"

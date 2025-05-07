@@ -1,6 +1,5 @@
 /*
  *  google-sheets.h
- *
  *  Simplified Google Sheets handler
  */
 
@@ -40,26 +39,20 @@ public:
     GoogleSheetClient();
     ~GoogleSheetClient();
 
-    // Initialize with service account credentials
     bool begin(const char *clientEmail, const char *projectId, const char *privateKey);
 
-    // For handling Wi-Fi connection on Pico W, that doesn't have a reconnected feature
     void addAP(const char *ssid, const char *password);
     void clearAP();
 
-    // Set certificate (optional)
     void setCert(const char *cert);
     void setCertFile(const char *certFile, esp_google_sheet_file_storage_type storageType);
 
-    // Set the token callback (for debug only)
     typedef void (*TokenStatusCallback)(TokenInfo info);
     void setTokenCallback(TokenStatusCallback callback);
 
-    // Set the seconds to refresh auth token before expire
     void setPrerefreshSeconds(int seconds);
 
-    // Call in loop for processing
-    void loop();
+    void process();
     bool ready();
     String errorReason();
 
@@ -85,33 +78,26 @@ public:
     bool batchClearValues(const char *spreadsheetId, const char *ranges);
     bool batchClearValuesByDataFilter(const char *spreadsheetId, FirebaseJsonArray *dataFiltersArr);
 
-    // Direct access to response
-    FirebaseJson* getResponse();
+    // Access to response
+    FirebaseJson *getResponse();
+
+    static String getTokenType();
+    static String getTokenType(TokenInfo info);
+    static String getTokenStatus();
+    static String getTokenStatus(TokenInfo info);
+    static String getTokenError();
+    static String getTokenError(TokenInfo info);
 
 private:
-    // SSL client
     SSL_CLIENT _sslClient;
-
-    // GSheet client instance
     bool _isInitialized;
     FirebaseJson _response;
     String _lastError;
     TokenStatusCallback _tokenCallback;
 
-    // Service account credentials
     String _clientEmail;
     String _projectId;
     String _privateKey;
-
-    // Method to process async results
-    void processAsyncResult(FirebaseJson &response, bool success);
-
-    // Helper methods for simplified operation
-    bool makeRequest(const char *operation, const char *param1 = "", const char *param2 = "",
-                     FirebaseJson *json = nullptr, FirebaseJsonArray *jsonArray = nullptr);
-
-    // Task completion flag
-    bool _taskComplete;
 };
 
 #endif // ESP32 || ESP8266

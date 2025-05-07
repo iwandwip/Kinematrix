@@ -7,7 +7,6 @@
 #include "SH1106Wire.h"
 #include "SPI.h"
 
-// Wi-Fi support only for ESP32 and ESP8266
 #if defined(ESP32) || defined(ESP8266)
 #define WIFI_SUPPORTED
 #if defined(ESP32)
@@ -38,6 +37,7 @@ struct MenuProperties {
     int select;
     int index;
     int upCount;
+    int *itemState;
 };
 
 class SH1106Menu : public SH1106Wire {
@@ -69,11 +69,25 @@ public:
     void showMenu(MenuProperties *properties, bool forced = false, uint32_t showTime = 250);
     void onCursor(MenuProperties *properties);
     void drawCursor(int y, bool isUp = false, bool isDown = false);
+
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)());
     void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)());
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor));
-    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(),
-                  void (*optionCallback)(MenuCursor *cursor));
+    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(MenuCursor *cursor));
+
+    // State Management Functions
+    int getState(MenuProperties *properties, uint8_t index);
+    int getState(MenuProperties *properties, const char *options);
+    void setState(MenuProperties *properties, uint8_t index, int state);
+    void setState(MenuProperties *properties, const char *options, int state);
+    void updateMenuText(MenuProperties *properties, uint8_t index, int state, const char *format, ...);
+
+    // Existing functions
+    void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(int state));
+    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(int state));
+    void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor, int state));
+    void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(MenuCursor *cursor, int state));
+
     void formatMenu(MenuProperties *properties, uint8_t index, const char *format, ...);
     void clearMenu(MenuProperties *firstMenu, ...);
     int begin(int nums);
@@ -87,7 +101,6 @@ public:
     void debugPrint(const char *format, ...);
     void debug(MenuProperties *properties, uint8_t index);
     void wait(uint32_t time);
-    void renderInfoScreen(const char *title, const char *line1, const char *line2, const char *line3);
 
 #ifdef WIFI_SUPPORTED
     bool connectToWiFi(const char *ssid, const char *password, int timeoutSeconds = 10);
@@ -111,6 +124,7 @@ public:
     void flipHorizontal(bool flip);
     void setFlip(bool horizontalFlip, bool verticalFlip);
 
+    void renderInfoScreen(const char *title, const char *line1, const char *line2, const char *line3);
     void renderLargeText(const char *text, int fontSize = 24, bool withBox = false);
     void renderSplashScreen(const char *title, const char *subtitle = nullptr, const uint8_t *logo = nullptr);
     void renderStatusScreen(const char *title, const char *status, bool isOk = true);
@@ -122,7 +136,7 @@ public:
     void renderBoxedText(const char *lines[], int numLines);
 
     void renderBatteryStatus(int percentage, bool charging = false);
-    void renderSignalStrength(int strength, const char *networkName = nullptr); // strength 0-4
+    void renderSignalStrength(int strength, const char *networkName = nullptr);
     void renderClock(int hour, int minute, int second = -1, bool isAnalog = false);
     void renderPercentageCircle(int percentage, const char *text = nullptr);
     void renderScrollingText(const char *text, int speed = 50, int scrollCount = 1);

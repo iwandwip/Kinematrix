@@ -45,7 +45,7 @@ PIDController::PIDController(float p, float i, float d, float timeStep, float mi
     testAmplitude = 0;
     tuningInProgress = false;
     tuningStartTime = 0;
-    tuningData = NULL;
+    tuningData = nullptr;
     tuningDataSize = 0;
     tuningDataIndex = 0;
     oscillationCount = 0;
@@ -70,9 +70,9 @@ PIDController::PIDController(float p, float i, float d, float timeStep, float mi
 }
 
 PIDController::~PIDController() {
-    if (tuningData != NULL) {
+    if (tuningData != nullptr) {
         delete[] tuningData;
-        tuningData = NULL;
+        tuningData = nullptr;
     }
 }
 
@@ -84,8 +84,14 @@ void PIDController::setSetPoint(float sp) {
     resetPerformanceMetrics();
 }
 
-float PIDController::getSetPoint() {
+float PIDController::getSetPoint() const {
     return targetSetPoint;
+}
+
+void PIDController::setTunings(float p, float i, float d) {
+    setKp(p);
+    setKi(i);
+    setKd(d);
 }
 
 void PIDController::setKp(float p) {
@@ -101,15 +107,15 @@ void PIDController::setKd(float d) {
     kd = d;
 }
 
-float PIDController::getKp() {
+float PIDController::getKp() const {
     return kp;
 }
 
-float PIDController::getKi() {
+float PIDController::getKi() const {
     return ki;
 }
 
-float PIDController::getKd() {
+float PIDController::getKd() const {
     return kd;
 }
 
@@ -117,7 +123,7 @@ void PIDController::setIntegralLimit(float limit) {
     integralMax = limit;
 }
 
-float PIDController::getIntegralLimit() {
+float PIDController::getIntegralLimit() const {
     return integralMax;
 }
 
@@ -128,7 +134,7 @@ void PIDController::calculateOptimalIntegralLimit() {
     if (ki > 0) {
         integralMax = outputRange / (ki * normalizationFactor);
 
-        float maxAllowedContribution = 0.4 * outputRange;
+        float maxAllowedContribution = 0.4f * outputRange;
         float maxAllowedLimit = maxAllowedContribution / ki;
 
         if (integralMax > maxAllowedLimit) {
@@ -148,15 +154,15 @@ void PIDController::reset() {
     resetPerformanceMetrics();
 }
 
-float PIDController::getProportionalComponent() {
+float PIDController::getProportionalComponent() const {
     return kp * error;
 }
 
-float PIDController::getIntegralComponent() {
+float PIDController::getIntegralComponent() const {
     return ki * integral;
 }
 
-float PIDController::getDerivativeComponent() {
+float PIDController::getDerivativeComponent() const {
     return kd * derivative;
 }
 
@@ -387,7 +393,7 @@ void PIDController::setDeadband(float band) {
     deadband = band;
 }
 
-float PIDController::getDeadband() {
+float PIDController::getDeadband() const {
     return deadband;
 }
 
@@ -401,11 +407,11 @@ void PIDController::disableSetpointRamping() {
     setPoint = targetSetPoint;
 }
 
-float PIDController::getSetpointRampRate() {
+float PIDController::getSetpointRampRate() const {
     return setpointRampRate;
 }
 
-float PIDController::getCurrentRampedSetpoint() {
+float PIDController::getCurrentRampedSetpoint() const {
     return setPoint;
 }
 
@@ -418,7 +424,7 @@ void PIDController::disableOutputRateLimit() {
     useOutputRateLimit = false;
 }
 
-float PIDController::getOutputRateLimit() {
+float PIDController::getOutputRateLimit() const {
     return outputRateLimit;
 }
 
@@ -426,7 +432,7 @@ void PIDController::setControllerDirection(bool reverse) {
     isReverse = reverse;
 }
 
-bool PIDController::getControllerDirection() {
+bool PIDController::getControllerDirection() const {
     return isReverse;
 }
 
@@ -453,14 +459,14 @@ void PIDController::updatePerformanceMetrics() {
     }
 }
 
-float PIDController::getSettlingTime() {
+float PIDController::getSettlingTime() const {
     if (isSettled) {
         return (millis() - startTime) / 1000.0;
     }
     return -1.0;
 }
 
-float PIDController::getOvershoot() {
+float PIDController::getOvershoot() const {
     if (steadyStateValue != 0) {
         float overshoot = (peakValue - steadyStateValue) / abs(setPoint - input) * 100.0;
         return overshoot;
@@ -468,7 +474,7 @@ float PIDController::getOvershoot() {
     return 0.0;
 }
 
-bool PIDController::isSystemSettled() {
+bool PIDController::isSystemSettled() const {
     return isSettled;
 }
 
@@ -484,7 +490,7 @@ bool PIDController::autoTuneZN1(float testInput, float stepAmplitude, unsigned l
 
     tuningDataSize = maxTuningTime / (dt * 1000) + 10;
     tuningData = new float[tuningDataSize];
-    if (tuningData == NULL) {
+    if (tuningData == nullptr) {
         tuningInProgress = false;
         return false;
     }
@@ -554,7 +560,7 @@ bool PIDController::autoTuneCohenCoon(float testInput, float stepAmplitude, unsi
 
     tuningDataSize = maxTuningTime / (dt * 1000) + 10;
     tuningData = new float[tuningDataSize];
-    if (tuningData == NULL) {
+    if (tuningData == nullptr) {
         tuningInProgress = false;
         return false;
     }
@@ -582,14 +588,14 @@ bool PIDController::autoTuneCohenCoon(float testInput, float stepAmplitude, unsi
     return true;
 }
 
-bool PIDController::isTuning() {
+bool PIDController::isTuning() const {
     return tuningInProgress;
 }
 
 void PIDController::cancelTuning() {
     tuningInProgress = false;
 
-    if (tuningData != NULL) {
+    if (tuningData != nullptr) {
         if (tuningMethod == 0 && tuningDataIndex > 10) { // ZN1
             int peaks = 0;
             // int valleys = 0; // Unused variable
@@ -620,16 +626,16 @@ void PIDController::cancelTuning() {
         }
 
         delete[] tuningData;
-        tuningData = NULL;
+        tuningData = nullptr;
         tuningDataIndex = 0;
     }
 }
 
-float PIDController::getUltimateGain() {
+float PIDController::getUltimateGain() const {
     return ultimateGain;
 }
 
-float PIDController::getUltimatePeriod() {
+float PIDController::getUltimatePeriod() const {
     return ultimatePeriod;
 }
 
@@ -683,7 +689,7 @@ void PIDController::setEEPROMAddress(int address) {
     eepromAddress = address;
 }
 
-bool PIDController::saveParametersToEEPROM() {
+bool PIDController::saveParametersToEEPROM() const {
     int addr = eepromAddress;
 
 #if IS_ESP

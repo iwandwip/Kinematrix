@@ -1,6 +1,5 @@
 /*
  *  google-sheets.cpp
- *
  *  Simplified Google Sheets handler implementation
  */
 
@@ -8,7 +7,7 @@
 
 #if defined(ESP32) || defined(ESP8266)
 
-GoogleSheetClient::GoogleSheetClient() : _isInitialized(false), _taskComplete(false) {
+GoogleSheetClient::GoogleSheetClient() : _isInitialized(false) {
     set_ssl_client_insecure_and_buffer(_sslClient);
 }
 
@@ -21,7 +20,6 @@ bool GoogleSheetClient::begin(const char *clientEmail, const char *projectId, co
     _projectId = projectId;
     _privateKey = privateKey;
 
-    // Initialize the Google Sheet Client
     GSheet.begin(_clientEmail.c_str(), _projectId.c_str(), _privateKey.c_str());
 
     _isInitialized = true;
@@ -65,8 +63,7 @@ void GoogleSheetClient::setPrerefreshSeconds(int seconds) {
     }
 }
 
-void GoogleSheetClient::loop() {
-    // Call ready() repeatedly in loop for authentication checking and processing
+void GoogleSheetClient::process() {
     if (_isInitialized) {
         GSheet.ready();
     }
@@ -80,19 +77,17 @@ bool GoogleSheetClient::ready() {
 }
 
 String GoogleSheetClient::errorReason() {
-    if (_isInitialized) {
-        return GSheet.errorReason();
-    }
-    return "Not initialized";
+    return _lastError.length() > 0 ? _lastError : (_isInitialized ? GSheet.errorReason() : "Not initialized");
 }
 
 String GoogleSheetClient::createSpreadsheet(const char *title, const char *sheetName, int rowCount, int columnCount, const char *userEmail) {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
     FirebaseJson spreadsheet;
     spreadsheet.set("properties/title", title);
@@ -102,257 +97,295 @@ String GoogleSheetClient::createSpreadsheet(const char *title, const char *sheet
     spreadsheet.set("sheets/[0]/properties/gridProperties/rowCount", rowCount);
     spreadsheet.set("sheets/[0]/properties/gridProperties/columnCount", columnCount);
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create
     bool success = GSheet.create(&_response, &spreadsheet, userEmail);
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 String GoogleSheetClient::getSpreadsheet(const char *spreadsheetId) {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/get
     bool success = GSheet.get(&_response, spreadsheetId);
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 String GoogleSheetClient::getSpreadsheetByDataFilter(const char *spreadsheetId, const char *dataFiltersJson) {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
     FirebaseJsonArray dataFiltersArr;
     FirebaseJson dataFilters;
     dataFilters.setJsonData(dataFiltersJson);
     dataFiltersArr.add(dataFilters);
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/getByDataFilter
     bool success = GSheet.getByDataFilter(&_response, spreadsheetId, &dataFiltersArr, "true");
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 String GoogleSheetClient::deleteSpreadsheet(const char *spreadsheetId) {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
     bool success = GSheet.deleteFile(&_response, spreadsheetId);
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 String GoogleSheetClient::listSpreadsheets() {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
     bool success = GSheet.listFiles(&_response);
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 String GoogleSheetClient::copySheetTo(const char *sourceSpreadsheetId, int sheetId, const char *destinationSpreadsheetId) {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.sheets/copyTo
     bool success = GSheet.sheets.copyTo(&_response, sourceSpreadsheetId, sheetId, destinationSpreadsheetId);
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 bool GoogleSheetClient::updateValues(const char *spreadsheetId, const char *range, FirebaseJson *valueRange) {
     if (!_isInitialized || valueRange == nullptr) {
+        _lastError = !_isInitialized ? "Not initialized" : "Invalid valueRange (null)";
         return false;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/update
     bool success = GSheet.values.update(&_response, spreadsheetId, range, valueRange);
+
+    if (!success) {
+        _lastError = GSheet.errorReason();
+    }
 
     return success;
 }
 
 bool GoogleSheetClient::batchUpdateValues(const char *spreadsheetId, FirebaseJsonArray *valueRangeArr) {
     if (!_isInitialized || valueRangeArr == nullptr) {
+        _lastError = !_isInitialized ? "Not initialized" : "Invalid valueRangeArr (null)";
         return false;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdate
     bool success = GSheet.values.batchUpdate(&_response, spreadsheetId, valueRangeArr);
+
+    if (!success) {
+        _lastError = GSheet.errorReason();
+    }
 
     return success;
 }
 
 bool GoogleSheetClient::batchUpdateValuesByDataFilter(const char *spreadsheetId, FirebaseJsonArray *dataFilterValueRangeArr) {
     if (!_isInitialized || dataFilterValueRangeArr == nullptr) {
+        _lastError = !_isInitialized ? "Not initialized" : "Invalid dataFilterValueRangeArr (null)";
         return false;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchUpdateByDataFilter
     bool success = GSheet.values.batchUpdateByDataFilter(&_response, spreadsheetId, dataFilterValueRangeArr);
+
+    if (!success) {
+        _lastError = GSheet.errorReason();
+    }
 
     return success;
 }
 
 bool GoogleSheetClient::appendValues(const char *spreadsheetId, const char *range, FirebaseJson *valueRange) {
     if (!_isInitialized || valueRange == nullptr) {
+        _lastError = !_isInitialized ? "Not initialized" : "Invalid valueRange (null)";
         return false;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/append
     bool success = GSheet.values.append(&_response, spreadsheetId, range, valueRange);
+
+    if (!success) {
+        _lastError = GSheet.errorReason();
+    }
 
     return success;
 }
 
 String GoogleSheetClient::getValues(const char *spreadsheetId, const char *range) {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/get
     bool success = GSheet.values.get(&_response, spreadsheetId, range);
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 String GoogleSheetClient::batchGetValues(const char *spreadsheetId, const char *ranges) {
     if (!_isInitialized) {
-        return "Error: Not initialized";
+        _lastError = "Not initialized";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchGet
     bool success = GSheet.values.batchGet(&_response, spreadsheetId, ranges);
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 String GoogleSheetClient::batchGetValuesByDataFilter(const char *spreadsheetId, FirebaseJsonArray *dataFiltersArr) {
     if (!_isInitialized || dataFiltersArr == nullptr) {
-        return "Error: Not initialized or invalid dataFiltersArr";
+        _lastError = !_isInitialized ? "Not initialized" : "Invalid dataFiltersArr (null)";
+        return "Error: " + _lastError;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchGetByDataFilter
     bool success = GSheet.values.batchGetByDataFilter(&_response, spreadsheetId, dataFiltersArr, "ROWS");
 
     if (success) {
         return _response.raw();
     } else {
-        return "Error: " + GSheet.errorReason();
+        _lastError = GSheet.errorReason();
+        return "Error: " + _lastError;
     }
 }
 
 bool GoogleSheetClient::clearValues(const char *spreadsheetId, const char *range) {
     if (!_isInitialized) {
+        _lastError = "Not initialized";
         return false;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/clear
     bool success = GSheet.values.clear(&_response, spreadsheetId, range);
+
+    if (!success) {
+        _lastError = GSheet.errorReason();
+    }
 
     return success;
 }
 
 bool GoogleSheetClient::batchClearValues(const char *spreadsheetId, const char *ranges) {
     if (!_isInitialized) {
+        _lastError = "Not initialized";
         return false;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClear
     bool success = GSheet.values.batchClear(&_response, spreadsheetId, ranges);
 
+    if (!success) {
+        _lastError = GSheet.errorReason();
+    }
+    GSheet.getTokenType();
     return success;
 }
 
 bool GoogleSheetClient::batchClearValuesByDataFilter(const char *spreadsheetId, FirebaseJsonArray *dataFiltersArr) {
     if (!_isInitialized || dataFiltersArr == nullptr) {
+        _lastError = !_isInitialized ? "Not initialized" : "Invalid dataFiltersArr (null)";
         return false;
     }
 
-    _taskComplete = false;
     _response.clear();
+    _lastError = "";
 
-    // For Google Sheet API ref doc, go to https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/batchClearByDataFilter
     bool success = GSheet.values.batchClearByDataFilter(&_response, spreadsheetId, dataFiltersArr);
+
+    if (!success) {
+        _lastError = GSheet.errorReason();
+    }
 
     return success;
 }
@@ -361,18 +394,28 @@ FirebaseJson *GoogleSheetClient::getResponse() {
     return &_response;
 }
 
-void GoogleSheetClient::processAsyncResult(FirebaseJson &response, bool success) {
-    _taskComplete = true;
-    if (!success) {
-        _lastError = GSheet.errorReason();
-    }
+String GoogleSheetClient::getTokenType() {
+    return GSheet.getTokenType();
 }
 
-bool GoogleSheetClient::makeRequest(const char *operation, const char *param1, const char *param2,
-                                    FirebaseJson *json, FirebaseJsonArray *jsonArray) {
-    // Helper method for common operation patterns
-    // Implementation would depend on the specific operation
-    return false; // Placeholder
+String GoogleSheetClient::getTokenType(TokenInfo info) {
+    return GSheet.getTokenType(info);
+}
+
+String GoogleSheetClient::getTokenStatus() {
+    return GSheet.getTokenStatus();
+}
+
+String GoogleSheetClient::getTokenStatus(TokenInfo info) {
+    return GSheet.getTokenStatus(info);
+}
+
+String GoogleSheetClient::getTokenError() {
+    return GSheet.getTokenError();
+}
+
+String GoogleSheetClient::getTokenError(TokenInfo info) {
+    return GSheet.getTokenError(info);
 }
 
 #endif // ESP32 || ESP8266

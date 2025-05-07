@@ -1,10 +1,3 @@
-/*
- *  hx711-sens.h
- *
- *  hx711 sensor lib
- *  Created on: 2023. 4. 3
- */
-
 #pragma once
 
 #ifndef HX711_SENS_H
@@ -27,10 +20,24 @@ private:
     float format;
     float (*sensorFilterCb)(float value);
 
+    float stabilityTolerance;
+    uint8_t sampleCount;
+    uint32_t stabilityTime;
+    float resetThreshold;
+
+    float *lastWeights;
+    uint8_t weightIndex;
+    bool isLocked;
+    float lockedWeight;
+    uint32_t stabilityTimer;
+
     using HX711::HX711;
 
 public:
-    explicit HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin, float _format = HX711Sens::G);
+    explicit HX711Sens(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin, float _format = HX711Sens::G,
+                       float _stabilityTolerance = 0.2, uint8_t _sampleCount = 5,
+                       uint32_t _stabilityTime = 3000, float _resetThreshold = 5.0);
+    ~HX711Sens();
     bool init() override;
     bool update() override;
 
@@ -52,9 +59,15 @@ public:
     [[nodiscard]] float getValueWeight(bool isCanZero = true) const;
     void setPins(uint8_t _sensorDOUTPin, uint8_t _sensorSCKPin);
 
+    void setStabilityTolerance(float tolerance);
+    void setSampleCount(uint8_t count);
+    void setStabilityTime(uint32_t time);
+    void setResetThreshold(float threshold);
+    void resetLock();
+
     constexpr static const float G = 1.0;
     constexpr static const float KG = 1000.0;
     constexpr static const float POUND = 453.6;
 };
 
-#endif  // HX711_SENS_H
+#endif
