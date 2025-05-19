@@ -75,14 +75,12 @@ public:
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor));
     void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(MenuCursor *cursor));
 
-    // State Management Functions
     int getState(MenuProperties *properties, uint8_t index);
     int getState(MenuProperties *properties, const char *options);
     void setState(MenuProperties *properties, uint8_t index, int state);
     void setState(MenuProperties *properties, const char *options, int state);
     void updateMenuText(MenuProperties *properties, uint8_t index, int state, const char *format, ...);
 
-    // Existing functions
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(int state));
     void onSelect(MenuProperties *properties, const char *options, void (*onClickCallback)(), void (*optionCallback)(int state));
     void onSelect(MenuProperties *properties, const char *options, void (*optionCallback)(MenuCursor *cursor, int state));
@@ -108,10 +106,13 @@ public:
     String getIPAddress();
 #endif
 
+    void flipVertical(bool flip);
+    void flipHorizontal(bool flip);
+    void setFlip(bool horizontalFlip, bool verticalFlip);
+
     void showLoadingBar(const char *title, int progressPercent);
     void showLoadingBarTimed(const char *title, int durationSeconds);
     void showCircleLoading(const char *title, int frame);
-
     void showToast(const char *message, uint16_t durationMs = 2000);
     bool showConfirmation(const char *title, const char *message);
     void drawBarChart(const char *title, int values[], int numValues, int maxValue);
@@ -120,11 +121,8 @@ public:
     int showSlider(const char *title, int minValue, int maxValue, int currentValue);
     void showTextInput(const char *title, char *buffer, int maxLength);
 
-    void flipVertical(bool flip);
-    void flipHorizontal(bool flip);
-    void setFlip(bool horizontalFlip, bool verticalFlip);
-
     void renderInfoScreen(const char *title, const char *line1, const char *line2, const char *line3);
+    void renderInfoScreenCenter(const char *title, const char *line1, const char *line2, const char *line3);
     void renderLargeText(const char *text, int fontSize = 24, bool withBox = false);
     void renderSplashScreen(const char *title, const char *subtitle = nullptr, const uint8_t *logo = nullptr);
     void renderStatusScreen(const char *title, const char *status, bool isOk = true);
@@ -143,6 +141,49 @@ public:
     void renderAnimatedLoading(int frame);
     void renderToggleSwitch(const char *label, bool state);
     void renderNotification(const char *message, int timeMs = 3000);
+    void renderModal(const char *title, const char *message, const char *buttonText, bool isSelected, bool isError);
+
+    void renderRadialMenu(const char *title, const char *options[], int numOptions, int selectedOption = -1);
+    void renderTabView(const char *tabs[], int numTabs, int activeTab, const char *content);
+    void renderHistogram(const char *title, int values[], int numValues, int maxValue);
+    void renderCalendar(int year, int month, int highlightDay = -1);
+    void renderGridMenu(const char *options[], int numOptions, int columns, int selectedOption = -1);
+    void renderSensorGraph(const char *title, int values[], int numValues, int minValue, int maxValue, bool autoScroll = true);
+    void renderQRCode(const char *data, int size = 3);
+    void renderGauge(const char *title, int value, int minValue, int maxValue);
+    void renderSpeedometer(int speed, int maxSpeed = 100);
+    void renderWeatherIcon(int weatherType, const char *temperature = nullptr);
+    void renderPopupMenu(const char *title, const char *options[], int numOptions, int selectedOption = 0);
+    void renderAlertBox(const char *title, const char *message, bool isError = false);
+    void renderProgressCircle(const char *title, int percentage);
+    void renderSplitScreen(const char *leftTitle, const char *leftContent, const char *rightTitle, const char *rightContent);
+    void renderDataTable(const char *headers[], const char *data[][3], int rows, int cols);
+    void renderBubbleChart(const char *title, int values[], int numValues, int maxValue);
+    void renderStarRating(const char *title, float rating, float maxRating = 5.0);
+    void renderRoundedButton(int x, int y, int width, int height, const char *text, bool inverted = false);
+    void renderPieChart(const char *title, int values[], int numValues);
+    void renderTabbedData(const char *title, const char *tabs[], const char *contents[], int numTabs, int activeTab);
+
+    void renderDropdownMenu(const char *title, const char *options[], int numOptions, int selectedOption = 0);
+    void renderListMenu(const char *title, const char *options[], int numOptions, int selectedOption = 0, int startIndex = 0);
+    void renderCheckboxMenu(const char *title, const char *options[], bool checked[], int numOptions, int selectedOption = 0);
+    void renderRadioMenu(const char *title, const char *options[], int numOptions, int selectedOption = 0);
+    void renderSelectionWheel(const char *title, const char *options[], int numOptions, int selectedOption = 0);
+    void renderMenuTiles(const char *titles[], const uint8_t *icons[], int numTiles, int columns, int selectedTile = -1);
+    void renderHorizontalMenu(const char *options[], int numOptions, int selectedOption = 0);
+    void renderVerticalMenu(const char *options[], int numOptions, int selectedOption = 0, int startIndex = 0);
+    void renderIconMenu(const char *options[], const uint8_t *icons[], int numOptions, int selectedOption = -1);
+    void renderNestedMenu(const char *title, const char *items[], bool hasSubmenu[], int numItems, int selectedItem = 0);
+    void renderContextMenu(const char *options[], int numOptions, int x, int y, int selectedOption = 0);
+    void renderSettingsMenu(const char *title, const char *settings[], const char *values[], int numSettings, int selectedSetting = 0);
+    void renderNumericInput(const char *title, int value, int minValue, int maxValue, int step = 1);
+    void renderDatePicker(const char *title, int year, int month, int day);
+    void renderTimePicker(const char *title, int hour, int minute);
+    void renderColorPicker(const char *title, uint8_t r = 255, uint8_t g = 255, uint8_t b = 255);
+    void renderSlidingMenu(const char *title, const char *options[], int numOptions, int selectedOption = 0, int slidePosition = 0);
+    void renderSegmentedControl(const char *title, const char *segments[], int numSegments, int selectedSegment = 0);
+    void renderExpandableMenu(const char *title, const char *categories[], const char *items[][5], int numItemsPerCategory[], int numCategories, int expandedCategory = -1);
+    void renderDrawerMenu(const char *title, const char *options[], int numOptions, int selectedOption = 0, bool isOpen = true);
 };
 
 #endif

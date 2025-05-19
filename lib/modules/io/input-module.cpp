@@ -81,6 +81,7 @@ void DigitalIn::resetCount() {
 void DigitalIn::resetState() {
     previousSteadyState = HIGH;
     lastSteadyState = HIGH;
+    lastDebounceTime = millis();
 }
 
 void DigitalIn::update() {

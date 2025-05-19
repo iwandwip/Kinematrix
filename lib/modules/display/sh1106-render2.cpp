@@ -19,6 +19,26 @@ void SH1106Menu::renderInfoScreen(const char *title, const char *line1, const ch
     display();
 }
 
+void SH1106Menu::renderInfoScreenCenter(const char *title, const char *line1, const char *line2, const char *line3) {
+    clear();
+
+    setColor(WHITE);
+    fillRect(0, 0, 128, 15);
+    setColor(BLACK);
+    setTextAlignment(TEXT_ALIGN_CENTER);
+    drawString(64, 3, title);
+
+    setColor(WHITE);
+    drawRect(0, 15, 128, 49);
+
+    setTextAlignment(TEXT_ALIGN_CENTER);
+    drawString(64, 20, line1);
+    drawString(64, 32, line2);
+    drawString(64, 44, line3);
+
+    display();
+}
+
 void SH1106Menu::renderLargeText(const char *text, int fontSize, bool withBox) {
     clear();
     if (fontSize == 24) {
@@ -599,6 +619,101 @@ void SH1106Menu::renderNotification(const char *message, int timeMs) {
     display();
 
     delete[] tempBuffer;
+}
+
+void SH1106Menu::renderModal(const char *title, const char *message, const char *buttonText, bool isSelected, bool isError) {
+    clear();
+
+    int modalPadding = 3;
+    int modalWidth = displayWidth - (2 * modalPadding);
+    int titleHeight = 14;
+    int buttonHeight = (buttonText != nullptr) ? 14 : 0;
+    int messageMaxHeight = displayHeight - titleHeight - buttonHeight - (4 * modalPadding);
+
+    int messageHeight = 0;
+    String tempMessage = String(message);
+    int messageLen = tempMessage.length();
+    int lineHeight = 11;
+    int lineWidth = modalWidth - (2 * modalPadding);
+    int lineStart = 0;
+    int lineCount = 0;
+
+    for (int i = 0; i <= messageLen; i++) {
+        if (i == messageLen || message[i] == '\n' ||
+            getStringWidth(tempMessage.substring(lineStart, i+1).c_str()) > lineWidth) {
+            lineCount++;
+            lineStart = i;
+            if (i < messageLen && message[i] == '\n') {
+                lineStart++;
+            }
+        }
+    }
+
+    messageHeight = lineCount * lineHeight;
+    messageHeight = min(messageHeight, messageMaxHeight);
+
+    int modalHeight = titleHeight + messageHeight + buttonHeight + (3 * modalPadding);
+    int modalX = modalPadding;
+    int modalY = (displayHeight - modalHeight) / 2;
+
+    setColor(BLACK);
+    fillRect(0, 0, displayWidth, displayHeight);
+    setColor(BLACK);
+    fillRect(modalX, modalY + titleHeight, modalWidth, modalHeight - titleHeight);
+    setColor(WHITE);
+    fillRect(modalX, modalY, modalWidth, titleHeight);
+    setColor(BLACK);
+    setTextAlignment(TEXT_ALIGN_CENTER);
+    drawString(displayWidth / 2, modalY + 2, title);
+
+    setColor(WHITE);
+    setTextAlignment(TEXT_ALIGN_LEFT);
+
+    lineStart = 0;
+    int currentY = modalY + titleHeight + modalPadding;
+
+    for (int i = 0; i <= messageLen; i++) {
+        if (i == messageLen || message[i] == '\n' ||
+            getStringWidth(tempMessage.substring(lineStart, i+1).c_str()) > lineWidth) {
+            int endIdx = (i == messageLen || message[i] == '\n') ? i : i;
+
+            if (currentY < modalY + messageMaxHeight) {
+                String line = tempMessage.substring(lineStart, endIdx);
+                drawString(modalX + modalPadding, currentY, line.c_str());
+                currentY += lineHeight;
+            }
+
+            lineStart = i;
+            if (i < messageLen && message[i] == '\n') {
+                lineStart++;
+            }
+        }
+    }
+
+    if (buttonText != nullptr) {
+        int buttonWidth = min(100, modalWidth - (2 * modalPadding));
+        int buttonX = (displayWidth - buttonWidth) / 2;
+        int buttonY = modalY + modalHeight - buttonHeight - modalPadding;
+
+        if (isSelected) {
+            setColor(WHITE);
+            fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 3);
+            setColor(BLACK);
+        } else {
+            setColor(WHITE);
+            drawRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 3);
+        }
+
+        setTextAlignment(TEXT_ALIGN_CENTER);
+        drawString(displayWidth / 2, buttonY + 2, buttonText);
+    }
+
+    if (isError) {
+        setColor(WHITE);
+        drawRect(modalX - 1, modalY - 1, modalWidth + 2, modalHeight + 2);
+    }
+
+    display();
 }
 
 void SH1106Menu::drawRoundedRect(int x, int y, int width, int height, int radius) {

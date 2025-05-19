@@ -158,7 +158,7 @@ BaseSens &SensorModule::getModule(uint8_t index) {
     return *(base[index]);
 }
 
-BaseSens *SensorModule::getModulePtr(uint8_t index) {
+BaseSens * SensorModule::getModulePtr(uint8_t index) const {
     if (base == nullptr || index >= len) return nullptr;
     return base[index];
 }
@@ -181,7 +181,7 @@ BaseSens *SensorModule::getModuleByNamePtr(const char *searchName) {
     return base[count];
 }
 
-char *SensorModule::getName(uint8_t index) {
+char * SensorModule::getName(uint8_t index) const {
     return name[index];
 }
 

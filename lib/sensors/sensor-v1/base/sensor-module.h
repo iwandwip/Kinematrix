@@ -58,10 +58,10 @@ public:
     SensorModule();
     ~SensorModule();
 
-    void init(void (*initializeCallback)() = nullptr);
-    void update(void (*updateCallback)() = nullptr);
-    void update(const char *searchName);
-    bool isReady(void (*readyCallback)() = nullptr);
+    virtual void init(void (*initializeCallback)() = nullptr);
+    virtual void update(void (*updateCallback)() = nullptr);
+    virtual void update(const char *searchName);
+    virtual bool isReady(void (*readyCallback)() = nullptr);
 
     void enable();
     void disable();
@@ -79,11 +79,11 @@ public:
     JsonDocument operator()(const char *searchName);
 
     BaseSens &getModule(uint8_t index);
-    BaseSens *getModulePtr(uint8_t index);
+    BaseSens * getModulePtr(uint8_t index) const;
     BaseSens &getModuleByName(const char *searchName);
     BaseSens *getModuleByNamePtr(const char *searchName);
 
-    char *getName(uint8_t index);
+    char * getName(uint8_t index) const;
     char **getNames();
     void clearModules();
 
@@ -101,10 +101,10 @@ public:
         return modulePtr;
     }
 
-    void debug(const char *searchName, bool showHeapMemory = false, bool endl = true);
-    void debug(bool showHeapMemory = false);
-    void debug(uint32_t time, bool showHeapMemory = false, void (*debugCallback)() = nullptr);
-    void debugPretty(uint32_t time = 1000);
+    virtual void debug(const char *searchName, bool showHeapMemory = false, bool endl = true);
+    virtual void debug(bool showHeapMemory = false);
+    virtual void debug(uint32_t time, bool showHeapMemory = false, void (*debugCallback)() = nullptr);
+    virtual void debugPretty(uint32_t time = 1000);
     static void print(const char *format, ...);
     static void wait(uint32_t time);
 };

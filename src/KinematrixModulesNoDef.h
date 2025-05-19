@@ -108,6 +108,10 @@
 #include "../lib/modules/control/SerialDebuggerLite.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_SERIAL_DEBUGGER_V2
+#include "../lib/modules/control/SerialDebuggerV2.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_DATETIME_NTP
 #include "../lib/modules/wifi/datetime-ntp.h"
 #endif

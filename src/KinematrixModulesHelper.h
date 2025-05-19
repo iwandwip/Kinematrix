@@ -127,13 +127,18 @@
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_SERIAL_DEBUGGER
-#include "../lib/modules/control/SerialDebugger.h"
-#include "../lib/modules/control/SerialDebugger.cpp"
+#include "../lib/modules/debug/SerialDebugger.h"
+#include "../lib/modules/debug/SerialDebugger.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_SERIAL_DEBUGGER_LITE
-#include "../lib/modules/control/SerialDebuggerLite.h"
-#include "../lib/modules/control/SerialDebuggerLite.cpp"
+#include "../lib/modules/debug/SerialDebuggerLite.h"
+#include "../lib/modules/debug/SerialDebuggerLite.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_HELPER_SERIAL_DEBUGGER_V2
+#include "../lib/modules/debug/SerialDebuggerV2.h"
+#include "../lib/modules/debug/SerialDebuggerV2.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_DATETIME_NTP
@@ -241,7 +246,10 @@
 #ifdef ENABLE_MODULE_HELPER_SH1106_MENU
 #include "../lib/modules/display/sh1106-menu.h"
 #include "../lib/modules/display/sh1106-menu.cpp"
-#include "../lib/modules/display/sh1106-render.cpp"
+#include "../lib/modules/display/sh1106-render1.cpp"
+#include "../lib/modules/display/sh1106-render2.cpp"
+#include "../lib/modules/display/sh1106-render3.cpp"
+#include "../lib/modules/display/sh1106-render4.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_MOTOR_DRIVER
