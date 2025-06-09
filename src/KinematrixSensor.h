@@ -281,6 +281,11 @@
 #include "../lib/sensors/sensor-v2/SensorList/AnalogSensV2.cpp"
 #endif
 
+#ifdef ENABLE_SENSOR_BME680_v2
+#include "../lib/sensors/sensor-v2/SensorList/BME680SensV2.h"
+#include "../lib/sensors/sensor-v2/SensorList/BME680SensV2.cpp"
+#endif
+
 #ifdef ENABLE_SENSOR_DHT_V2
 #include "../lib/sensors/sensor-v2/SensorList/DHTSensV2.h"
 #include "../lib/sensors/sensor-v2/SensorList/DHTSensV2.cpp"

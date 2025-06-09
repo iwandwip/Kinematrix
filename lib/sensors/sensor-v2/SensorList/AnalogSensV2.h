@@ -31,7 +31,7 @@ public:
 
     void setCustomDataCallback(CustomDataCallback callback);
 
-    void addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, SensorValueType type);
+    void addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, bool calibrable);
 };
 
 #endif  // ANALOG_SENS_V2_H

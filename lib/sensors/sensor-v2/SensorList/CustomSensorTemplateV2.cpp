@@ -7,8 +7,8 @@ CustomSensorTemplateV2::CustomSensorTemplateV2(uint8_t pin)
           _updateInterval(1000),
           _calibrationFactor(1.0),
           _sensorMode(0) {
-    addValueInfo("rawValue", "Raw Value", "", 0, TYPE_INT);
-    addValueInfo("value", "Processed Value", "units", 2, TYPE_FLOAT);
+    addValueInfo("rawValue", "Raw Value", "", 0, true);
+    addValueInfo("value", "Processed Value", "units", 2, true);
 }
 
 CustomSensorTemplateV2::~CustomSensorTemplateV2() = default;
@@ -53,6 +53,6 @@ void CustomSensorTemplateV2::setSensorMode(int mode) {
     _sensorMode = mode;
 }
 
-void CustomSensorTemplateV2::addCustomSensorValue(const char *key, const char *label, const char *unit, uint8_t precision, SensorValueType type) {
-    addValueInfo(key, label, unit, precision, type);
+void CustomSensorTemplateV2::addCustomSensorValue(const char *key, const char *label, const char *unit, uint8_t precision, bool calibrable) {
+    addValueInfo(key, label, unit, precision, calibrable);
 }

@@ -8,7 +8,7 @@ AbstractSensV2::AbstractSensV2(int enumRandomMode)
           _updateTimer(0),
           _updateInterval(500) {
 
-    addValueInfo("value", "Value", "", 1, TYPE_FLOAT);
+    addValueInfo("value", "Value", "", 1, true);
 }
 
 AbstractSensV2::AbstractSensV2(int enumRandomMode, float dummyValue1, float dummyValue2)
@@ -18,7 +18,7 @@ AbstractSensV2::AbstractSensV2(int enumRandomMode, float dummyValue1, float dumm
           _updateTimer(0),
           _updateInterval(500) {
 
-    addValueInfo("value", "Value", "", 1, TYPE_FLOAT);
+    addValueInfo("value", "Value", "", 1, true);
 }
 
 AbstractSensV2::~AbstractSensV2() = default;
@@ -67,6 +67,6 @@ void AbstractSensV2::setDummyValues(float dummyValue1, float dummyValue2) {
     _dummyValue2 = dummyValue2;
 }
 
-void AbstractSensV2::addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, SensorValueType type) {
-    addValueInfo(key, label, unit, precision, type);
+void AbstractSensV2::addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, bool calibrable) {
+    addValueInfo(key, label, unit, precision, calibrable);
 }

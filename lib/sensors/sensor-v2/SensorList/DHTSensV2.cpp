@@ -6,9 +6,8 @@ DHTSensV2::DHTSensV2(uint8_t pin, uint8_t type)
           _sensorPin(pin),
           _updateTimer(0),
           _updateInterval(2000) {
-
-    addValueInfo("temp", "Temperature", "°C", 1, TYPE_FLOAT);
-    addValueInfo("hum", "Humidity", "%", 0, TYPE_FLOAT);
+    addValueInfo("temp", "Temperature", "°C", 1, true);
+    addValueInfo("hum", "Humidity", "%", 0, true);
 }
 
 DHTSensV2::~DHTSensV2() = default;

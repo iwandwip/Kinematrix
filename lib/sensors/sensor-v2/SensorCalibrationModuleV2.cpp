@@ -5,6 +5,9 @@ SensorCalibrationModuleV2::SensorCalibrationModuleV2()
           _entries(nullptr),
           _entryCount(0),
           _entryCapacity(0),
+          _sensorControls(nullptr),
+          _sensorControlCount(0),
+          _sensorControlCapacity(0),
           _serial(nullptr),
           _calibrationMode(false),
           _activeEntryIndex(0),
@@ -24,6 +27,17 @@ SensorCalibrationModuleV2::SensorCalibrationModuleV2()
             _entries[i].valueKey = nullptr;
             _entries[i].calibrator = nullptr;
             _entries[i].isActive = false;
+            _entries[i].isEnabled = true;
+            _entries[i].valueTypeCode = TYPE_UNKNOWN;
+        }
+    }
+
+    _sensorControlCapacity = 8;
+    _sensorControls = (SensorCalibrationControl *) malloc(_sensorControlCapacity * sizeof(SensorCalibrationControl));
+    if (_sensorControls) {
+        for (uint8_t i = 0; i < _sensorControlCapacity; i++) {
+            _sensorControls[i].sensorName = nullptr;
+            _sensorControls[i].isEnabled = true;
         }
     }
 }
@@ -38,6 +52,15 @@ SensorCalibrationModuleV2::~SensorCalibrationModuleV2() {
             }
         }
         free(_entries);
+    }
+
+    if (_sensorControls) {
+        for (uint8_t i = 0; i < _sensorControlCount; i++) {
+            if (_sensorControls[i].sensorName) {
+                free(_sensorControls[i].sensorName);
+            }
+        }
+        free(_sensorControls);
     }
 }
 
@@ -102,6 +125,49 @@ void SensorCalibrationModuleV2::discoverSensorValues() {
     }
 }
 
+void SensorCalibrationModuleV2::discoverCalibrableValues() {
+    for (uint8_t i = 0; i < getSensorCount(); i++) {
+        BaseSensV2 *sensor = getSensor(i);
+        const char *sensorName = getSensorName(i);
+
+        if (!sensor || !sensor->isCalibrationEnabled() ||
+            !isSensorCalibrationEnabled(sensorName))
+            continue;
+
+        for (uint8_t j = 0; j < sensor->getValueCount(); j++) {
+            const SensorValueInfo *info = sensor->getValueInfo(j);
+            if (info && sensor->isNumericValue(info->key) &&
+                sensor->isValueCalibrable(info->key)) {
+                addCalibrationEntry(sensor, sensorName, info->key);
+            }
+        }
+    }
+}
+
+void SensorCalibrationModuleV2::discoverNestedCalibrableValues() {
+    for (uint8_t i = 0; i < getSensorCount(); i++) {
+        BaseSensV2 *sensor = getSensor(i);
+        const char *sensorName = getSensorName(i);
+
+        if (!sensor || !sensor->isCalibrationEnabled() ||
+            !isSensorCalibrationEnabled(sensorName))
+            continue;
+
+        JsonDocument *doc = sensor->getDocument();
+        if (doc && doc->containsKey(sensorName)) {
+            JsonVariant sensorObj = (*doc)[sensorName];
+            extractNestedPaths(sensor, sensorName, sensorObj);
+        }
+
+        for (uint8_t j = 0; j < sensor->getValueCount(); j++) {
+            const SensorValueInfo *info = sensor->getValueInfo(j);
+            if (info && isPathCalibrable(sensor, info->key)) {
+                addCalibrationEntry(sensor, sensorName, info->key);
+            }
+        }
+    }
+}
+
 bool SensorCalibrationModuleV2::addCalibrationEntry(BaseSensV2 *sensor, const char *sensorName, const char *valueKey) {
     if (!sensor || !sensorName || !valueKey) {
         return false;
@@ -130,6 +196,8 @@ bool SensorCalibrationModuleV2::addCalibrationEntry(BaseSensV2 *sensor, const ch
                 _entries[i].valueKey = nullptr;
                 _entries[i].calibrator = nullptr;
                 _entries[i].isActive = false;
+                _entries[i].isEnabled = true;
+                _entries[i].valueTypeCode = TYPE_UNKNOWN;
             }
         } else {
             return false;
@@ -157,6 +225,13 @@ bool SensorCalibrationModuleV2::addCalibrationEntry(BaseSensV2 *sensor, const ch
     _entries[_entryCount].valueKey = strdup(valueKey);
     _entries[_entryCount].calibrator = calibrator;
     _entries[_entryCount].isActive = true;
+    _entries[_entryCount].isEnabled = sensor->isValueCalibrable(valueKey);
+
+    if (strchr(valueKey, '.') || strchr(valueKey, '[')) {
+        _entries[_entryCount].valueTypeCode = sensor->getTypeAtPath(valueKey);
+    } else {
+        _entries[_entryCount].valueTypeCode = sensor->getValueTypeCode(valueKey);
+    }
 
     _entryCount++;
     return true;
@@ -173,7 +248,7 @@ void SensorCalibrationModuleV2::calibrateOnePoint(const char *sensorName, const 
     int index = findEntryIndex(sensorName, valueKey);
     if (index < 0) return;
 
-    float rawValue = getRawValue(sensorName, valueKey);
+    float rawValue = getRawValue<float>(sensorName, valueKey);
 
     if (rawValue == 0) {
         rawValue = 0.0001;
@@ -253,23 +328,74 @@ bool SensorCalibrationModuleV2::isInCalibrationMode() const {
 }
 
 float SensorCalibrationModuleV2::getRawValue(const char *sensorName, const char *valueKey) const {
-    BaseSensV2 *sensor = getSensorByName(sensorName);
-    if (sensor) {
-        return sensor->getFloatValue(valueKey);
-    }
-    return 0.0f;
+    return getRawValue<float>(sensorName, valueKey);
 }
 
 float SensorCalibrationModuleV2::getCalibratedValue(const char *sensorName, const char *valueKey) const {
+    return getCalibratedValue<float>(sensorName, valueKey);
+}
+
+bool SensorCalibrationModuleV2::enableValueCalibration(const char *sensorName, const char *valueKey, bool enable) {
     int index = findEntryIndex(sensorName, valueKey);
-    if (index < 0) {
-        return getRawValue(sensorName, valueKey);
+    if (index < 0) return false;
+
+    _entries[index].isEnabled = enable;
+
+    BaseSensV2 *sensor = getSensorByName(sensorName);
+    if (sensor) {
+        sensor->setValueCalibrable(valueKey, enable);
     }
 
-    if (_entries[index].calibrator && _entries[index].calibrator->isCalibrated()) {
-        return _entries[index].calibrator->readCalibratedValue();
+    return true;
+}
+
+bool SensorCalibrationModuleV2::isValueCalibrationEnabled(const char *sensorName, const char *valueKey) const {
+    int index = findEntryIndex(sensorName, valueKey);
+    if (index < 0) {
+        BaseSensV2 *sensor = getSensorByName(sensorName);
+        if (sensor) {
+            return sensor->isValueCalibrable(valueKey);
+        }
+        return false;
+    }
+
+    return _entries[index].isEnabled;
+}
+
+void SensorCalibrationModuleV2::enableSensorCalibration(const char *sensorName, bool enable) {
+    int index = findSensorControlIndex(sensorName);
+    if (index >= 0) {
+        _sensorControls[index].isEnabled = enable;
     } else {
-        return getRawValue(sensorName, valueKey);
+        addSensorControl(sensorName, enable);
+    }
+
+    BaseSensV2 *sensor = getSensorByName(sensorName);
+    if (sensor) {
+        sensor->enableCalibration(enable);
+    }
+}
+
+bool SensorCalibrationModuleV2::isSensorCalibrationEnabled(const char *sensorName) const {
+    int index = findSensorControlIndex(sensorName);
+    if (index >= 0) {
+        return _sensorControls[index].isEnabled;
+    }
+    return true;
+}
+
+void SensorCalibrationModuleV2::enableAllCalibration(bool enable) {
+    for (uint8_t i = 0; i < getSensorCount(); i++) {
+        const char *sensorName = getSensorName(i);
+        if (sensorName) {
+            enableSensorCalibration(sensorName, enable);
+        }
+    }
+
+    for (uint16_t i = 0; i < _entryCount; i++) {
+        if (_entries[i].isActive) {
+            _entries[i].isEnabled = enable;
+        }
     }
 }
 
@@ -386,20 +512,46 @@ void SensorCalibrationModuleV2::listAllSensorValues() {
             _serial->print(info->key);
             _serial->print("): ");
 
-            switch (info->type) {
+            SensorTypeCode typeCode;
+            if (strchr(info->key, '.') || strchr(info->key, '[')) {
+                typeCode = sensor->getTypeAtPath(info->key);
+            } else {
+                typeCode = sensor->getValueTypeCode(info->key);
+            }
+
+            switch (typeCode) {
                 case TYPE_FLOAT: {
-                    float value = sensor->getFloatValue(info->key);
+                    float value = sensor->getValue<float>(info->key);
                     _serial->print(value, info->precision);
                     break;
                 }
                 case TYPE_INT: {
-                    int value = sensor->getIntValue(info->key);
+                    int value = sensor->getValue<int>(info->key);
                     _serial->print(value);
                     break;
                 }
                 case TYPE_STRING: {
-                    const char *value = sensor->getStringValue(info->key);
-                    if (value) _serial->print(value);
+                    String value = sensor->getValue<String>(info->key);
+                    _serial->print(value);
+                    break;
+                }
+                case TYPE_BOOL: {
+                    bool value = sensor->getValue<bool>(info->key);
+                    _serial->print(value ? "true" : "false");
+                    break;
+                }
+                case TYPE_LONG: {
+                    long value = sensor->getValue<long>(info->key);
+                    _serial->print(value);
+                    break;
+                }
+                case TYPE_DOUBLE: {
+                    double value = sensor->getValue<double>(info->key);
+                    _serial->print(value, info->precision);
+                    break;
+                }
+                default: {
+                    _serial->print("N/A");
                     break;
                 }
             }
@@ -409,12 +561,182 @@ void SensorCalibrationModuleV2::listAllSensorValues() {
                 _serial->print(info->unit);
             }
 
+            _serial->print(" [");
+            _serial->print(BaseSensV2::getTypeCodeName(typeCode));
+            _serial->print("]");
+
             int calIndex = findEntryIndex(sensorName, info->key);
             if (calIndex >= 0 && _entries[calIndex].calibrator && _entries[calIndex].calibrator->isCalibrated()) {
                 _serial->print(" [Calibrated]");
             }
 
+            if (sensor->isNumericValue(info->key)) {
+                if (sensor->isValueCalibrable(info->key)) {
+                    _serial->print(" [Calibrable]");
+                } else {
+                    _serial->print(" [Cal-Disabled]");
+                }
+            }
+
             _serial->println();
+        }
+    }
+}
+
+void SensorCalibrationModuleV2::listCalibrableValues(bool showDisabled) {
+    if (!_serial) return;
+
+    _serial->println("\n===== CALIBRABLE VALUES =====");
+
+    for (uint16_t i = 0; i < _entryCount; i++) {
+        if (!_entries[i].isActive) continue;
+        if (!showDisabled && !_entries[i].isEnabled) continue;
+
+        const SensorValueInfo *info = _entries[i].sensor->getValueInfoByKey(_entries[i].valueKey);
+
+        _serial->print(i + 1);
+        _serial->print(": ");
+        _serial->print(_entries[i].sensorName);
+        _serial->print(" - ");
+
+        if (info) {
+            _serial->print(info->label);
+        } else {
+            String cleanPath = String(_entries[i].valueKey);
+            cleanPath.replace(".", " → ");
+            cleanPath.replace("[", " [");
+            cleanPath.replace("]", "]");
+            _serial->print(cleanPath);
+        }
+
+        _serial->print(" [");
+        _serial->print(BaseSensV2::getTypeCodeName(_entries[i].valueTypeCode));
+        _serial->print("]");
+
+        if (_entries[i].calibrator && _entries[i].calibrator->isCalibrated()) {
+            _serial->print(" [Calibrated]");
+        }
+
+        if (!_entries[i].isEnabled) {
+            _serial->print(" [DISABLED]");
+        }
+
+        _serial->println();
+    }
+}
+
+void SensorCalibrationModuleV2::listNumericValues() {
+    if (!_serial) return;
+
+    _serial->println("\n===== NUMERIC SENSOR VALUES =====");
+
+    for (uint8_t i = 0; i < getSensorCount(); i++) {
+        BaseSensV2 *sensor = getSensor(i);
+        const char *sensorName = getSensorName(i);
+
+        if (!sensor || !sensorName) continue;
+
+        bool hasNumericValues = false;
+        for (uint8_t j = 0; j < sensor->getValueCount(); j++) {
+            const SensorValueInfo *info = sensor->getValueInfo(j);
+            if (info && sensor->isNumericValue(info->key)) {
+                if (!hasNumericValues) {
+                    _serial->print("Sensor: ");
+                    _serial->println(sensorName);
+                    hasNumericValues = true;
+                }
+
+                _serial->print("  - ");
+                _serial->print(info->label);
+                _serial->print(" (");
+                _serial->print(info->key);
+                _serial->print("): ");
+
+                SensorTypeCode typeCode = sensor->getValueTypeCode(info->key);
+                switch (typeCode) {
+                    case TYPE_FLOAT: {
+                        float value = sensor->getValue<float>(info->key);
+                        _serial->print(value, info->precision);
+                        break;
+                    }
+                    case TYPE_INT: {
+                        int value = sensor->getValue<int>(info->key);
+                        _serial->print(value);
+                        break;
+                    }
+                    case TYPE_LONG: {
+                        long value = sensor->getValue<long>(info->key);
+                        _serial->print(value);
+                        break;
+                    }
+                    case TYPE_DOUBLE: {
+                        double value = sensor->getValue<double>(info->key);
+                        _serial->print(value, info->precision);
+                        break;
+                    }
+                    default:
+                        _serial->print("N/A");
+                        break;
+                }
+
+                if (info->unit && strlen(info->unit) > 0) {
+                    _serial->print(" ");
+                    _serial->print(info->unit);
+                }
+
+                _serial->print(" [");
+                _serial->print(BaseSensV2::getTypeCodeName(typeCode));
+                _serial->print("]");
+
+                _serial->println();
+            }
+        }
+    }
+}
+
+void SensorCalibrationModuleV2::listSensorCalibrationStatus() {
+    if (!_serial) return;
+
+    _serial->println("\n===== SENSOR CALIBRATION STATUS =====");
+
+    for (uint8_t i = 0; i < getSensorCount(); i++) {
+        BaseSensV2 *sensor = getSensor(i);
+        const char *sensorName = getSensorName(i);
+
+        if (!sensor || !sensorName) continue;
+
+        _serial->print("Sensor: ");
+        _serial->print(sensorName);
+        _serial->print(" - Master Calibration: ");
+        _serial->print(sensor->isCalibrationEnabled() ? "ENABLED" : "DISABLED");
+        _serial->print(" - Module Control: ");
+        _serial->println(isSensorCalibrationEnabled(sensorName) ? "ENABLED" : "DISABLED");
+
+        for (uint8_t j = 0; j < sensor->getValueCount(); j++) {
+            const SensorValueInfo *info = sensor->getValueInfo(j);
+            if (info && sensor->isNumericValue(info->key)) {
+                _serial->print("  - ");
+                _serial->print(info->label);
+                _serial->print(": ");
+
+                if (sensor->isValueCalibrable(info->key)) {
+                    _serial->print("Calibrable");
+
+                    int calIndex = findEntryIndex(sensorName, info->key);
+                    if (calIndex >= 0) {
+                        if (_entries[calIndex].calibrator && _entries[calIndex].calibrator->isCalibrated()) {
+                            _serial->print(" & Calibrated");
+                        }
+                        if (!_entries[calIndex].isEnabled) {
+                            _serial->print(" but DISABLED");
+                        }
+                    }
+                } else {
+                    _serial->print("Not Calibrable");
+                }
+
+                _serial->println();
+            }
         }
     }
 }
@@ -536,6 +858,28 @@ void SensorCalibrationModuleV2::processCalibrationCommand(char cmd) {
             listAllSensorValues();
             break;
 
+        case 'c':
+        case 'C':
+            listCalibrableValues(true);
+            break;
+
+        case 'n':
+        case 'N':
+            listNumericValues();
+            break;
+
+        case 't':
+        case 'T':
+            listSensorCalibrationStatus();
+            break;
+
+        case 'd':
+        case 'D':
+            discoverNestedCalibrableValues();
+            _serial->println("Nested calibrable values discovered");
+            printCalibrationMenu();
+            break;
+
         case 's':
         case 'S':
             if (saveAllCalibrations(_eepromStartAddress)) {
@@ -578,12 +922,44 @@ void SensorCalibrationModuleV2::processCalibrationCommand(char cmd) {
             _serial->println(_autoSaveCalibration ? "ON" : "OFF");
             break;
 
+        case 'e':
+        case 'E': {
+            _serial->print("Enter entry number to toggle: ");
+            clearSerialBuffer();
+
+            while (!_serial->available()) {
+                delay(10);
+            }
+
+            int entryNum = _serial->parseInt();
+            clearSerialBuffer();
+            _serial->println(entryNum);
+
+            if (entryNum > 0 && entryNum <= _entryCount) {
+                int index = entryNum - 1;
+                if (_entries[index].isActive) {
+                    _entries[index].isEnabled = !_entries[index].isEnabled;
+                    _serial->print("Entry ");
+                    _serial->print(entryNum);
+                    _serial->print(" calibration is now ");
+                    _serial->println(_entries[index].isEnabled ? "ENABLED" : "DISABLED");
+                }
+            } else {
+                _serial->println("Invalid entry number");
+            }
+            break;
+        }
+
         default:
             if (cmd >= '1' && cmd <= '9') {
                 int index = cmd - '1';
                 if (index < _entryCount && _entries[index].isActive) {
-                    _activeEntryIndex = index;
-                    startCalibratorForEntry(index);
+                    if (_entries[index].isEnabled) {
+                        _activeEntryIndex = index;
+                        startCalibratorForEntry(index);
+                    } else {
+                        _serial->println("Calibration is disabled for this value");
+                    }
                 } else {
                     _serial->println("Invalid selection");
                 }
@@ -595,33 +971,51 @@ void SensorCalibrationModuleV2::processCalibrationCommand(char cmd) {
 void SensorCalibrationModuleV2::printCalibrationMenu() {
     if (!_serial) return;
 
-    _serial->println("\n===== SENSOR VALUE CALIBRATION MENU =====");
-    _serial->println("Available Values:");
+    _serial->println("\n===== SENSOR CALIBRATION MENU V2 =====");
+    _serial->println("Calibrable Values:");
 
+    uint8_t displayCount = 0;
     for (uint16_t i = 0; i < _entryCount; i++) {
         if (!_entries[i].isActive) continue;
 
-        const SensorValueInfo *info = _entries[i].sensor->getValueInfoByKey(_entries[i].valueKey);
-
-        _serial->print(i + 1);
+        displayCount++;
+        _serial->print(displayCount);
         _serial->print(": ");
         _serial->print(_entries[i].sensorName);
         _serial->print(" - ");
 
+        const SensorValueInfo *info = _entries[i].sensor->getValueInfoByKey(_entries[i].valueKey);
         if (info) {
             _serial->print(info->label);
         } else {
-            _serial->print(_entries[i].valueKey);
+            String cleanPath = String(_entries[i].valueKey);
+            cleanPath.replace(".", " → ");
+            cleanPath.replace("[", " [");
+            cleanPath.replace("]", "]");
+            _serial->print(cleanPath);
         }
+
+        _serial->print(" [");
+        _serial->print(BaseSensV2::getTypeCodeName(_entries[i].valueTypeCode));
+        _serial->print("]");
 
         if (_entries[i].calibrator && _entries[i].calibrator->isCalibrated()) {
             _serial->print(" [Calibrated]");
         }
 
+        if (!_entries[i].isEnabled) {
+            _serial->print(" [DISABLED]");
+        }
+
         _serial->println();
     }
 
-    _serial->println("\nL: List All Sensor Values");
+    _serial->println("\nE: Enable/Disable Entry (E<num>)");
+    _serial->println("L: List All Sensor Values");
+    _serial->println("C: List Calibrable Values");
+    _serial->println("N: List Numeric Values Only");
+    _serial->println("T: List Sensor Calibration Status");
+    _serial->println("D: Discover Nested Calibrable Values");
     _serial->println("S: Save All Calibrations");
     _serial->println("R: Load All Calibrations");
     _serial->println("A: Toggle Auto-save");
@@ -646,6 +1040,83 @@ int SensorCalibrationModuleV2::findEntryIndex(const char *sensorName, const char
     return -1;
 }
 
+int SensorCalibrationModuleV2::findSensorControlIndex(const char *sensorName) const {
+    if (!sensorName || !_sensorControls) {
+        return -1;
+    }
+
+    for (uint8_t i = 0; i < _sensorControlCount; i++) {
+        if (_sensorControls[i].sensorName &&
+            strcmp(_sensorControls[i].sensorName, sensorName) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void SensorCalibrationModuleV2::addSensorControl(const char *sensorName, bool enabled) {
+    if (!sensorName) return;
+
+    if (_sensorControlCount >= _sensorControlCapacity) {
+        uint8_t newCapacity = _sensorControlCapacity + 4;
+        SensorCalibrationControl *newControls = (SensorCalibrationControl *) realloc(
+                _sensorControls, newCapacity * sizeof(SensorCalibrationControl));
+
+        if (newControls) {
+            _sensorControls = newControls;
+            _sensorControlCapacity = newCapacity;
+
+            for (uint8_t i = _sensorControlCount; i < _sensorControlCapacity; i++) {
+                _sensorControls[i].sensorName = nullptr;
+                _sensorControls[i].isEnabled = true;
+            }
+        } else {
+            return;
+        }
+    }
+
+    _sensorControls[_sensorControlCount].sensorName = strdup(sensorName);
+    _sensorControls[_sensorControlCount].isEnabled = enabled;
+    _sensorControlCount++;
+}
+
+void SensorCalibrationModuleV2::extractNestedPaths(BaseSensV2 *sensor, const char *sensorName, JsonVariant obj, String currentPath) {
+    if (obj.is<JsonObject>()) {
+        JsonObject jsonObj = obj.as<JsonObject>();
+        for (JsonPair kv: jsonObj) {
+            String newPath = currentPath.length() > 0 ? currentPath + "." + kv.key().c_str() : String(kv.key().c_str());
+
+            if (kv.value().is<JsonObject>() || kv.value().is<JsonArray>()) {
+                extractNestedPaths(sensor, sensorName, kv.value(), newPath);
+            } else if (isPathCalibrable(sensor, newPath.c_str())) {
+                addCalibrationEntry(sensor, sensorName, newPath.c_str());
+            }
+        }
+    } else if (obj.is<JsonArray>()) {
+        JsonArray jsonArray = obj.as<JsonArray>();
+        for (size_t i = 0; i < jsonArray.size(); i++) {
+            String newPath = currentPath + "[" + String(i) + "]";
+
+            if (jsonArray[i].is<JsonObject>() || jsonArray[i].is<JsonArray>()) {
+                extractNestedPaths(sensor, sensorName, jsonArray[i], newPath);
+            } else if (isPathCalibrable(sensor, newPath.c_str())) {
+                addCalibrationEntry(sensor, sensorName, newPath.c_str());
+            }
+        }
+    }
+}
+
+bool SensorCalibrationModuleV2::isPathCalibrable(BaseSensV2 *sensor, const char *path) const {
+    if (!sensor || !path) return false;
+
+    if (!sensor->hasPath(path)) return false;
+
+    SensorTypeCode typeCode = sensor->getTypeAtPath(path);
+    if (!BaseSensV2::isNumericTypeCode(typeCode)) return false;
+
+    return sensor->isValueCalibrable(path);
+}
+
 void SensorCalibrationModuleV2::calibrationCompletedCallback(void *context) {
     SensorCalibrationModuleV2 *instance = static_cast<SensorCalibrationModuleV2 *>(context);
     if (instance) {
@@ -664,7 +1135,13 @@ void SensorCalibrationModuleV2::startCalibratorForEntry(uint16_t entryIndex) {
     }
 
     const SensorValueInfo *info = entry.sensor->getValueInfoByKey(entry.valueKey);
-    const char *valueLabel = (info) ? info->label : entry.valueKey;
+    const char *valueLabel;
+
+    if (info) {
+        valueLabel = info->label;
+    } else {
+        valueLabel = entry.valueKey;
+    }
 
     int eepromAddr = _eepromStartAddress + (entryIndex * 50);
 

@@ -220,6 +220,10 @@
 #include "../lib/sensors/sensor-v2/SensorList/AnalogSensV2.h"
 #endif
 
+#ifdef ENABLE_SENSOR_NODEF_BME680_v2
+#include "../lib/sensors/sensor-v2/SensorList/BME680SensV2.h"
+#endif
+
 #ifdef ENABLE_SENSOR_NODEF_DHT_V2
 #include "../lib/sensors/sensor-v2/SensorList/DHTSensV2.h"
 #endif

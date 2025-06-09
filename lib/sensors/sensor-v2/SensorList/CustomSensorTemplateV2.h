@@ -24,7 +24,7 @@ public:
     void setUpdateInterval(uint32_t interval);
     void setCalibrationFactor(float factor);
     void setSensorMode(int mode);
-    void addCustomSensorValue(const char *key, const char *label, const char *unit, uint8_t precision, SensorValueType type);
+    void addCustomSensorValue(const char *key, const char *label, const char *unit, uint8_t precision, bool calibrable);
 };
 
 #endif

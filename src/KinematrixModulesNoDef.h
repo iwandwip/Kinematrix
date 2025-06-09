@@ -112,78 +112,6 @@
 #include "../lib/modules/control/SerialDebuggerV2.h"
 #endif
 
-#ifdef ENABLE_MODULE_NODEF_DATETIME_NTP
-#include "../lib/modules/wifi/datetime-ntp.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_DATETIME_NTP_V2
-#include "../lib/modules/wifi/datetime-ntpv2.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_GOOGLE_SHEETS
-#include "../lib/modules/wifi/google-sheets.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_MQTT_MANAGER
-#include "../lib/modules/wifi/mqtt-manager.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_HANDLER
-#include "../lib/modules/wifi/firebase/firebasev1/firebase-handler.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_FIRESTORE_V2
-#include "../lib/modules/wifi/firebase/firebasev2/firebase-firestorev2.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_MESSAGING_V2
-#include "../lib/modules/wifi/firebase/firebasev2/firebase-messagingv2.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_RTDB_V2
-#include "../lib/modules/wifi/firebase/firebasev2/firebase-rtdbv2.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_STORAGE_V2
-#include "../lib/modules/wifi/firebase/firebasev2/firebase-storagev2.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_APPLICATION_V3
-#include "../lib/modules/wifi/firebase/firebasev3/firebase-applicationv3.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_FIRESTORE_V3
-#include "../lib/modules/wifi/firebase/firebasev3/firebase-firestorev3.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_MESSAGING_V3
-#include "../lib/modules/wifi/firebase/firebasev3/firebase-messagingv3.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_RTDB_V3
-#include "../lib/modules/wifi/firebase/firebasev3/firebase-rtdbv3.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FIREBASE_STORAGE_V3
-#include "../lib/modules/wifi/firebase/firebasev3/firebase-storagev3.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_TELEGRAM_BOT
-#include "../lib/modules/wifi/telegram-bot.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_WHATSAPP_BOT
-#include "../lib/modules/wifi/whatsapp-bot.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_WIFI_HANDLER
-#include "../lib/modules/wifi/wifi-handler.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_WIFI_HANDLER_V2
-#include "../lib/modules/wifi/wifi-handlerv2.h"
-#endif
-
 #ifdef ENABLE_MODULE_NODEF_LCD_MENU
 #include "../lib/modules/display/LiquidCrystal_I2C.h"
 #include "../lib/modules/display/lcd-menu.h"
@@ -275,4 +203,97 @@
 
 #ifdef ENABLE_MODULE_NODEF_TIMER_TASK
 #include "../lib/modules/time/timer-task.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_EASY_LOGIC
+#include "../lib/modules/utils/EasyLogic.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_LOGIC_CONDITION_MANAGER
+#include "../lib/modules/utils/LogicConditionManager.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_STATE_ACTION_MANAGER
+#include "../lib/modules/utils/StateActionManager.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_VARIABLE_WATCHER
+#include "../lib/modules/utils/VariableWatcher.h"
+#include "../lib/modules/utils/VariableWatcher.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DATETIME_NTP
+#include "../lib/modules/wifi/datetime-ntp.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DATETIME_NTP_V2
+#include "../lib/modules/wifi/datetime-ntpv2.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_GOOGLE_SHEETS
+#include "../lib/modules/wifi/google-sheets.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_MQTT_MANAGER
+#include "../lib/modules/wifi/mqtt-manager.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_HANDLER
+#include "../lib/modules/wifi/firebase/firebasev1/firebase-handler.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_FIRESTORE_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-firestorev2.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_MESSAGING_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-messagingv2.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_RTDB_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-rtdbv2.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_STORAGE_V2
+#include "../lib/modules/wifi/firebase/firebasev2/firebase-storagev2.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_APPLICATION_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-applicationv3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_FIRESTORE_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-firestorev3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_MESSAGING_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-messagingv3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_RTDB_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-rtdbv3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FIREBASE_STORAGE_V3
+#include "../lib/modules/wifi/firebase/firebasev3/firebase-storagev3.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_TELEGRAM_BOT
+#include "../lib/modules/wifi/telegram-bot.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_WHATSAPP_BOT
+#include "../lib/modules/wifi/whatsapp-bot.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_WIFI_HANDLER
+#include "../lib/modules/wifi/wifi-handler.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_WIFI_HANDLER_V2
+#include "../lib/modules/wifi/wifi-handlerv2.h"
+#endif
+
+#ifdef ENABLE_NODEF_HELPER_WIFI_MODULE
+#include "../lib/modules/wifi/WiFiModule.h"
 #endif

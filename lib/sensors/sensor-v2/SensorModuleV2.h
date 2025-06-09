@@ -6,19 +6,18 @@
 #include "SensorAlertSystemV2.h"
 #include "SensorFilterV2.h"
 
-enum SensorValueType {
-    TYPE_FLOAT,
-    TYPE_INT,
-    TYPE_STRING
-};
-
-struct SensorValueData {
-    union {
-        float floatValue;
-        int intValue;
-        char *stringValue;
-    };
-    SensorValueType type;
+enum SensorTypeCode {
+    TYPE_UNKNOWN = 0,
+    TYPE_BOOL = 1,
+    TYPE_INT = 2,
+    TYPE_FLOAT = 3,
+    TYPE_DOUBLE = 4,
+    TYPE_LONG = 5,
+    TYPE_UINT = 6,
+    TYPE_ULONG = 7,
+    TYPE_STRING = 8,
+    TYPE_OBJECT = 9,
+    TYPE_ARRAY = 10
 };
 
 struct SensorValueInfo {
@@ -26,14 +25,12 @@ struct SensorValueInfo {
     char *label;
     char *unit;
     uint8_t precision;
-    SensorValueType type;
 
-    SensorValueInfo(const char *_key, const char *_label, const char *_unit, uint8_t _precision, SensorValueType _type) {
+    SensorValueInfo(const char *_key, const char *_label, const char *_unit, uint8_t _precision) {
         key = strdup(_key);
         label = strdup(_label);
         unit = strdup(_unit);
         precision = _precision;
-        type = _type;
     }
 
     ~SensorValueInfo() {
@@ -41,6 +38,11 @@ struct SensorValueInfo {
         if (label) free(label);
         if (unit) free(unit);
     }
+};
+
+struct CalibrationConfig {
+    char *valueKey;
+    bool isCalibrable;
 };
 
 class BaseSensV2 {
@@ -52,6 +54,16 @@ private:
     JsonDocument *_doc;
     char *_name;
 
+    CalibrationConfig *_calibrationConfigs;
+    uint8_t _configCount;
+    uint8_t _configCapacity;
+    bool _calibrationEnabled;
+
+    int findConfigIndex(const char *key) const;
+    void addCalibrationConfig(const char *key, bool calibrable);
+    JsonVariant getValueAtPath(const char *path) const;
+    void setValueAtPath(const char *path, JsonVariant value);
+
 public:
     BaseSensV2();
     virtual ~BaseSensV2();
@@ -59,7 +71,47 @@ public:
     virtual bool init() = 0;
     virtual bool update() = 0;
 
-    void addValueInfo(const char *key, const char *label, const char *unit, uint8_t precision, SensorValueType type);
+    template<typename T>
+    T getValue(const char *key) const {
+        if (_doc && _name) {
+            return (*_doc)[_name][key].as<T>();
+        }
+        return T{};
+    }
+
+    template<typename T>
+    void updateValue(const char *key, T value) {
+        if (_doc && _name) {
+            (*_doc)[_name][key] = value;
+        }
+    }
+
+    template<typename T>
+    T getValueAtPath(const char *path) const {
+        JsonVariant variant = getValueAtPath(path);
+        return variant.as<T>();
+    }
+
+    template<typename T>
+    void updateValueAtPath(const char *path, T value) {
+        setValueAtPath(path, JsonVariant(value));
+    }
+
+    bool isNumericValue(const char *key) const;
+    SensorTypeCode getValueTypeCode(const char *key) const;
+    static const char *getTypeCodeName(SensorTypeCode typeCode);
+    static bool isNumericTypeCode(SensorTypeCode typeCode);
+
+    bool hasPath(const char *path) const;
+    SensorTypeCode getTypeAtPath(const char *path) const;
+
+    void setValueCalibrable(const char *key, bool calibrable = true);
+    bool isValueCalibrable(const char *key) const;
+    void enableCalibration(bool enable = true);
+    bool isCalibrationEnabled() const;
+
+    void addValueInfo(const char *key, const char *label, const char *unit, uint8_t precision = 3, bool calibrable = true);
+    void addPathValueInfo(const char *path, const char *label, const char *unit, uint8_t precision = 3, bool calibrable = true);
     void updateValue(const char *key, float value);
     void updateValue(const char *key, int value);
     void updateValue(const char *key, const char *value);
@@ -68,11 +120,12 @@ public:
     const SensorValueInfo *getValueInfo(uint8_t index) const;
     const SensorValueInfo *getValueInfoByKey(const char *key) const;
 
-    virtual SensorValueData getValueByKey(const char *key) const;
-
     float getFloatValue(const char *key) const;
     int getIntValue(const char *key) const;
     const char *getStringValue(const char *key) const;
+
+    JsonObject getObject(const char *key) const;
+    JsonArray getArray(const char *key) const;
 
     void setDocument(const char *objName);
     void setDocumentValue(JsonDocument *docBase);

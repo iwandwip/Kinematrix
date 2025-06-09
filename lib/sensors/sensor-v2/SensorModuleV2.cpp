@@ -2,9 +2,18 @@
 #include "SensorUtilityV2.h"
 
 BaseSensV2::BaseSensV2() : _valueInfos(nullptr), _valueCount(0), _valueCapacity(0),
-                           _doc(nullptr), _name(nullptr) {
+                           _doc(nullptr), _name(nullptr),
+                           _calibrationConfigs(nullptr), _configCount(0), _configCapacity(0),
+                           _calibrationEnabled(true) {
     _valueCapacity = 4;
     _valueInfos = (SensorValueInfo **) malloc(_valueCapacity * sizeof(SensorValueInfo *));
+
+    _configCapacity = 8;
+    _calibrationConfigs = (CalibrationConfig *) malloc(_configCapacity * sizeof(CalibrationConfig));
+    for (uint8_t i = 0; i < _configCapacity; i++) {
+        _calibrationConfigs[i].valueKey = nullptr;
+        _calibrationConfigs[i].isCalibrable = true;
+    }
 }
 
 BaseSensV2::~BaseSensV2() {
@@ -18,10 +27,116 @@ BaseSensV2::~BaseSensV2() {
     }
 
     if (_name) free(_name);
+
+    if (_calibrationConfigs) {
+        for (uint8_t i = 0; i < _configCount; i++) {
+            if (_calibrationConfigs[i].valueKey) {
+                free(_calibrationConfigs[i].valueKey);
+            }
+        }
+        free(_calibrationConfigs);
+    }
 }
 
-void BaseSensV2::addValueInfo(const char *key, const char *label, const char *unit,
-                              uint8_t precision, SensorValueType type) {
+bool BaseSensV2::isNumericValue(const char *key) const {
+    SensorTypeCode typeCode = getValueTypeCode(key);
+    return isNumericTypeCode(typeCode);
+}
+
+SensorTypeCode BaseSensV2::getValueTypeCode(const char *key) const {
+    if (!_doc || !_name) return TYPE_UNKNOWN;
+
+    JsonVariant v = (*_doc)[_name][key];
+    if (v.is<bool>()) return TYPE_BOOL;
+    if (v.is<int>()) return TYPE_INT;
+    if (v.is<float>()) return TYPE_FLOAT;
+    if (v.is<double>()) return TYPE_DOUBLE;
+    if (v.is<long>()) return TYPE_LONG;
+    if (v.is<unsigned int>()) return TYPE_UINT;
+    if (v.is<unsigned long>()) return TYPE_ULONG;
+    if (v.is<const char *>()) return TYPE_STRING;
+    if (v.is<JsonObject>()) return TYPE_OBJECT;
+    if (v.is<JsonArray>()) return TYPE_ARRAY;
+    return TYPE_UNKNOWN;
+}
+
+const char *BaseSensV2::getTypeCodeName(SensorTypeCode typeCode) {
+    switch (typeCode) {
+        case TYPE_BOOL:
+            return "bool";
+        case TYPE_INT:
+            return "int";
+        case TYPE_FLOAT:
+            return "float";
+        case TYPE_DOUBLE:
+            return "double";
+        case TYPE_LONG:
+            return "long";
+        case TYPE_UINT:
+            return "uint";
+        case TYPE_ULONG:
+            return "ulong";
+        case TYPE_STRING:
+            return "string";
+        case TYPE_OBJECT:
+            return "object";
+        case TYPE_ARRAY:
+            return "array";
+        case TYPE_UNKNOWN:
+        default:
+            return "unknown";
+    }
+}
+
+bool BaseSensV2::isNumericTypeCode(SensorTypeCode typeCode) {
+    return typeCode == TYPE_INT || typeCode == TYPE_FLOAT || typeCode == TYPE_DOUBLE ||
+           typeCode == TYPE_LONG || typeCode == TYPE_UINT || typeCode == TYPE_ULONG;
+}
+
+bool BaseSensV2::hasPath(const char *path) const {
+    JsonVariant variant = getValueAtPath(path);
+    return !variant.isNull();
+}
+
+SensorTypeCode BaseSensV2::getTypeAtPath(const char *path) const {
+    JsonVariant v = getValueAtPath(path);
+    if (v.is<bool>()) return TYPE_BOOL;
+    if (v.is<int>()) return TYPE_INT;
+    if (v.is<float>()) return TYPE_FLOAT;
+    if (v.is<double>()) return TYPE_DOUBLE;
+    if (v.is<long>()) return TYPE_LONG;
+    if (v.is<unsigned int>()) return TYPE_UINT;
+    if (v.is<unsigned long>()) return TYPE_ULONG;
+    if (v.is<const char *>()) return TYPE_STRING;
+    if (v.is<JsonObject>()) return TYPE_OBJECT;
+    if (v.is<JsonArray>()) return TYPE_ARRAY;
+    return TYPE_UNKNOWN;
+}
+
+void BaseSensV2::setValueCalibrable(const char *key, bool calibrable) {
+    addCalibrationConfig(key, calibrable);
+}
+
+bool BaseSensV2::isValueCalibrable(const char *key) const {
+    if (!_calibrationEnabled) return false;
+
+    int index = findConfigIndex(key);
+    if (index >= 0) {
+        return _calibrationConfigs[index].isCalibrable;
+    }
+
+    return isNumericValue(key);
+}
+
+void BaseSensV2::enableCalibration(bool enable) {
+    _calibrationEnabled = enable;
+}
+
+bool BaseSensV2::isCalibrationEnabled() const {
+    return _calibrationEnabled;
+}
+
+void BaseSensV2::addValueInfo(const char *key, const char *label, const char *unit, uint8_t precision, bool calibrable) {
     if (_valueCount >= _valueCapacity) {
         uint8_t newCapacity = _valueCapacity + 4;
         SensorValueInfo **newInfos = (SensorValueInfo **) realloc(_valueInfos,
@@ -34,8 +149,14 @@ void BaseSensV2::addValueInfo(const char *key, const char *label, const char *un
         }
     }
 
-    _valueInfos[_valueCount] = new SensorValueInfo(key, label, unit, precision, type);
+    _valueInfos[_valueCount] = new SensorValueInfo(key, label, unit, precision);
     _valueCount++;
+
+    setValueCalibrable(key, calibrable);
+}
+
+void BaseSensV2::addPathValueInfo(const char *path, const char *label, const char *unit, uint8_t precision, bool calibrable) {
+    addValueInfo(path, label, unit, precision, calibrable);
 }
 
 void BaseSensV2::updateValue(const char *key, float value) {
@@ -76,60 +197,31 @@ const SensorValueInfo *BaseSensV2::getValueInfoByKey(const char *key) const {
     return nullptr;
 }
 
-SensorValueData BaseSensV2::getValueByKey(const char *key) const {
-    SensorValueData emptyData;
-    emptyData.floatValue = 0.0f;
-    emptyData.type = TYPE_FLOAT;
-
-    const SensorValueInfo *info = getValueInfoByKey(key);
-    if (!info) return emptyData;
-
-    SensorValueData data;
-    data.type = info->type;
-
-    if (_doc && _name) {
-        switch (info->type) {
-            case TYPE_FLOAT:
-                data.floatValue = (*_doc)[_name][key].as<float>();
-                break;
-            case TYPE_INT:
-                data.intValue = (*_doc)[_name][key].as<int>();
-                break;
-            case TYPE_STRING:
-                data.stringValue = strdup((*_doc)[_name][key].as<const char *>());
-                break;
-        }
-    }
-
-    return data;
-}
-
 float BaseSensV2::getFloatValue(const char *key) const {
-    SensorValueData data = getValueByKey(key);
-    if (data.type == TYPE_FLOAT) {
-        return data.floatValue;
-    } else if (data.type == TYPE_INT) {
-        return (float) data.intValue;
-    }
-    return 0.0f;
+    return getValue<float>(key);
 }
 
 int BaseSensV2::getIntValue(const char *key) const {
-    SensorValueData data = getValueByKey(key);
-    if (data.type == TYPE_INT) {
-        return data.intValue;
-    } else if (data.type == TYPE_FLOAT) {
-        return (int) data.floatValue;
-    }
-    return 0;
+    return getValue<int>(key);
 }
 
 const char *BaseSensV2::getStringValue(const char *key) const {
-    SensorValueData data = getValueByKey(key);
-    if (data.type == TYPE_STRING) {
-        return data.stringValue;
+    static String temp = getValue<String>(key);
+    return temp.c_str();
+}
+
+JsonObject BaseSensV2::getObject(const char *key) const {
+    if (_doc && _name) {
+        return (*_doc)[_name][key].as<JsonObject>();
     }
-    return "";
+    return JsonObject();
+}
+
+JsonArray BaseSensV2::getArray(const char *key) const {
+    if (_doc && _name) {
+        return (*_doc)[_name][key].as<JsonArray>();
+    }
+    return JsonArray();
 }
 
 void BaseSensV2::setDocument(const char *objName) {
@@ -151,6 +243,143 @@ JsonVariant BaseSensV2::getVariant(const char *key) const {
     }
     JsonVariant empty;
     return empty;
+}
+
+int BaseSensV2::findConfigIndex(const char *key) const {
+    for (uint8_t i = 0; i < _configCount; i++) {
+        if (_calibrationConfigs[i].valueKey &&
+            strcmp(_calibrationConfigs[i].valueKey, key) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void BaseSensV2::addCalibrationConfig(const char *key, bool calibrable) {
+    int index = findConfigIndex(key);
+    if (index >= 0) {
+        _calibrationConfigs[index].isCalibrable = calibrable;
+        return;
+    }
+
+    if (_configCount >= _configCapacity) {
+        uint8_t newCapacity = _configCapacity + 4;
+        CalibrationConfig *newConfigs = (CalibrationConfig *) realloc(
+                _calibrationConfigs, newCapacity * sizeof(CalibrationConfig));
+
+        if (newConfigs) {
+            _calibrationConfigs = newConfigs;
+            _configCapacity = newCapacity;
+
+            for (uint8_t i = _configCount; i < _configCapacity; i++) {
+                _calibrationConfigs[i].valueKey = nullptr;
+                _calibrationConfigs[i].isCalibrable = true;
+            }
+        } else {
+            return;
+        }
+    }
+
+    _calibrationConfigs[_configCount].valueKey = strdup(key);
+    _calibrationConfigs[_configCount].isCalibrable = calibrable;
+    _configCount++;
+}
+
+JsonVariant BaseSensV2::getValueAtPath(const char *path) const {
+    if (!_doc || !_name) return JsonVariant();
+
+    JsonVariant current = (*_doc)[_name];
+    String pathStr = String(path);
+
+    int start = 0;
+    int end = pathStr.indexOf('.', start);
+
+    while (end != -1) {
+        String segment = pathStr.substring(start, end);
+
+        if (segment.indexOf('[') != -1) {
+            int bracketStart = segment.indexOf('[');
+            int bracketEnd = segment.indexOf(']');
+            String arrayName = segment.substring(0, bracketStart);
+            int index = segment.substring(bracketStart + 1, bracketEnd).toInt();
+            current = current[arrayName][index];
+        } else {
+            current = current[segment];
+        }
+
+        start = end + 1;
+        end = pathStr.indexOf('.', start);
+    }
+
+    String lastSegment = pathStr.substring(start);
+    if (lastSegment.indexOf('[') != -1) {
+        int bracketStart = lastSegment.indexOf('[');
+        int bracketEnd = lastSegment.indexOf(']');
+        String arrayName = lastSegment.substring(0, bracketStart);
+        int index = lastSegment.substring(bracketStart + 1, bracketEnd).toInt();
+        current = current[arrayName][index];
+    } else {
+        current = current[lastSegment];
+    }
+
+    return current;
+}
+
+void BaseSensV2::setValueAtPath(const char *path, JsonVariant value) {
+    if (!_doc || !_name) return;
+
+    JsonVariant current = (*_doc)[_name];
+    String pathStr = String(path);
+
+    int start = 0;
+    int end = pathStr.indexOf('.', start);
+
+    while (end != -1) {
+        String segment = pathStr.substring(start, end);
+
+        if (segment.indexOf('[') != -1) {
+            int bracketStart = segment.indexOf('[');
+            int bracketEnd = segment.indexOf(']');
+            String arrayName = segment.substring(0, bracketStart);
+            int index = segment.substring(bracketStart + 1, bracketEnd).toInt();
+
+            if (!current[arrayName].is<JsonArray>()) {
+                current[arrayName].to<JsonArray>();
+            }
+            JsonArray arr = current[arrayName].as<JsonArray>();
+            while (arr.size() <= index) {
+                arr.add(JsonVariant());
+            }
+            current = arr[index];
+        } else {
+            if (!current[segment].is<JsonObject>()) {
+                current[segment].to<JsonObject>();
+            }
+            current = current[segment];
+        }
+
+        start = end + 1;
+        end = pathStr.indexOf('.', start);
+    }
+
+    String lastSegment = pathStr.substring(start);
+    if (lastSegment.indexOf('[') != -1) {
+        int bracketStart = lastSegment.indexOf('[');
+        int bracketEnd = lastSegment.indexOf(']');
+        String arrayName = lastSegment.substring(0, bracketStart);
+        int index = lastSegment.substring(bracketStart + 1, bracketEnd).toInt();
+
+        if (!current[arrayName].is<JsonArray>()) {
+            current[arrayName].to<JsonArray>();
+        }
+        JsonArray arr = current[arrayName].as<JsonArray>();
+        while (arr.size() <= index) {
+            arr.add(JsonVariant());
+        }
+        arr[index] = value;
+    } else {
+        current[lastSegment] = value;
+    }
 }
 
 SensorModuleV2::SensorModuleV2() : _sensors(nullptr), _names(nullptr), _sensorCount(0),

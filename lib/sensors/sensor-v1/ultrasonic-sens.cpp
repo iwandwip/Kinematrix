@@ -81,7 +81,7 @@ bool UltrasonicSens::update() {
 
         float finalDistance = isLocked ? lockedDistance : distance;
 
-        (*doc)[name] = finalDistance;
+        (*doc)[name] = distance;
         sensorTimer = millis();
         return true;
     }

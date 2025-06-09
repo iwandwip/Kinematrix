@@ -5,9 +5,9 @@ INA219SensV2::INA219SensV2(uint8_t addr)
         : Adafruit_INA219(addr),
           _updateTimer(0),
           _updateInterval(2000) {
-    addValueInfo("voltage", "Voltage", "V", 2, TYPE_FLOAT);
-    addValueInfo("current", "Current", "A", 2, TYPE_FLOAT);
-    addValueInfo("power", "Power", "W", 2, TYPE_FLOAT);
+    addValueInfo("voltage", "Voltage", "V", 2, true);
+    addValueInfo("current", "Current", "A", 2, true);
+    addValueInfo("power", "Power", "W", 2, true);
 }
 
 INA219SensV2::~INA219SensV2() = default;

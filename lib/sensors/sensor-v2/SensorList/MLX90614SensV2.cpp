@@ -4,7 +4,7 @@
 MLX90614SensV2::MLX90614SensV2()
         : _updateTimer(0),
           _updateInterval(2000) {
-    addValueInfo("temp", "Temperature", "°C", 1, TYPE_FLOAT);
+    addValueInfo("temp", "Temperature", "°C", 1, true);
 }
 
 MLX90614SensV2::~MLX90614SensV2() = default;

@@ -8,9 +8,8 @@ AnalogSensV2::AnalogSensV2(uint8_t pin, float vref, int adcRange, CustomDataCall
           _updateTimer(0),
           _updateInterval(100),
           _onCustomData(onCustomData) {
-
-    addValueInfo("raw", "Raw Value", "", 0, TYPE_INT);
-    addValueInfo("volt", "Voltage", "V", 3, TYPE_FLOAT);
+    addValueInfo("raw", "Raw Value", "", 0, false);
+    addValueInfo("volt", "Voltage", "V", 3, true);
 }
 
 AnalogSensV2::~AnalogSensV2() = default;
@@ -52,6 +51,6 @@ void AnalogSensV2::setCustomDataCallback(CustomDataCallback callback) {
     _onCustomData = callback;
 }
 
-void AnalogSensV2::addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, SensorValueType type) {
-    addValueInfo(key, label, unit, precision, type);
+void AnalogSensV2::addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, bool calibrable) {
+    addValueInfo(key, label, unit, precision, calibrable);
 }

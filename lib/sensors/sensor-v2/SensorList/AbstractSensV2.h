@@ -28,7 +28,7 @@ public:
     void setRandomMode(int enumRandomMode);
     void setDummyValues(float dummyValue1, float dummyValue2 = 0);
 
-    void addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, SensorValueType type);
+    void addCustomValue(const char *key, const char *label, const char *unit, uint8_t precision, bool calibrable);
 };
 
 #endif  // ABSTRACT_SENS_V2_H
