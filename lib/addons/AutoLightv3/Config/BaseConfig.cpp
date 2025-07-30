@@ -435,7 +435,7 @@ namespace AutoLight {
     void BaseConfig::calculateOptimizedDistribution(uint8_t total_channels, uint8_t num_pcf) {
         // Optimized: Use minimum number of PCFs needed
         uint8_t needed_pcfs = (total_channels + 7) / 8;  // Ceiling division
-        needed_pcfs = min(needed_pcfs, num_pcf);          // Don't exceed available
+        needed_pcfs = (needed_pcfs > num_pcf) ? num_pcf : needed_pcfs;          // Don't exceed available
         
         // Distribute channels across minimum needed PCFs
         calculateBalancedDistribution(total_channels, needed_pcfs);
@@ -454,7 +454,7 @@ namespace AutoLight {
 
         for (int i = 0; i < num_pcf; i++) {
             if (remaining > 0) {
-                uint8_t channels_for_this_pcf = min(8, remaining);
+                uint8_t channels_for_this_pcf = (remaining > 8) ? 8 : remaining;
 
                 dynamic_config_.pcf_list[i].used_pins = channels_for_this_pcf;
                 dynamic_config_.pcf_list[i].start_channel = current_channel;
