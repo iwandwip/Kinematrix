@@ -13,7 +13,7 @@
 #include "Wire.h"
 
 namespace AutoLight {
-    const int MAXNUM_I2C_SLAVE_ADDRESS = 127;
+    using namespace Constants;
 
     class I2CScanner {
     public:

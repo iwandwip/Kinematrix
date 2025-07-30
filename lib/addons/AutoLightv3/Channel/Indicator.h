@@ -20,13 +20,10 @@
 #endif
 
 #include "KinematrixModulesNoDef.h"
+#include "../Common/Constants.h"
 
 namespace AutoLight {
-    const int MAXNUM_INDICATOR = 4;
-    const int LED_RED_PIN = 14;
-    const int LED_GREEN_PIN = 12;
-    const int LED_BLUE_PIN = 13;
-    const int BUZZER_PIN = 15; // 2
+    using namespace Constants;
 
     class OutputData {
     public:
@@ -34,7 +31,7 @@ namespace AutoLight {
         DigitalOut led_green_;
         DigitalOut led_blue_;
         DigitalOut buzzer_;
-        TimerTask timer_[MAXNUM_INDICATOR];
+        TimerTask timer_[Constants::MAXNUM_INDICATOR];
     };
 
     class Indicator {

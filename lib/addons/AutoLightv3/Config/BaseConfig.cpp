@@ -27,11 +27,11 @@ namespace AutoLight {
                       .channel_ = {}
               }} {
         // initialize version and channel table
-        for (int i = 0; i < MAXNUM_VERSION; ++i) {
-            config_data_.table.version_[i] = (MAXNUM_VERSION - 1) - i;
+        for (int i = 0; i < Constants::MAXNUM_VERSION; ++i) {
+            config_data_.table.version_[i] = (Constants::MAXNUM_VERSION - 1) - i;
             config_data_.table.channel_[i] = (i + 1) * 2;
         }
-        for (int i = 0; i < MAXNUM_IO_EXPANDER; i++) {
+        for (int i = 0; i < Constants::MAXNUM_IO_EXPANDER; i++) {
             dynamic_config_.pcf_list[i].is_active = false;
         }
         dynamic_config_.pcf_count = 0;
@@ -82,14 +82,14 @@ namespace AutoLight {
     }
 
     int BaseConfig::readChannel() {
-        for (int i = 0; i < MAXNUM_CHANNEL_PIN; i++) {
+        for (int i = 0; i < Constants::MAXNUM_CHANNEL_PIN; i++) {
             pinMode(config_data_.table.address_pin_[i], INPUT_PULLUP);
         }
         int read_value = 0;
-        for (int i = 0; i < MAXNUM_CHANNEL_PIN; i++) {
+        for (int i = 0; i < Constants::MAXNUM_CHANNEL_PIN; i++) {
             read_value = (read_value << 1) | digitalRead(config_data_.table.address_pin_[i]); // int read_value = (value_pin[0] << 4) | (value_pin[1] << 3) | (value_pin[2] << 2) | (value_pin[3] << 1) | value_pin[4];
         }
-        for (int i = 0; i < MAXNUM_VERSION; i++) {
+        for (int i = 0; i < Constants::MAXNUM_VERSION; i++) {
             if (read_value == config_data_.table.version_[i]) {
                 config_data_.header.channel_ = config_data_.table.channel_[i];
             }
@@ -213,7 +213,7 @@ namespace AutoLight {
         Serial.println("| STATIC CONFIG DATA");
 
         Serial.print("| STATIC address_pin_          : ");
-        for (int i = 0; i < MAXNUM_CHANNEL_PIN; ++i) {
+        for (int i = 0; i < Constants::MAXNUM_CHANNEL_PIN; ++i) {
             Serial.print("| ");
             Serial.print(config_data_.table.address_pin_[i]);
             Serial.print("(0x000");
@@ -223,21 +223,21 @@ namespace AutoLight {
         Serial.println();
 
         Serial.print("| STATIC i2c_address_          : ");
-        for (int i = 0; i < MAXNUM_IO_EXPANDER; ++i) {
+        for (int i = 0; i < Constants::MAXNUM_IO_EXPANDER; ++i) {
             Serial.print("| 0x000");
             Serial.print(config_data_.table.i2c_address_[i], HEX);
         }
         Serial.println();
 
         Serial.print("| version_                     : ");
-        for (int i = 0; i < MAXNUM_VERSION; ++i) {
+        for (int i = 0; i < Constants::MAXNUM_VERSION; ++i) {
             Serial.print("| 0x000");
             Serial.print(config_data_.table.version_[i], HEX);
         }
         Serial.println();
 
         Serial.print("| channel_                     : ");
-        for (int i = 0; i < MAXNUM_VERSION; ++i) {
+        for (int i = 0; i < Constants::MAXNUM_VERSION; ++i) {
             Serial.print("| 0x000");
             Serial.print(config_data_.table.channel_[i], HEX);
         }
@@ -287,7 +287,7 @@ namespace AutoLight {
         dynamic_config_.pcf_count = num_pcf;
         dynamic_config_.strategy = strategy;
 
-        for (int i = 0; i < MAXNUM_IO_EXPANDER; i++) {
+        for (int i = 0; i < Constants::MAXNUM_IO_EXPANDER; i++) {
             dynamic_config_.pcf_list[i].is_active = false;
         }
 
@@ -359,7 +359,7 @@ namespace AutoLight {
         dynamic_config_.strategy = DISTRIBUTE_CUSTOM;
         dynamic_config_.total_channels = 0;
 
-        for (int i = 0; i < MAXNUM_IO_EXPANDER; i++) {
+        for (int i = 0; i < Constants::MAXNUM_IO_EXPANDER; i++) {
             dynamic_config_.pcf_list[i].is_active = false;
         }
 
@@ -540,7 +540,7 @@ namespace AutoLight {
         int address;
         Serial.println("| Scanning...");
         n_devices_ = 0;
-        for (address = 1; address < MAXNUM_I2C_SLAVE_ADDRESS; address++) {
+        for (address = 1; address < Constants::MAXNUM_I2C_SLAVE_ADDRESS; address++) {
             Wire.beginTransmission(address);
             error = Wire.endTransmission();
             if (error == 0) {

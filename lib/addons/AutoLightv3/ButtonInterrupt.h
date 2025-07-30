@@ -11,14 +11,15 @@
 #define BUTTON_INTERRUPT_H
 
 #include <Arduino.h>
+#include "Common/Constants.h"
 
 namespace AutoLight {
-#define MAX_BUTTONS 4
+    using namespace Constants;
 
     typedef struct {
-        volatile int num_of_pressed_[MAX_BUTTONS];
-        volatile bool is_pressed_[MAX_BUTTONS];
-        volatile bool is_changed_[MAX_BUTTONS];
+        volatile int num_of_pressed_[Constants::MAX_BUTTONS];
+        volatile bool is_pressed_[Constants::MAX_BUTTONS];
+        volatile bool is_changed_[Constants::MAX_BUTTONS];
     } VolatileData;
 
     class ButtonInterrupt {
@@ -38,13 +39,13 @@ namespace AutoLight {
 
         void debug(int8_t _sequence_index = -1);
     private:
-        uint8_t pin_interrupt_[MAX_BUTTONS]{};
-        uint32_t interrupt_timer_[MAX_BUTTONS]{};
+        uint8_t pin_interrupt_[Constants::MAX_BUTTONS]{};
+        uint32_t interrupt_timer_[Constants::MAX_BUTTONS]{};
         uint32_t debounce_time;
         bool is_unit_test_;
 
         VolatileData volatile_data_{};
-        void (*isr_callback_[MAX_BUTTONS])(){};
+        void (*isr_callback_[Constants::MAX_BUTTONS])(){};
     };
 }
 

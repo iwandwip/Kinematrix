@@ -12,6 +12,8 @@
 
 #include "Arduino.h"
 
+#include "Common/Constants.h"
+
 #include "Channel/BaseChannel.h"
 #include "Channel/BaseChannel.cpp"
 #include "Channel/BaseChannelSequence.cpp"

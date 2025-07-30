@@ -14,7 +14,7 @@ namespace AutoLight {
               is_unit_test_(_enable_unit_test) {
 
         // Initialize all button states
-        for (uint8_t i = 0; i < MAX_BUTTONS; i++) {
+        for (uint8_t i = 0; i < Constants::MAX_BUTTONS; i++) {
             pin_interrupt_[i] = 0;
             interrupt_timer_[i] = 0;
             volatile_data_.num_of_pressed_[i] = 0;
@@ -29,7 +29,7 @@ namespace AutoLight {
     }
 
     ButtonInterrupt &ButtonInterrupt::attach(uint8_t _button_index, uint8_t _pin, int _pin_mode, int _isr_mode, void (*_callback)(), uint32_t _timer) {
-        if (_button_index >= MAX_BUTTONS) return *this;  // Safety check
+        if (_button_index >= Constants::MAX_BUTTONS) return *this;  // Safety check
 
         pin_interrupt_[_button_index] = _pin;
         isr_callback_[_button_index] = _callback;
@@ -42,7 +42,7 @@ namespace AutoLight {
     }
 
     void ButtonInterrupt::readInterrupt(uint8_t _button_index, void (*_callback)()) {
-        if (_button_index >= MAX_BUTTONS) return;  // Safety check
+        if (_button_index >= Constants::MAX_BUTTONS) return;  // Safety check
 
         if (millis() - interrupt_timer_[_button_index] >= debounce_time) {
             volatile_data_.num_of_pressed_[_button_index]++;
@@ -59,25 +59,25 @@ namespace AutoLight {
     }
 
     void ButtonInterrupt::resetButton(uint8_t _button_index) {
-        if (_button_index >= MAX_BUTTONS) return;  // Safety check
+        if (_button_index >= Constants::MAX_BUTTONS) return;  // Safety check
 
         volatile_data_.is_pressed_[_button_index] = false;
     }
 
     volatile bool ButtonInterrupt::isPressed(uint8_t _button_index) const {
-        if (_button_index >= MAX_BUTTONS) return false;  // Safety check
+        if (_button_index >= Constants::MAX_BUTTONS) return false;  // Safety check
 
         return volatile_data_.is_pressed_[_button_index] || volatile_data_.is_changed_[_button_index];
     }
 
     volatile int ButtonInterrupt::getNumOfPressed(uint8_t _button_index) const {
-        if (_button_index >= MAX_BUTTONS) return 0;  // Safety check
+        if (_button_index >= Constants::MAX_BUTTONS) return 0;  // Safety check
 
         return volatile_data_.num_of_pressed_[_button_index];
     }
 
     int ButtonInterrupt::getPin(uint8_t _button_index) const {
-        if (_button_index >= MAX_BUTTONS) return -1;  // Safety check
+        if (_button_index >= Constants::MAX_BUTTONS) return -1;  // Safety check
 
         return pin_interrupt_[_button_index];
     }
@@ -100,7 +100,7 @@ namespace AutoLight {
             Serial.println();
         }
 
-        for (uint8_t i = 0; i < MAX_BUTTONS; i++) {
+        for (uint8_t i = 0; i < Constants::MAX_BUTTONS; i++) {
             Serial.println("|------------------------------");
             Serial.print("| BUTTON                       : ");
             Serial.print("| ");

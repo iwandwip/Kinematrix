@@ -12,8 +12,7 @@
 #define BASE_CHANNEL_H
 
 #include "Arduino.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
+#include <cstdarg>
 
 #ifndef ENABLE_MODULE_NODEF_IO_EXPANDER
 #define ENABLE_MODULE_NODEF_IO_EXPANDER
@@ -27,18 +26,13 @@
 
 #include "KinematrixModulesNoDef.h"
 
+#include "../Common/Constants.h"
 #include "../Config/BaseConfig.h"
 #include "../ButtonInterrupt.h"
 #include "../Cores/Task.h"
 
 namespace AutoLight {
-    const int MAXNUM_TASK_SEQUENCE = 14;
-    const int MAXNUM_TASK_SEQUENCE_ADDITION = 2;
-    const int MAXNUM_TOTAL_TASK_SEQUENCE = 16;
-    const int MAXNUM_TASK_TIME = 250;
-
-    const int DEFAULT_DELAY_TIME = 50;
-    const int DEFAULT_INIT_SEQUENCE = 0;
+    using namespace Constants;
 
     void taskCallback();
 
@@ -93,6 +87,21 @@ namespace AutoLight {
         void setButtonMode(button_mode_t mode);
         void setButtonConfig(ButtonConfig* config);
         void executeButtonAction(uint8_t button_index);
+
+        // Sequence mapping functions
+        void enableSequenceMapping(bool enable = true);
+        void setActiveSequences(uint8_t* sequences, uint8_t count);
+        void setActiveSequences(uint8_t count, ...);
+        void reorderActiveSequences(uint8_t* new_order, uint8_t count);
+        void printSequenceMapping();
+        String getActiveMappingString();
+        
+        // Helper macro untuk mudah penggunaan
+        #define SET_ACTIVE_SEQUENCES(channel, ...) \
+            do { \
+                uint8_t sequences[] = {__VA_ARGS__}; \
+                channel.setActiveSequences(sequences, sizeof(sequences)/sizeof(sequences[0])); \
+            } while(0)
 
         // Legacy method
         void changeMode();
@@ -152,7 +161,7 @@ namespace AutoLight {
         uint32_t task_sequence_timer_;
 
         void (BaseChannel::*temp_mode_)();
-        void (BaseChannel::*total_mode_[(MAXNUM_TOTAL_TASK_SEQUENCE)])();
+        void (BaseChannel::*total_mode_[(Constants::MAXNUM_TOTAL_TASK_SEQUENCE)])();
 
         ExpanderIo expander_io_;
         ChannelData channel_data_;
@@ -161,7 +170,13 @@ namespace AutoLight {
         ButtonInterrupt *button_interrupt_ptr_;
         ButtonConfig button_config_;
         button_mode_t current_button_mode_;
-        SemaphoreHandle_t state_mutex_;
+        SequenceMapper sequence_mapper_;
+
+        // Internal mapping functions
+        uint8_t mapApiIndexToActualSequence(uint8_t api_index);
+        uint8_t mapActualSequenceToApiIndex(uint8_t actual_sequence);
+        bool isApiIndexValid(uint8_t api_index);
+        void initializeDefaultMapping();
     };
 }
 

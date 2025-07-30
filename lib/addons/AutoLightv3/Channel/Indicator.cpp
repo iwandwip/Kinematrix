@@ -12,10 +12,10 @@
 namespace AutoLight {
     Indicator::Indicator()
             : output_data_{
-            .led_red_= DigitalOut(LED_RED_PIN),
-            .led_green_= DigitalOut(LED_GREEN_PIN),
-            .led_blue_= DigitalOut(LED_BLUE_PIN),
-            .buzzer_ = DigitalOut(BUZZER_PIN),
+            .led_red_= DigitalOut(Constants::LED_RED_PIN),
+            .led_green_= DigitalOut(Constants::LED_GREEN_PIN),
+            .led_blue_= DigitalOut(Constants::LED_BLUE_PIN),
+            .buzzer_ = DigitalOut(Constants::BUZZER_PIN),
             .timer_{TimerTask(500),
                     TimerTask(500),
                     TimerTask(100),

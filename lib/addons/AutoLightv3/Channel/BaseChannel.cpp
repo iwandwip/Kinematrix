@@ -22,17 +22,14 @@ namespace AutoLight {
             button_config_.custom_handlers[i] = nullptr;
         }
         
-        // Initialize mutex for thread safety
-        state_mutex_ = xSemaphoreCreateMutex();
+        // Initialize default sequence mapping
+        initializeDefaultMapping();
         
         setTaskSequenceFunction();
     }
 
     BaseChannel::~BaseChannel() {
-        // Clean up mutex
-        if (state_mutex_) {
-            vSemaphoreDelete(state_mutex_);
-        }
+        // No cleanup needed - using volatile variables only
     }
 
     bool BaseChannel::initialize() {
@@ -78,7 +75,19 @@ namespace AutoLight {
     }
 
     volatile uint32_t BaseChannel::getSequenceIndex() {
-        return channel_data_.sequence_index_;
+        if (!sequence_mapper_.is_mapping_enabled) {
+            return channel_data_.sequence_index_;  // ORIGINAL BEHAVIOR
+        }
+        
+        // Return API index for Apps.ino, not actual sequence
+        if (channel_data_.is_mode_changed_apps_) {
+            // If changed via app, return the API index that was set
+            return channel_data_.sequence_index_apps_;
+        } else {
+            // If changed via button, map actual sequence back to API index
+            uint8_t api_index = mapActualSequenceToApiIndex(channel_data_.sequence_index_);
+            return (api_index == 0xFF) ? channel_data_.sequence_index_ : api_index;
+        }
     }
 
     volatile uint32_t BaseChannel::getDelayTime() {
@@ -96,30 +105,58 @@ namespace AutoLight {
 
     // New button functions
     void BaseChannel::nextMode() {
-        if (xSemaphoreTake(state_mutex_, pdMS_TO_TICKS(100)) == pdTRUE) {
-            if (!channel_data_.is_on_) {
-                xSemaphoreGive(state_mutex_);
-                return; // Only work when a system is on
-            }
+        if (!channel_data_.is_on_) {
+            return; // Only work when a system is on
+        }
 
+        if (!sequence_mapper_.is_mapping_enabled) {
+            // ORIGINAL BEHAVIOR
             channel_data_.is_mode_changed_ = true;
-            channel_data_.sequence_index_++; // Will be properly handled in runAutoLight
+            channel_data_.sequence_index_++;
 
             if (channel_data_.sequence_index_ > (total_task_sequence_)) {
                 channel_data_.sequence_index_ = 1; // Cycle back to mode 1 (skip off mode)
             }
             
-            xSemaphoreGive(state_mutex_);
+            return;
         }
+        
+        // NEW BEHAVIOR - navigate through mapped sequences
+        uint8_t current_api_index = mapActualSequenceToApiIndex(channel_data_.sequence_index_);
+        if (current_api_index == 0xFF) {
+            // Current sequence not in active list, go to first non-OFF
+            uint8_t first_non_off = (sequence_mapper_.active_sequences[0] == 0 && sequence_mapper_.total_active > 1) ? 1 : 0;
+            changeModeApp(first_non_off);
+            return;
+        }
+        
+        uint8_t next_api_index = current_api_index + 1;
+        
+        // Skip OFF sequence when navigating (unless it's the only sequence)
+        if (next_api_index >= sequence_mapper_.total_active) {
+            // Cycle back - skip OFF if there are other sequences
+            if (sequence_mapper_.active_sequences[0] == 0 && sequence_mapper_.total_active > 1) {
+                next_api_index = 1;
+            } else {
+                next_api_index = 0;
+            }
+        }
+        
+        // If the next sequence is OFF, but we have other options, skip it
+        if (sequence_mapper_.active_sequences[next_api_index] == 0 && sequence_mapper_.total_active > 1) {
+            next_api_index = (next_api_index + 1) % sequence_mapper_.total_active;
+        }
+        
+        changeModeApp(next_api_index);
     }
 
     void BaseChannel::previousMode() {
-        if (xSemaphoreTake(state_mutex_, pdMS_TO_TICKS(100)) == pdTRUE) {
-            if (!channel_data_.is_on_) {
-                xSemaphoreGive(state_mutex_);
-                return; // Only work when a system is on
-            }
+        if (!channel_data_.is_on_) {
+            return; // Only work when a system is on
+        }
 
+        if (!sequence_mapper_.is_mapping_enabled) {
+            // ORIGINAL BEHAVIOR
             channel_data_.is_mode_changed_ = true;
 
             if (channel_data_.sequence_index_ <= 1) {
@@ -128,49 +165,75 @@ namespace AutoLight {
                 channel_data_.sequence_index_--;
             }
             
-            xSemaphoreGive(state_mutex_);
+            return;
         }
+        
+        // NEW BEHAVIOR - navigate through mapped sequences
+        uint8_t current_api_index = mapActualSequenceToApiIndex(channel_data_.sequence_index_);
+        if (current_api_index == 0xFF) {
+            // Current sequence not in active list, go to last non-OFF
+            uint8_t last_index = sequence_mapper_.total_active - 1;
+            if (sequence_mapper_.active_sequences[last_index] == 0 && sequence_mapper_.total_active > 1) {
+                last_index = sequence_mapper_.total_active - 2;
+            }
+            changeModeApp(last_index);
+            return;
+        }
+        
+        uint8_t prev_api_index;
+        
+        if (current_api_index == 0) {
+            // From first sequence, cycle to last
+            prev_api_index = sequence_mapper_.total_active - 1;
+            // Skip OFF if at the end and there are other sequences
+            if (sequence_mapper_.active_sequences[prev_api_index] == 0 && sequence_mapper_.total_active > 1) {
+                prev_api_index = sequence_mapper_.total_active - 2;
+            }
+        } else {
+            prev_api_index = current_api_index - 1;
+        }
+        
+        // If the previous sequence is OFF, but we have other options, skip it
+        if (sequence_mapper_.active_sequences[prev_api_index] == 0 && sequence_mapper_.total_active > 1) {
+            if (prev_api_index == 0) {
+                prev_api_index = sequence_mapper_.total_active - 1;
+            } else {
+                prev_api_index--;
+            }
+        }
+        
+        changeModeApp(prev_api_index);
     }
 
     void BaseChannel::onMode() {
-        if (xSemaphoreTake(state_mutex_, pdMS_TO_TICKS(100)) == pdTRUE) {
-            if (channel_data_.is_on_) {
-                xSemaphoreGive(state_mutex_);
-                return; // Already on, do nothing
-            }
+        if (channel_data_.is_on_) {
+            return; // Already on, do nothing
+        }
 
-            channel_data_.is_on_ = true;
-            channel_data_.is_mode_changed_ = true;
+        channel_data_.is_on_ = true;
+        channel_data_.is_mode_changed_ = true;
 
-            // Restore the last active sequence
-            if (channel_data_.last_active_sequence_ < 1) {
-                channel_data_.sequence_index_ = 1; // Default to mode 1 if no last active mode
-            } else {
-                channel_data_.sequence_index_ = channel_data_.last_active_sequence_;
-            }
-            
-            xSemaphoreGive(state_mutex_);
+        // Restore the last active sequence
+        if (channel_data_.last_active_sequence_ < 1) {
+            channel_data_.sequence_index_ = 1; // Default to mode 1 if no last active mode
+        } else {
+            channel_data_.sequence_index_ = channel_data_.last_active_sequence_;
         }
     }
 
     void BaseChannel::offMode() {
-        if (xSemaphoreTake(state_mutex_, pdMS_TO_TICKS(100)) == pdTRUE) {
-            if (!channel_data_.is_on_) {
-                xSemaphoreGive(state_mutex_);
-                return; // Already off, do nothing
-            }
-
-            // Store the current sequence for later restoration
-            if (channel_data_.sequence_index_ > 0) {
-                channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
-            }
-
-            channel_data_.is_on_ = false;
-            channel_data_.is_mode_changed_ = true;
-            channel_data_.sequence_index_ = 0; // Mode 0 is off
-            
-            xSemaphoreGive(state_mutex_);
+        if (!channel_data_.is_on_) {
+            return; // Already off, do nothing
         }
+
+        // Store the current sequence for later restoration
+        if (channel_data_.sequence_index_ > 0) {
+            channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
+        }
+
+        channel_data_.is_on_ = false;
+        channel_data_.is_mode_changed_ = true;
+        channel_data_.sequence_index_ = 0; // Mode 0 is off
     }
 
     volatile bool BaseChannel::isOn() {
@@ -178,23 +241,63 @@ namespace AutoLight {
     }
 
     void BaseChannel::singleButtonCycle() {
-        channel_data_.is_mode_changed_ = true;
-        
-        if (!channel_data_.is_on_) {
-            channel_data_.sequence_index_ = 1;
-            channel_data_.is_on_ = true;
-        } else {
-            channel_data_.sequence_index_++;
+        if (!sequence_mapper_.is_mapping_enabled) {
+            // ORIGINAL BEHAVIOR
+            channel_data_.is_mode_changed_ = true;
             
-            if (channel_data_.sequence_index_ > total_task_sequence_) {
-                channel_data_.sequence_index_ = 0;
-                channel_data_.is_on_ = false;
+            if (!channel_data_.is_on_) {
+                channel_data_.sequence_index_ = 1;
+                channel_data_.is_on_ = true;
             } else {
-                channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
+                channel_data_.sequence_index_++;
+                
+                if (channel_data_.sequence_index_ > total_task_sequence_) {
+                    channel_data_.sequence_index_ = 0;
+                    channel_data_.is_on_ = false;
+                } else {
+                    channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
+                }
             }
+            
+            temp_mode_ = total_mode_[channel_data_.sequence_index_];
+            return;
         }
         
-        temp_mode_ = total_mode_[channel_data_.sequence_index_];
+        // NEW BEHAVIOR - cycle through mapped sequences
+        if (!channel_data_.is_on_) {
+            // Turn ON with first non-OFF sequence
+            uint8_t first_api_index = 0;
+            if (sequence_mapper_.active_sequences[0] == 0 && sequence_mapper_.total_active > 1) {
+                first_api_index = 1;  // Skip OFF, go to first active sequence
+            }
+            changeModeApp(first_api_index);
+        } else {
+            // Navigate to next active sequence or OFF
+            uint8_t current_api_index = mapActualSequenceToApiIndex(channel_data_.sequence_index_);
+            if (current_api_index == 0xFF) {
+                // Current sequence not in active list, go to first
+                changeModeApp(0);
+                return;
+            }
+            
+            uint8_t next_api_index = current_api_index + 1;
+            if (next_api_index >= sequence_mapper_.total_active) {
+                // Cycle to OFF (API index for OFF sequence)
+                for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+                    if (sequence_mapper_.active_sequences[i] == 0) {
+                        changeModeApp(i);
+                        return;
+                    }
+                }
+                // If no OFF sequence in mapping, turn off manually
+                channel_data_.is_on_ = false;
+                channel_data_.sequence_index_ = 0;
+                channel_data_.is_mode_changed_ = true;
+                temp_mode_ = total_mode_[0];
+            } else {
+                changeModeApp(next_api_index);
+            }
+        }
     }
 
     void BaseChannel::toggleOnOff() {
@@ -280,22 +383,51 @@ namespace AutoLight {
         smartButtonPress(button_index);
     }
 
-    void BaseChannel::changeModeApp(uint32_t num) {
-        channel_data_.is_mode_changed_apps_ = true;
-        channel_data_.sequence_index_apps_ = num;
+    void BaseChannel::changeModeApp(uint32_t api_index) {
+        if (!sequence_mapper_.is_mapping_enabled) {
+            // ORIGINAL BEHAVIOR - no mapping
+            channel_data_.is_mode_changed_apps_ = true;
+            channel_data_.sequence_index_apps_ = api_index;
 
-        // If turning on via app
-        if (num > 0 && !channel_data_.is_on_) {
-            channel_data_.is_on_ = true;
-        }
+            // If turning on via app
+            if (api_index > 0 && !channel_data_.is_on_) {
+                channel_data_.is_on_ = true;
+            }
             // If turning off via app
-        else if (num == 0 && channel_data_.is_on_) {
+            else if (api_index == 0 && channel_data_.is_on_) {
+                channel_data_.is_on_ = false;
+                // Store the current sequence for later restoration if not already going to off mode
+                if (channel_data_.sequence_index_ > 0) {
+                    channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
+                }
+            }
+            return;
+        }
+        
+        // NEW BEHAVIOR - with mapping
+        if (!isApiIndexValid(api_index)) {
+            Serial.printf("[MAPPING] Invalid API index %d, ignoring\n", api_index);
+            return;  // IGNORE invalid index
+        }
+        
+        uint8_t actual_sequence = mapApiIndexToActualSequence(api_index);
+        
+        channel_data_.is_mode_changed_apps_ = true;
+        channel_data_.sequence_index_apps_ = api_index;  // Apps.ino expects API index
+        
+        // Handle OFF sequence
+        if (actual_sequence == 0) {
             channel_data_.is_on_ = false;
-            // Store the current sequence for later restoration if not already going to off mode
+            // Store the current sequence for later restoration
             if (channel_data_.sequence_index_ > 0) {
                 channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
             }
+        } else {
+            channel_data_.is_on_ = true;
+            channel_data_.last_active_sequence_ = actual_sequence;
         }
+        
+        Serial.printf("[MAPPING] API index %d → Actual sequence %d\n", api_index, actual_sequence);
     }
 
     volatile bool BaseChannel::isChangeMode() {
@@ -314,13 +446,21 @@ namespace AutoLight {
             }*/
 
             if (channel_data_.is_mode_changed_apps_) {
-                if (channel_data_.sequence_index_apps_ > total_task_sequence_) {
-                    channel_data_.sequence_index_apps_ = total_task_sequence_;
+                if (!sequence_mapper_.is_mapping_enabled) {
+                    // ORIGINAL BEHAVIOR
+                    if (channel_data_.sequence_index_apps_ > total_task_sequence_) {
+                        channel_data_.sequence_index_apps_ = total_task_sequence_;
+                    }
+                    channel_data_.sequence_index_ = channel_data_.sequence_index_apps_;
+                    // Update on/off state based on the selected mode
+                    channel_data_.is_on_ = (channel_data_.sequence_index_ > 0);
+                } else {
+                    // NEW BEHAVIOR - use actual mapped sequence
+                    uint8_t actual_sequence = mapApiIndexToActualSequence(channel_data_.sequence_index_apps_);
+                    if (actual_sequence != 0xFF) {  // Valid mapping
+                        channel_data_.sequence_index_ = actual_sequence;
+                    }
                 }
-                channel_data_.sequence_index_ = channel_data_.sequence_index_apps_;
-
-                // Update on/off state based on the selected mode
-                channel_data_.is_on_ = (channel_data_.sequence_index_ > 0);
             }
 
             if (_callbackRun != nullptr) {
@@ -462,7 +602,7 @@ namespace AutoLight {
             Serial.println();
 
             Serial.print("| i2c_address_ available       : ");
-            for (int i = 0; i < MAXNUM_IO_EXPANDER; ++i) {
+            for (int i = 0; i < Constants::MAXNUM_IO_EXPANDER; ++i) {
                 Serial.print("| 0x000");
                 Serial.print(config_data_ptr_->table.i2c_address_[i], HEX);
             }
@@ -486,7 +626,7 @@ namespace AutoLight {
         }
         bool check_io_expander = false;
         for (int i = 0; i < expander_io_.io_length; i++) {
-            for (int j = 0; j < MAXNUM_IO_EXPANDER; j++) {
+            for (int j = 0; j < Constants::MAXNUM_IO_EXPANDER; j++) {
                 expander_io_.io_base_[i]->pinMode(j, OUTPUT);
             }
             check_io_expander = true;
@@ -504,7 +644,7 @@ namespace AutoLight {
                     Serial.println();
                 }
             }
-            for (int j = 0; j < MAXNUM_IO_EXPANDER; j++) {
+            for (int j = 0; j < Constants::MAXNUM_IO_EXPANDER; j++) {
                 expander_io_.io_base_[i]->digitalWrite(j, HIGH);
             }
         }
@@ -706,5 +846,128 @@ namespace AutoLight {
 
         Serial.println("| END DEBUG BASE CHANNEL");
         Serial.println("==============================");
+    }
+
+    // ========== SEQUENCE MAPPING IMPLEMENTATION ==========
+    
+    void BaseChannel::initializeDefaultMapping() {
+        sequence_mapper_.is_mapping_enabled = false;
+        sequence_mapper_.total_active = Constants::MAXNUM_TOTAL_TASK_SEQUENCE;
+        
+        // Default: all sequences active in order (0,1,2,3,...,15)
+        for (uint8_t i = 0; i < Constants::MAXNUM_TOTAL_TASK_SEQUENCE; i++) {
+            sequence_mapper_.active_sequences[i] = i;
+        }
+    }
+    
+    void BaseChannel::enableSequenceMapping(bool enable) {
+        sequence_mapper_.is_mapping_enabled = enable;
+        if (enable) {
+            Serial.println("[MAPPING] Sequence mapping enabled");
+        } else {
+            Serial.println("[MAPPING] Sequence mapping disabled (default behavior)");
+        }
+    }
+    
+    void BaseChannel::setActiveSequences(uint8_t* sequences, uint8_t count) {
+        sequence_mapper_.total_active = (count > Constants::MAXNUM_TOTAL_TASK_SEQUENCE) ? Constants::MAXNUM_TOTAL_TASK_SEQUENCE : count;
+        
+        for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+            if (sequences[i] < Constants::MAXNUM_TOTAL_TASK_SEQUENCE) {
+                sequence_mapper_.active_sequences[i] = sequences[i];
+            } else {
+                Serial.printf("[MAPPING] Invalid sequence %d, using 0\n", sequences[i]);
+                sequence_mapper_.active_sequences[i] = 0;
+            }
+        }
+        
+        // Clear remaining slots
+        for (uint8_t i = sequence_mapper_.total_active; i < Constants::MAXNUM_TOTAL_TASK_SEQUENCE; i++) {
+            sequence_mapper_.active_sequences[i] = 0;
+        }
+        
+        Serial.printf("[MAPPING] Active sequences configured: %d total\n", sequence_mapper_.total_active);
+        printSequenceMapping();
+    }
+    
+    void BaseChannel::setActiveSequences(uint8_t count, ...) {
+        uint8_t sequences[Constants::MAXNUM_TOTAL_TASK_SEQUENCE];
+        
+        va_list args;
+        va_start(args, count);
+        
+        for (uint8_t i = 0; i < count && i < Constants::MAXNUM_TOTAL_TASK_SEQUENCE; i++) {
+            sequences[i] = va_arg(args, int);  // int because of promotion
+        }
+        
+        va_end(args);
+        
+        setActiveSequences(sequences, count);
+    }
+    
+    void BaseChannel::reorderActiveSequences(uint8_t* new_order, uint8_t count) {
+        if (count != sequence_mapper_.total_active) {
+            Serial.println("[MAPPING] Reorder failed: size mismatch");
+            return;
+        }
+        
+        uint8_t temp_sequences[Constants::MAXNUM_TOTAL_TASK_SEQUENCE];
+        
+        // Copy current sequences to temp
+        for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+            temp_sequences[i] = sequence_mapper_.active_sequences[i];
+        }
+        
+        // Reorder based on new_order indices
+        for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+            if (new_order[i] < sequence_mapper_.total_active) {
+                sequence_mapper_.active_sequences[i] = temp_sequences[new_order[i]];
+            }
+        }
+        
+        Serial.println("[MAPPING] Sequences reordered");
+        printSequenceMapping();
+    }
+    
+    uint8_t BaseChannel::mapApiIndexToActualSequence(uint8_t api_index) {
+        if (api_index >= sequence_mapper_.total_active) {
+            return 0xFF;  // Invalid index
+        }
+        return sequence_mapper_.active_sequences[api_index];
+    }
+    
+    uint8_t BaseChannel::mapActualSequenceToApiIndex(uint8_t actual_sequence) {
+        for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+            if (sequence_mapper_.active_sequences[i] == actual_sequence) {
+                return i;
+            }
+        }
+        return 0xFF;  // Not found
+    }
+    
+    bool BaseChannel::isApiIndexValid(uint8_t api_index) {
+        return api_index < sequence_mapper_.total_active;
+    }
+    
+    void BaseChannel::printSequenceMapping() {
+        if (!sequence_mapper_.is_mapping_enabled) {
+            Serial.println("[MAPPING] Mapping disabled - using default behavior");
+            return;
+        }
+        
+        Serial.println("[MAPPING] Current sequence mapping:");
+        for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+            Serial.printf("  API Index %d → Sequence %d\n", i, sequence_mapper_.active_sequences[i]);
+        }
+        Serial.printf("[MAPPING] Total active sequences: %d\n", sequence_mapper_.total_active);
+    }
+    
+    String BaseChannel::getActiveMappingString() {
+        String result = "";
+        for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+            if (i > 0) result += ",";
+            result += String(i) + "→" + String(sequence_mapper_.active_sequences[i]);
+        }
+        return result;
     }
 }

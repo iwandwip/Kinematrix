@@ -9,13 +9,10 @@
 #define CONFIG_DATA_H
 
 #include "Arduino.h"
+#include "../Common/Constants.h"
 
 namespace AutoLight {
-
-    const int MAXNUM_CHANNEL = 64;
-    const int MAXNUM_IO_EXPANDER = 8;
-    const int MAXNUM_VERSION = 32;
-    const int MAXNUM_CHANNEL_PIN = 5;
+    using namespace Constants;
 
     typedef enum {
         CUSTOM_CONFIG = 0,
@@ -47,7 +44,7 @@ namespace AutoLight {
     };
 
     struct DynamicConfigData {
-        PCFDistribution pcf_list[MAXNUM_IO_EXPANDER];
+        PCFDistribution pcf_list[Constants::MAXNUM_IO_EXPANDER];
         uint8_t pcf_count;
         uint8_t total_channels;
         distribution_strategy_t strategy;
@@ -61,6 +58,18 @@ namespace AutoLight {
         void (*custom_handlers[4])();
     };
 
+    struct SequenceMapper {
+        uint8_t active_sequences[Constants::MAXNUM_TOTAL_TASK_SEQUENCE];
+        uint8_t total_active;
+        bool is_mapping_enabled;
+        
+        SequenceMapper() : total_active(0), is_mapping_enabled(false) {
+            for (int i = 0; i < Constants::MAXNUM_TOTAL_TASK_SEQUENCE; i++) {
+                active_sequences[i] = 0;
+            }
+        }
+    };
+
     typedef struct {
         uint8_t version_;           // version of the board
         uint8_t channel_;           // total channel
@@ -72,10 +81,10 @@ namespace AutoLight {
     } ConfigHeader;
 
     typedef struct {
-        uint8_t address_pin_[MAXNUM_CHANNEL_PIN];
-        uint8_t i2c_address_[MAXNUM_IO_EXPANDER];
-        uint8_t version_[MAXNUM_VERSION];
-        uint8_t channel_[MAXNUM_VERSION];
+        uint8_t address_pin_[Constants::MAXNUM_CHANNEL_PIN];
+        uint8_t i2c_address_[Constants::MAXNUM_IO_EXPANDER];
+        uint8_t version_[Constants::MAXNUM_VERSION];
+        uint8_t channel_[Constants::MAXNUM_VERSION];
     } ConfigTable;
 
     typedef struct {
@@ -91,9 +100,9 @@ namespace AutoLight {
 
     class ConfigI2CMaxData {
     public:
-        static const int VERSION = 32;
-        static const int PIN_ADDRESS = 5;
-        static const int I2C_ADDRESS = 8;
+        static const int VERSION = Constants::MAXNUM_VERSION;
+        static const int PIN_ADDRESS = Constants::MAXNUM_CHANNEL_PIN;
+        static const int I2C_ADDRESS = Constants::MAXNUM_IO_EXPANDER;
     };
 }
 
