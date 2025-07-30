@@ -14,10 +14,6 @@
 
 #include "FuzzyHeader.h"
 
-using Fuzzy::MembershipType;
-using Fuzzy::OutputType;
-using Fuzzy::FuzzySet;
-using Fuzzy::FuzzyVariable;
 
 typedef FuzzySet FuzzySugenoSet;
 typedef FuzzyVariable FuzzySugenoVariable;

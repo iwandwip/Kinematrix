@@ -15,9 +15,6 @@
 #include "FuzzyHeader.h"
 
 // Using the common Fuzzy namespace
-using Fuzzy::MembershipType;
-using Fuzzy::FuzzySet;
-using Fuzzy::FuzzyVariable;
 
 // Typedef for backward compatibility
 typedef FuzzySet FuzzyTsukamotoSet;

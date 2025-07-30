@@ -1,10 +1,3 @@
-/*
- *  FuzzyMamdani.h
- *
- *  Fuzzy Mamdani library for embedded systems
- *  Created on: 2025. 3. 30
- */
-
 #pragma once
 
 #ifndef FUZZY_MAMDANI_LIB_H
@@ -14,25 +7,18 @@
 
 #include "FuzzyHeader.h"
 
-// Using the common Fuzzy namespace
-using Fuzzy::MembershipType;
-using Fuzzy::DefuzzificationMethod;
-using Fuzzy::FuzzySet;
-using Fuzzy::FuzzyVariable;
-
-// Typedef for backward compatibility
 typedef FuzzySet FuzzyMamdaniSet;
 typedef FuzzyVariable FuzzyMamdaniVariable;
 typedef DefuzzificationMethod FuzzyMamdaniDefuzzificationMethod;
 typedef MembershipType FuzzyMamdaniMembershipType;
 
 struct FuzzyMamdaniRule {
-    int *antecedentVars;    // Indices of input variables
-    int *antecedentSets;    // Indices of sets for each variable
-    int consequentVar;      // Index of output variable
-    int consequentSet;      // Index of a set for output variable
+    int *antecedentVars;
+    int *antecedentSets;
+    int consequentVar;
+    int consequentSet;
     int numAntecedents;
-    bool useAND;            // true for AND, false for OR operator
+    bool useAND;
 };
 
 class FuzzyMamdani {

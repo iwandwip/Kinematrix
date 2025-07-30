@@ -239,7 +239,7 @@ bool FuzzySugeno::addFuzzySet(int varIndex, bool isInput, const char *name, Memb
         inputVars[varIndex].sets[setIndex].type = type;
 
         switch (type) {
-            case Fuzzy::TRIANGULAR:
+            case TRIANGULAR:
                 if (params[0] > params[1] || params[1] > params[2]) {
                     errorState = true;
                     strncpy(errorMessage, "Invalid triangular parameters", 49);
@@ -251,7 +251,7 @@ bool FuzzySugeno::addFuzzySet(int varIndex, bool isInput, const char *name, Memb
                 inputVars[varIndex].sets[setIndex].params[2] = params[2];
                 break;
 
-            case Fuzzy::TRAPEZOIDAL:
+            case TRAPEZOIDAL:
                 if (params[0] > params[1] || params[1] > params[2] || params[2] > params[3]) {
                     errorState = true;
                     strncpy(errorMessage, "Invalid trapezoidal parameters", 49);
@@ -264,7 +264,7 @@ bool FuzzySugeno::addFuzzySet(int varIndex, bool isInput, const char *name, Memb
                 inputVars[varIndex].sets[setIndex].params[3] = params[3];
                 break;
 
-            case Fuzzy::GAUSSIAN:
+            case GAUSSIAN:
                 if (params[1] <= 0) {
                     errorState = true;
                     strncpy(errorMessage, "Invalid gaussian parameters", 49);
@@ -275,7 +275,7 @@ bool FuzzySugeno::addFuzzySet(int varIndex, bool isInput, const char *name, Memb
                 inputVars[varIndex].sets[setIndex].params[1] = params[1]; // Sigma
                 break;
 
-            case Fuzzy::SINGLETON:
+            case SINGLETON:
                 inputVars[varIndex].sets[setIndex].params[0] = params[0]; // Center
                 break;
 
@@ -323,7 +323,7 @@ bool FuzzySugeno::addConstantOutput(int varIndex, const char *name, float value)
     int setIndex = numOutputSets[varIndex];
     strncpy(outputSets[varIndex][setIndex].name, name, 19);
     outputSets[varIndex][setIndex].name[19] = '\0';
-    outputSets[varIndex][setIndex].type = Fuzzy::CONSTANT;
+    outputSets[varIndex][setIndex].type = CONSTANT;
     outputSets[varIndex][setIndex].numCoefficients = 1;
 
     outputSets[varIndex][setIndex].coefficients = new float[1];
@@ -373,7 +373,7 @@ bool FuzzySugeno::addLinearOutput(int varIndex, const char *name, const float co
     int setIndex = numOutputSets[varIndex];
     strncpy(outputSets[varIndex][setIndex].name, name, 19);
     outputSets[varIndex][setIndex].name[19] = '\0';
-    outputSets[varIndex][setIndex].type = Fuzzy::LINEAR;
+    outputSets[varIndex][setIndex].type = LINEAR;
     outputSets[varIndex][setIndex].numCoefficients = numCoefficients;
 
     outputSets[varIndex][setIndex].coefficients = new float[numCoefficients];
@@ -565,7 +565,7 @@ float *FuzzySugeno::evaluate(const float *inputs) {
             outputs[i] = numerators[i] / denominators[i];
         } else {
             // Default output if no rules fire significantly
-            if (numOutputSets[i] > 0 && outputSets[i][0].type == Fuzzy::CONSTANT) {
+            if (numOutputSets[i] > 0 && outputSets[i][0].type == CONSTANT) {
                 outputs[i] = outputSets[i][0].coefficients[0];
             } else {
                 outputs[i] = (outputVars[i].min + outputVars[i].max) / 2.0f;
@@ -591,7 +591,7 @@ float FuzzySugeno::evaluateSugenoOutput(int outputVarIndex, int outputSetIndex, 
 
     const FuzzySugenoOutput &output = outputSets[outputVarIndex][outputSetIndex];
 
-    if (output.type == Fuzzy::CONSTANT) {
+    if (output.type == CONSTANT) {
         return output.coefficients[0];
     } else { // LINEAR
         float result = output.numCoefficients > 0 ? output.coefficients[0] : 0.0f; // Constant term
@@ -614,13 +614,13 @@ float FuzzySugeno::applyFuzzyOperator(float a, float b, bool useAND) const {
 
 float FuzzySugeno::calculateMembership(float value, const FuzzySugenoSet &set) const {
     switch (set.type) {
-        case Fuzzy::TRIANGULAR:
+        case TRIANGULAR:
             return calculateTriangularMembership(value, set.params[0], set.params[1], set.params[2]);
-        case Fuzzy::TRAPEZOIDAL:
+        case TRAPEZOIDAL:
             return calculateTrapezoidalMembership(value, set.params[0], set.params[1], set.params[2], set.params[3]);
-        case Fuzzy::GAUSSIAN:
+        case GAUSSIAN:
             return calculateGaussianMembership(value, set.params[0], set.params[1]);
-        case Fuzzy::SINGLETON:
+        case SINGLETON:
             return calculateSingletonMembership(value, set.params[0]);
         default:
             return 0.0f;

@@ -12,6 +12,8 @@
 #define BASE_CHANNEL_H
 
 #include "Arduino.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 
 #ifndef ENABLE_MODULE_NODEF_IO_EXPANDER
 #define ENABLE_MODULE_NODEF_IO_EXPANDER
@@ -85,6 +87,13 @@ namespace AutoLight {
         void onMode();       // For button 2
         void offMode();      // For button 3
 
+        void singleButtonCycle();
+        void toggleOnOff();
+        void smartButtonPress(uint8_t button_index);
+        void setButtonMode(button_mode_t mode);
+        void setButtonConfig(ButtonConfig* config);
+        void executeButtonAction(uint8_t button_index);
+
         // Legacy method
         void changeMode();
         void changeModeApp(uint32_t num);
@@ -150,6 +159,9 @@ namespace AutoLight {
 
         ConfigData *config_data_ptr_;
         ButtonInterrupt *button_interrupt_ptr_;
+        ButtonConfig button_config_;
+        button_mode_t current_button_mode_;
+        SemaphoreHandle_t state_mutex_;
     };
 }
 

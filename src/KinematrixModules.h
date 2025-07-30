@@ -9,7 +9,6 @@
 
 #include "Arduino.h"
 
-
 #ifdef ENABLE_MODULE_I2C_EXPANDER
 #include "../lib/modules/communication/wired/i2c/i2c-expander.h"
 #include "../lib/modules/communication/wired/i2c/i2c-expander.cpp"
@@ -89,7 +88,6 @@
 #include "../lib/modules/communication/wireless/lora/lora-ebyte-e220.cpp"
 #endif
 
-
 #ifdef ENABLE_MODULE_ESP_NOW
 #include "../lib/modules/communication/wireless/now/esp-now.h"
 #include "../lib/modules/communication/wireless/now/esp-now.cpp"
@@ -130,6 +128,16 @@
 #include "../lib/modules/control/PIDController.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_STANDARD_SCALER
+#include "../lib/modules/control/StandardScaler.h"
+#include "../lib/modules/control/StandardScaler.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_TRAIN_TEST_SPLIT
+#include "../lib/modules/control/TrainTestSplit.h"
+#include "../lib/modules/control/TrainTestSplit.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_SERIAL_DEBUGGER
 #include "../lib/modules/debug/SerialDebugger.h"
 #include "../lib/modules/debug/SerialDebugger.cpp"
@@ -143,127 +151,6 @@
 #ifdef ENABLE_MODULE_SERIAL_DEBUGGER_V2
 #include "../lib/modules/debug/SerialDebuggerV2.h"
 #include "../lib/modules/debug/SerialDebuggerV2.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_LCD_MENU
-#include "../lib/modules/display/LiquidCrystal_I2C.h"
-#include "../lib/modules/display/LiquidCrystal_I2C.cpp"
-#include "../lib/modules/display/lcd-menu.h"
-#include "../lib/modules/display/lcd-menu.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_OLED_MENU
-#include "../lib/modules/display/oled-menu.h"
-#include "../lib/modules/display/oled-menu.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_SH1106_MENU
-#include "../lib/modules/display/sh1106-menu.h"
-#include "../lib/modules/display/sh1106-menu.cpp"
-#include "../lib/modules/display/sh1106-render1.cpp"
-#include "../lib/modules/display/sh1106-render2.cpp"
-#include "../lib/modules/display/sh1106-render3.cpp"
-#include "../lib/modules/display/sh1106-render4.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_MOTOR_DRIVER
-#include "../lib/modules/driver/motor/motor-driver.h"
-#include "../lib/modules/driver/motor/motor-driver.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_SERVO_HCPA9685
-#include "../lib/modules/driver/servo/HCPCA9685.h"
-#include "../lib/modules/driver/servo/HCPCA9685.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_EEPROM_LIB
-#include "../lib/modules/file/EEPROMLib.h"
-#include "../lib/modules/file/EEPROMLib.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_EEPROM_LIB_ESP8266
-#include "../lib/modules/file/EEPROMLibESP8266.h"
-#include "../lib/modules/file/EEPROMLibESP8266.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_SD_ARDUINO
-#include "../lib/modules/file/SDArduino.h"
-#include "../lib/modules/file/SDArduino.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_SD_CARD_MODULE_ESP32
-#include "../lib/modules/file/SDCardModuleESP32.h"
-#include "../lib/modules/file/SDCardModuleESP32.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_DIGITAL_INPUT
-#include "../lib/modules/io/input-module.h"
-#include "../lib/modules/io/input-module.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_DIGITAL_OUTPUT
-#include "../lib/modules/io/output-module.h"
-#include "../lib/modules/io/output-module.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_PCF8574_INPUT_MODULE
-#include "../lib/modules/io/pcf8574-input-module.h"
-#include "../lib/modules/io/pcf8574-input-module.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_PCF8574_MODULE
-#include "../lib/modules/io/pcf8574-module.h"
-#include "../lib/modules/io/pcf8574-module.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_PCF8574_OUTPUT_MODULE
-#include "../lib/modules/io/pcf8574-output-module.h"
-#include "../lib/modules/io/pcf8574-output-module.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_ROTARY_ENCODER
-#include "../lib/modules/io/rotary-module.h"
-#include "../lib/modules/io/rotary-module.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_SEVEN_SEGMENT
-#include "../lib/modules/io/seven-segment.h"
-#include "../lib/modules/io/seven-segment.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_SEVEN_SEGMENT_PCF
-#include "../lib/modules/io/seven-segment-pcf.h"
-#include "../lib/modules/io/seven-segment-pcf.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_SEVEN_SEGMENT_74HC595
-#include "../lib/modules/io/seven-segment-74hc595.h"
-#include "../lib/modules/io/seven-segment-74hc595.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_FREE_RTOS_HANDLER
-#include "../lib/modules/task/FreeRTOSHandler.h"
-#include "../lib/modules/task/FreeRTOSHandler.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_TASK_HANDLER
-#include "../lib/modules/task/Task.h"
-#include "../lib/modules/task/Task.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_TIMER_DURATION
-#include "../lib/modules/time/timer-duration.h"
-#include "../lib/modules/time/timer-duration.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_TIMER_MANAGER
-#include "../lib/modules/time/timer-manager.h"
-#include "../lib/modules/time/timer-manager.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_TIMER_TASK
-#include "../lib/modules/time/timer-task.h"
-#include "../lib/modules/time/timer-task.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_EASY_LOGIC
@@ -371,7 +258,7 @@
 #include "../lib/modules/wifi/wifi-handler.cpp"
 #endif
 
-#ifdef ENABLE_MODULE_WIFI_HANDLER_2
+#ifdef ENABLE_MODULE_WIFI_HANDLER_V2
 #include "../lib/modules/wifi/wifi-handlerv2.h"
 #include "../lib/modules/wifi/wifi-handlerv2.cpp"
 #endif
@@ -379,4 +266,189 @@
 #ifdef ENABLE_MODULE_WIFI_MODULE
 #include "../lib/modules/wifi/WiFiModule.h"
 #include "../lib/modules/wifi/WiFiModule.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_LCD_MENU
+#include "../lib/modules/display/LiquidCrystal_I2C.h"
+#include "../lib/modules/display/LiquidCrystal_I2C.cpp"
+#include "../lib/modules/display/lcd-menu.h"
+#include "../lib/modules/display/lcd-menu.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_OLED_MENU
+#include "../lib/modules/display/oled-menu.h"
+#include "../lib/modules/display/oled-menu.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SH1106_MENU
+#include "../lib/modules/display/sh1106-menu.h"
+#include "../lib/modules/display/sh1106-menu.cpp"
+#include "../lib/modules/display/sh1106-render1.cpp"
+#include "../lib/modules/display/sh1106-render2.cpp"
+#include "../lib/modules/display/sh1106-render3.cpp"
+#include "../lib/modules/display/sh1106-render4.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_MOTOR_DRIVER
+#include "../lib/modules/driver/motor/motor-driver.h"
+#include "../lib/modules/driver/motor/motor-driver.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SERVO_HCPA9685
+#include "../lib/modules/driver/servo/HCPCA9685.h"
+#include "../lib/modules/driver/servo/HCPCA9685.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_EEPROM_LIB
+#include "../lib/modules/file/EEPROMLib.h"
+#include "../lib/modules/file/EEPROMLib.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_EEPROM_LIB_ESP8266
+#include "../lib/modules/file/EEPROMLibESP8266.h"
+#include "../lib/modules/file/EEPROMLibESP8266.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SD_ARDUINO
+#include "../lib/modules/file/SDArduino.h"
+#include "../lib/modules/file/SDArduino.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SD_CARD_MODULE_ESP32
+#include "../lib/modules/file/SDCardModuleESP32.h"
+#include "../lib/modules/file/SDCardModuleESP32.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/MovingAverageFilter.h"
+#include "../lib/modules/filter/MovingAverageFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_EXPONENTIAL_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/ExponentialMovingAverageFilter.h"
+#include "../lib/modules/filter/ExponentialMovingAverageFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_DYNAMIC_TYPE_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/DynamicTypeMovingAverageFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_DYNAMIC_TYPE_EXPONENTIAL_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/DynamicTypeExponentialMovingAverageFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_LOW_PASS_FILTER
+#include "../lib/modules/filter/LowPassFilter.h"
+#include "../lib/modules/filter/LowPassFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_HIGH_PASS_FILTER
+#include "../lib/modules/filter/HighPassFilter.h"
+#include "../lib/modules/filter/HighPassFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_DYNAMIC_TYPE_HIGH_PASS_FILTER
+#include "../lib/modules/filter/DynamicTypeHighPassFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_MEDIAN_FILTER
+#include "../lib/modules/filter/MedianFilter.h"
+#include "../lib/modules/filter/MedianFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_DYNAMIC_TYPE_MEDIAN_FILTER
+#include "../lib/modules/filter/DynamicTypeMedianFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_KALMAN_FILTER
+#include "../lib/modules/filter/KalmanFilter.h"
+#include "../lib/modules/filter/KalmanFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_COMPLEMENTARY_FILTER
+#include "../lib/modules/filter/ComplementaryFilter.h"
+#include "../lib/modules/filter/ComplementaryFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_DYNAMIC_TYPE_COMPLEMENTARY_FILTER
+#include "../lib/modules/filter/DynamicTypeComplementaryFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_BAND_STOP_FILTER
+#include "../lib/modules/filter/BandStopFilter.h"
+#include "../lib/modules/filter/BandStopFilter.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_DYNAMIC_TYPE_BAND_STOP_FILTER
+#include "../lib/modules/filter/DynamicTypeBandStopFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_DIGITAL_INPUT
+#include "../lib/modules/io/input-module.h"
+#include "../lib/modules/io/input-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_DIGITAL_OUTPUT
+#include "../lib/modules/io/output-module.h"
+#include "../lib/modules/io/output-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PCF8574_INPUT_MODULE
+#include "../lib/modules/io/pcf8574-input-module.h"
+#include "../lib/modules/io/pcf8574-input-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PCF8574_MODULE
+#include "../lib/modules/io/pcf8574-module.h"
+#include "../lib/modules/io/pcf8574-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_PCF8574_OUTPUT_MODULE
+#include "../lib/modules/io/pcf8574-output-module.h"
+#include "../lib/modules/io/pcf8574-output-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_ROTARY_ENCODER
+#include "../lib/modules/io/rotary-module.h"
+#include "../lib/modules/io/rotary-module.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SEVEN_SEGMENT
+#include "../lib/modules/io/seven-segment.h"
+#include "../lib/modules/io/seven-segment.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SEVEN_SEGMENT_PCF
+#include "../lib/modules/io/seven-segment-pcf.h"
+#include "../lib/modules/io/seven-segment-pcf.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SEVEN_SEGMENT_74HC595
+#include "../lib/modules/io/seven-segment-74hc595.h"
+#include "../lib/modules/io/seven-segment-74hc595.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_FREE_RTOS_HANDLER
+#include "../lib/modules/task/FreeRTOSHandler.h"
+#include "../lib/modules/task/FreeRTOSHandler.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_TASK_HANDLER
+#include "../lib/modules/task/Task.h"
+#include "../lib/modules/task/Task.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_TIMER_DURATION
+#include "../lib/modules/time/timer-duration.h"
+#include "../lib/modules/time/timer-duration.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_TIMER_MANAGER
+#include "../lib/modules/time/timer-manager.h"
+#include "../lib/modules/time/timer-manager.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_TIMER_TASK
+#include "../lib/modules/time/timer-task.h"
+#include "../lib/modules/time/timer-task.cpp"
 #endif

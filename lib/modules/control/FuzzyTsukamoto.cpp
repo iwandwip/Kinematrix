@@ -192,7 +192,7 @@ bool FuzzyTsukamoto::addFuzzySet(int varIndex, bool isInput, const char *name,
     vars[varIndex].sets[setIndex].type = type;
 
     switch (type) {
-        case Fuzzy::TRIANGULAR:
+        case TRIANGULAR:
             if (params[0] > params[1] || params[1] > params[2]) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid triangular parameters", 49);
@@ -204,7 +204,7 @@ bool FuzzyTsukamoto::addFuzzySet(int varIndex, bool isInput, const char *name,
             vars[varIndex].sets[setIndex].params[2] = params[2];
             break;
 
-        case Fuzzy::TRAPEZOIDAL:
+        case TRAPEZOIDAL:
             if (params[0] > params[1] || params[1] > params[2] || params[2] > params[3]) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid trapezoidal parameters", 49);
@@ -217,7 +217,7 @@ bool FuzzyTsukamoto::addFuzzySet(int varIndex, bool isInput, const char *name,
             vars[varIndex].sets[setIndex].params[3] = params[3];
             break;
 
-        case Fuzzy::GAUSSIAN:
+        case GAUSSIAN:
             if (params[1] <= 0) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid gaussian parameters", 49);
@@ -228,11 +228,11 @@ bool FuzzyTsukamoto::addFuzzySet(int varIndex, bool isInput, const char *name,
             vars[varIndex].sets[setIndex].params[1] = params[1]; // Sigma
             break;
 
-        case Fuzzy::SINGLETON:
+        case SINGLETON:
             vars[varIndex].sets[setIndex].params[0] = params[0]; // Center
             break;
 
-        case Fuzzy::MONOTONIC_INCREASING:
+        case MONOTONIC_INCREASING:
             if (params[0] >= params[1]) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid monotonic parameters", 49);
@@ -243,7 +243,7 @@ bool FuzzyTsukamoto::addFuzzySet(int varIndex, bool isInput, const char *name,
             vars[varIndex].sets[setIndex].params[1] = params[1]; // End
             break;
 
-        case Fuzzy::MONOTONIC_DECREASING:
+        case MONOTONIC_DECREASING:
             if (params[0] <= params[1]) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid monotonic parameters", 49);
@@ -292,7 +292,7 @@ bool FuzzyTsukamoto::addRule(int *antecedentVars, int *antecedentSets, int numAn
     }
 
     const FuzzyTsukamotoSet &consequentFuzzySet = outputVars[consequentVar].sets[consequentSet];
-    if (consequentFuzzySet.type != Fuzzy::MONOTONIC_INCREASING && consequentFuzzySet.type != Fuzzy::MONOTONIC_DECREASING) {
+    if (consequentFuzzySet.type != MONOTONIC_INCREASING && consequentFuzzySet.type != MONOTONIC_DECREASING) {
         errorState = true;
         strncpy(errorMessage, "Consequent must be monotonic", 49);
         errorMessage[49] = '\0';
@@ -483,14 +483,14 @@ float *FuzzyTsukamoto::evaluateRules(const float *inputs) {
 
 float FuzzyTsukamoto::findInverseMembershipValue(float membershipDegree, const FuzzyTsukamotoSet &set, float min, float max) const {
     if (membershipDegree <= 0.001f) {
-        return (set.type == Fuzzy::MONOTONIC_INCREASING) ? set.params[0] : set.params[1];
+        return (set.type == MONOTONIC_INCREASING) ? set.params[0] : set.params[1];
     }
     if (membershipDegree >= 0.999f) {
         return set.params[1];
     }
-    if (set.type == Fuzzy::MONOTONIC_INCREASING) {
+    if (set.type == MONOTONIC_INCREASING) {
         return set.params[0] + membershipDegree * (set.params[1] - set.params[0]);
-    } else if (set.type == Fuzzy::MONOTONIC_DECREASING) {
+    } else if (set.type == MONOTONIC_DECREASING) {
         return set.params[0] - membershipDegree * (set.params[0] - set.params[1]);
     }
     return (min + max) / 2.0f;
@@ -506,17 +506,17 @@ float FuzzyTsukamoto::applyFuzzyOperator(float a, float b, bool useAND) const {
 
 float FuzzyTsukamoto::calculateMembership(float value, const FuzzyTsukamotoSet &set) const {
     switch (set.type) {
-        case Fuzzy::TRIANGULAR:
+        case TRIANGULAR:
             return calculateTriangularMembership(value, set.params[0], set.params[1], set.params[2]);
-        case Fuzzy::TRAPEZOIDAL:
+        case TRAPEZOIDAL:
             return calculateTrapezoidalMembership(value, set.params[0], set.params[1], set.params[2], set.params[3]);
-        case Fuzzy::GAUSSIAN:
+        case GAUSSIAN:
             return calculateGaussianMembership(value, set.params[0], set.params[1]);
-        case Fuzzy::SINGLETON:
+        case SINGLETON:
             return calculateSingletonMembership(value, set.params[0]);
-        case Fuzzy::MONOTONIC_INCREASING:
+        case MONOTONIC_INCREASING:
             return calculateMonotonicIncreasingMembership(value, set.params[0], set.params[1]);
-        case Fuzzy::MONOTONIC_DECREASING:
+        case MONOTONIC_DECREASING:
             return calculateMonotonicDecreasingMembership(value, set.params[0], set.params[1]);
         default:
             return 0.0f;

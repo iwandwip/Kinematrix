@@ -9,6 +9,7 @@
 #ifndef AUTO_LIGHT_V2_H
 #define AUTO_LIGHT_V2_H
 
+#pragma message("[COMPILED]: AutoLightv2/index.h")
 #include "AutoLightv2/index.h"
 
 #endif // AUTO_LIGHT_V2_H

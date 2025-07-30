@@ -101,108 +101,15 @@
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_SERIAL_DEBUGGER
-#include "../lib/modules/control/SerialDebugger.h"
+#include "../lib/modules/debug/SerialDebugger.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_SERIAL_DEBUGGER_LITE
-#include "../lib/modules/control/SerialDebuggerLite.h"
+#include "../lib/modules/debug/SerialDebuggerLite.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_SERIAL_DEBUGGER_V2
-#include "../lib/modules/control/SerialDebuggerV2.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_LCD_MENU
-#include "../lib/modules/display/LiquidCrystal_I2C.h"
-#include "../lib/modules/display/lcd-menu.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_OLED_MENU
-#include "../lib/modules/display/oled-menu.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_SH1106_MENU
-#include "../lib/modules/display/sh1106-menu.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_MOTOR_DRIVER
-#include "../lib/modules/driver/motor/motor-driver.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_SERVO_HCPA9685
-#include "../lib/modules/driver/servo/HCPCA9685.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_EEPROM_LIB
-#include "../lib/modules/file/EEPROMLib.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_EEPROM_LIB_ESP8266
-#include "../lib/modules/file/EEPROMLibESP8266.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_SD_ARDUINO
-#include "../lib/modules/file/SDArduino.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_SD_CARD_MODULE_ESP32
-#include "../lib/modules/file/SDCardModuleESP32.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_DIGITAL_INPUT
-#include "../lib/modules/io/input-module.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_DIGITAL_OUTPUT
-#include "../lib/modules/io/output-module.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_PCF8574_INPUT_MODULE
-#include "../lib/modules/io/pcf8574-input-module.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_PCF8574_MODULE
-#include "../lib/modules/io/pcf8574-module.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_PCF8574_OUTPUT_MODULE
-#include "../lib/modules/io/pcf8574-output-module.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_ROTARY_ENCODER
-#include "../lib/modules/io/rotary-module.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT
-#include "../lib/modules/io/seven-segment.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT_PCF
-#include "../lib/modules/io/seven-segment-pcf.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT_74HC595
-#include "../lib/modules/io/seven-segment-74hc595.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_FREE_RTOS_HANDLER
-#include "../lib/modules/task/FreeRTOSHandler.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_TASK_HANDLER
-#include "../lib/modules/task/Task.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_TIMER_DURATION
-#include "../lib/modules/time/timer-duration.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_TIMER_MANAGER
-#include "../lib/modules/time/timer-manager.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_TIMER_TASK
-#include "../lib/modules/time/timer-task.h"
+#include "../lib/modules/debug/SerialDebuggerV2.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_EASY_LOGIC
@@ -219,7 +126,6 @@
 
 #ifdef ENABLE_MODULE_NODEF_VARIABLE_WATCHER
 #include "../lib/modules/utils/VariableWatcher.h"
-#include "../lib/modules/utils/VariableWatcher.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_DATETIME_NTP
@@ -294,6 +200,155 @@
 #include "../lib/modules/wifi/wifi-handlerv2.h"
 #endif
 
-#ifdef ENABLE_NODEF_HELPER_WIFI_MODULE
+#ifdef ENABLE_MODULE_NODEF_WIFI_MODULE
 #include "../lib/modules/wifi/WiFiModule.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_LCD_MENU
+#include "../lib/modules/display/LiquidCrystal_I2C.h"
+#include "../lib/modules/display/lcd-menu.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_OLED_MENU
+#include "../lib/modules/display/oled-menu.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SH1106_MENU
+#include "../lib/modules/display/sh1106-menu.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_MOTOR_DRIVER
+#include "../lib/modules/driver/motor/motor-driver.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SERVO_HCPA9685
+#include "../lib/modules/driver/servo/HCPCA9685.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_EEPROM_LIB
+#include "../lib/modules/file/EEPROMLib.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_EEPROM_LIB_ESP8266
+#include "../lib/modules/file/EEPROMLibESP8266.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SD_ARDUINO
+#include "../lib/modules/file/SDArduino.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SD_CARD_MODULE_ESP32
+#include "../lib/modules/file/SDCardModuleESP32.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/MovingAverageFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_EXPONENTIAL_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/ExponentialMovingAverageFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DYNAMIC_TYPE_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/DynamicTypeMovingAverageFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DYNAMIC_TYPE_EXPONENTIAL_MOVING_AVERAGE_FILTER
+#include "../lib/modules/filter/DynamicTypeExponentialMovingAverageFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_LOW_PASS_FILTER
+#include "../lib/modules/filter/LowPassFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_HIGH_PASS_FILTER
+#include "../lib/modules/filter/HighPassFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DYNAMIC_TYPE_HIGH_PASS_FILTER
+#include "../lib/modules/filter/DynamicTypeHighPassFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_MEDIAN_FILTER
+#include "../lib/modules/filter/MedianFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DYNAMIC_TYPE_MEDIAN_FILTER
+#include "../lib/modules/filter/DynamicTypeMedianFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_KALMAN_FILTER
+#include "../lib/modules/filter/KalmanFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_COMPLEMENTARY_FILTER
+#include "../lib/modules/filter/ComplementaryFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DYNAMIC_TYPE_COMPLEMENTARY_FILTER
+#include "../lib/modules/filter/DynamicTypeComplementaryFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_BAND_STOP_FILTER
+#include "../lib/modules/filter/BandStopFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DYNAMIC_TYPE_BAND_STOP_FILTER
+#include "../lib/modules/filter/DynamicTypeBandStopFilter.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DIGITAL_INPUT
+#include "../lib/modules/io/input-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_DIGITAL_OUTPUT
+#include "../lib/modules/io/output-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PCF8574_INPUT_MODULE
+#include "../lib/modules/io/pcf8574-input-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PCF8574_MODULE
+#include "../lib/modules/io/pcf8574-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_PCF8574_OUTPUT_MODULE
+#include "../lib/modules/io/pcf8574-output-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_ROTARY_ENCODER
+#include "../lib/modules/io/rotary-module.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT
+#include "../lib/modules/io/seven-segment.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT_PCF
+#include "../lib/modules/io/seven-segment-pcf.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT_74HC595
+#include "../lib/modules/io/seven-segment-74hc595.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_FREE_RTOS_HANDLER
+#include "../lib/modules/task/FreeRTOSHandler.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_TASK_HANDLER
+#include "../lib/modules/task/Task.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_TIMER_DURATION
+#include "../lib/modules/time/timer-duration.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_TIMER_MANAGER
+#include "../lib/modules/time/timer-manager.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_TIMER_TASK
+#include "../lib/modules/time/timer-task.h"
 #endif

@@ -9,7 +9,7 @@
 
 FuzzyMamdani::FuzzyMamdani(int maxInputs, int maxOutputs, int maxRules, int maxSetsPerVar) :
         maxInputs(maxInputs), maxOutputs(maxOutputs), maxRules(maxRules), maxSetsPerVar(maxSetsPerVar),
-        numInputs(0), numOutputs(0), numRules(0), defuzzMethod(Fuzzy::CENTROID), debugMode(false),
+        numInputs(0), numOutputs(0), numRules(0), defuzzMethod(CENTROID), debugMode(false),
         errorState(false) {
 
     if (maxInputs <= 0 || maxOutputs <= 0 || maxRules <= 0 || maxSetsPerVar <= 0) {
@@ -192,7 +192,7 @@ bool FuzzyMamdani::addFuzzySet(int varIndex, bool isInput, const char *name, Fuz
     vars[varIndex].sets[setIndex].type = type;
 
     switch (type) {
-        case Fuzzy::TRIANGULAR:
+        case TRIANGULAR:
             if (params[0] > params[1] || params[1] > params[2]) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid triangular parameters", 49);
@@ -204,7 +204,7 @@ bool FuzzyMamdani::addFuzzySet(int varIndex, bool isInput, const char *name, Fuz
             vars[varIndex].sets[setIndex].params[2] = params[2];
             break;
 
-        case Fuzzy::TRAPEZOIDAL:
+        case TRAPEZOIDAL:
             if (params[0] > params[1] || params[1] > params[2] || params[2] > params[3]) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid trapezoidal parameters", 49);
@@ -217,7 +217,7 @@ bool FuzzyMamdani::addFuzzySet(int varIndex, bool isInput, const char *name, Fuz
             vars[varIndex].sets[setIndex].params[3] = params[3];
             break;
 
-        case Fuzzy::GAUSSIAN:
+        case GAUSSIAN:
             if (params[1] <= 0) {
                 errorState = true;
                 strncpy(errorMessage, "Invalid gaussian parameters", 49);
@@ -228,7 +228,7 @@ bool FuzzyMamdani::addFuzzySet(int varIndex, bool isInput, const char *name, Fuz
             vars[varIndex].sets[setIndex].params[1] = params[1]; // Sigma
             break;
 
-        case Fuzzy::SINGLETON:
+        case SINGLETON:
             vars[varIndex].sets[setIndex].params[0] = params[0]; // Center
             break;
     }
@@ -366,19 +366,19 @@ float *FuzzyMamdani::evaluate(const float *inputs) {
 
         if (hasRule) {
             switch (defuzzMethod) {
-                case Fuzzy::CENTROID:
+                case CENTROID:
                     outputs[i] = defuzzifyCentroid(i, ruleStrengths);
                     break;
-                case Fuzzy::BISECTOR:
+                case BISECTOR:
                     outputs[i] = defuzzifyBisector(i, ruleStrengths);
                     break;
-                case Fuzzy::MOM:
+                case MOM:
                     outputs[i] = defuzzifyMOM(i, ruleStrengths);
                     break;
-                case Fuzzy::SOM:
+                case SOM:
                     outputs[i] = defuzzifySOM(i, ruleStrengths);
                     break;
-                case Fuzzy::LOM:
+                case LOM:
                     outputs[i] = defuzzifyLOM(i, ruleStrengths);
                     break;
             }
@@ -446,13 +446,13 @@ float FuzzyMamdani::applyFuzzyOperator(float a, float b, bool useAND) const {
 
 float FuzzyMamdani::calculateMembership(float value, const FuzzyMamdaniSet &set) const {
     switch (set.type) {
-        case Fuzzy::TRIANGULAR:
+        case TRIANGULAR:
             return calculateTriangularMembership(value, set.params[0], set.params[1], set.params[2]);
-        case Fuzzy::TRAPEZOIDAL:
+        case TRAPEZOIDAL:
             return calculateTrapezoidalMembership(value, set.params[0], set.params[1], set.params[2], set.params[3]);
-        case Fuzzy::GAUSSIAN:
+        case GAUSSIAN:
             return calculateGaussianMembership(value, set.params[0], set.params[1]);
-        case Fuzzy::SINGLETON:
+        case SINGLETON:
             return calculateSingletonMembership(value, set.params[0]);
         default:
             return 0.0f;
