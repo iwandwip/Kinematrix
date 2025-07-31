@@ -92,5 +92,7 @@ namespace AutoLight {
     };
 }
 
+// Include implementation
+#include "BaseConfig.cpp"
 
 #endif // BASE_CONFIG_H

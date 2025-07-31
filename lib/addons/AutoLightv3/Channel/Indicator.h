@@ -49,6 +49,9 @@ namespace AutoLight {
 
 }
 
+// Include implementation
+#include "Indicator.cpp"
+
 #endif
 
 #endif // INDICATOR_H

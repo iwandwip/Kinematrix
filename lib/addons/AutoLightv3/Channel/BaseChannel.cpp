@@ -6,11 +6,13 @@
  *  Modified for 4 button support
  */
 
-#include "BaseChannel.h"
+// BaseChannel.cpp - Implementation file
+// Included by BaseChannel.h - do not include BaseChannel.h here to avoid circular dependency
+#include "../Web/WebManager.h"
 
 namespace AutoLight {
     BaseChannel::BaseChannel(bool _enable_unit_test)
-            : is_unit_test_(_enable_unit_test) {
+            : is_unit_test_(_enable_unit_test), web_manager_(nullptr) {
         channel_data_.is_on_ = false;
         channel_data_.last_active_sequence_ = 1;
         current_button_mode_ = BUTTON_MODE_4BUTTON;
@@ -29,7 +31,11 @@ namespace AutoLight {
     }
 
     BaseChannel::~BaseChannel() {
-        // No cleanup needed - using volatile variables only
+        // Cleanup WebManager if exists
+        if (web_manager_ != nullptr) {
+            delete web_manager_;
+            web_manager_ = nullptr;
+        }
     }
 
     bool BaseChannel::initialize() {
@@ -969,5 +975,30 @@ namespace AutoLight {
             result += String(i) + "→" + String(sequence_mapper_.active_sequences[i]);
         }
         return result;
+    }
+
+    // Web Server functions implementation
+    void BaseChannel::enableWebServer(const char* device_name, bool auto_task) {
+        if (web_manager_ == nullptr) {
+            // Need BaseConfig - get it from config_data_ptr_
+            BaseConfig* config = nullptr;
+            if (config_data_ptr_ != nullptr) {
+                // Create a BaseConfig instance from ConfigData
+                config = new BaseConfig();
+                config->setChannel(config_data_ptr_->header.channel_);
+                config->setVersion(config_data_ptr_->header.version_);
+            }
+            
+            web_manager_ = new WebManager(this, config);
+            // Set ownership flag if we created the config
+            if (config != nullptr) {
+                web_manager_->setConfigOwnership(true);
+            }
+            web_manager_->enableWebServer(device_name, auto_task);
+        }
+    }
+
+    void BaseChannel::enableWebServerManual(const char* device_name) {
+        enableWebServer(device_name, false);
     }
 }

@@ -5,7 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
-#include "Indicator.h"
+// Indicator.cpp - Implementation file
+// Included by Indicator.h - do not include Indicator.h here to avoid circular dependency
 
 #if defined(ESP32)
 

@@ -37,6 +37,9 @@ namespace AutoLight {
     };
 }
 
+// Include implementation
+#include "Task.cpp"
+
 #endif
 
 #endif // TASK_H

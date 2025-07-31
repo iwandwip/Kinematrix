@@ -5,7 +5,8 @@
  *  Created on: 2023. 4. 3
  */
 
-#include "BaseChannel.h"
+// BaseChannelSequence.cpp - Implementation file
+// Included by BaseChannel.h - do not include BaseChannel.h here to avoid circular dependency
 
 namespace AutoLight {
     void BaseChannel::taskSequence2() {

@@ -6,7 +6,8 @@
  *  Modified for 4 button support
  */
 
-#include "ButtonInterrupt.h"
+// ButtonInterrupt.cpp - Implementation file
+// Included by ButtonInterrupt.h - do not include ButtonInterrupt.h here to avoid circular dependency
 
 namespace AutoLight {
     ButtonInterrupt::ButtonInterrupt(bool _enable_unit_test)

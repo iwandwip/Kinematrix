@@ -5,8 +5,6 @@
  *  Created on: 2023. 4. 3
  */
 
-#pragma once
-
 #ifndef BUTTON_INTERRUPT_H
 #define BUTTON_INTERRUPT_H
 
@@ -48,5 +46,8 @@ namespace AutoLight {
         void (*isr_callback_[Constants::MAX_BUTTONS])(){};
     };
 }
+
+// Include implementation
+#include "ButtonInterrupt.cpp"
 
 #endif // BUTTON_INTERRUPT_H

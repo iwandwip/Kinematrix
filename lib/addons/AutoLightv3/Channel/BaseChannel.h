@@ -6,8 +6,6 @@
  *  Modified for 4 button support
  */
 
-#pragma once
-
 #ifndef BASE_CHANNEL_H
 #define BASE_CHANNEL_H
 
@@ -33,7 +31,8 @@
 
 namespace AutoLight {
     using namespace Constants;
-
+    
+    class WebManager; // Forward declaration
     void taskCallback();
 
     class ChannelData {
@@ -103,6 +102,11 @@ namespace AutoLight {
                 channel.setActiveSequences(sequences, sizeof(sequences)/sizeof(sequences[0])); \
             } while(0)
 
+        // Web Server functions
+        void enableWebServer(const char* device_name = "AutoLight", bool auto_task = true);
+        void enableWebServerManual(const char* device_name = "AutoLight");
+        WebManager* getWebManager() { return web_manager_; }
+
         // Legacy method
         void changeMode();
         void changeModeApp(uint32_t num);
@@ -171,6 +175,9 @@ namespace AutoLight {
         ButtonConfig button_config_;
         button_mode_t current_button_mode_;
         SequenceMapper sequence_mapper_;
+        
+        // Web Manager
+        WebManager* web_manager_;
 
         // Internal mapping functions
         uint8_t mapApiIndexToActualSequence(uint8_t api_index);
@@ -179,5 +186,9 @@ namespace AutoLight {
         void initializeDefaultMapping();
     };
 }
+
+// Include implementations
+#include "BaseChannel.cpp"
+#include "BaseChannelSequence.cpp"
 
 #endif // BASE_CHANNEL_H
