@@ -1,11 +1,3 @@
-/*
- *  BaseChannel.h
- *
- *  Kastara Electronics Embedded Development
- *  Created on: 2023. 4. 3
- *  Modified for 4 button support
- */
-
 #ifndef BASE_CHANNEL_H
 #define BASE_CHANNEL_H
 
@@ -31,8 +23,9 @@
 
 namespace AutoLight {
     using namespace Constants;
-    
-    class WebManager; // Forward declaration
+
+    class WebManager;
+
     void taskCallback();
 
     class ChannelData {
@@ -40,11 +33,11 @@ namespace AutoLight {
         volatile uint32_t delay_time_;
         volatile uint32_t sequence_index_;
         volatile uint32_t sequence_index_apps_;
-        volatile uint32_t last_active_sequence_; // To store the last active mode
+        volatile uint32_t last_active_sequence_;
         volatile bool is_reverse_;
         volatile bool is_mode_changed_;
         volatile bool is_mode_changed_apps_;
-        volatile bool is_on_; // To track if the system is on or off
+        volatile bool is_on_;
     };
 
     class ExpanderIo {
@@ -74,44 +67,40 @@ namespace AutoLight {
         volatile uint32_t getDelayTime();
         ChannelData getChannelData();
 
-        // New button functions
-        void nextMode();     // For button 0
-        void previousMode(); // For button 1
-        void onMode();       // For button 2
-        void offMode();      // For button 3
+        void nextMode();
+        void previousMode();
+        void onMode();
+        void offMode();
 
         void singleButtonCycle();
         void toggleOnOff();
         void smartButtonPress(uint8_t button_index);
         void setButtonMode(button_mode_t mode);
-        void setButtonConfig(ButtonConfig* config);
+        void setButtonConfig(ButtonConfig *config);
         void executeButtonAction(uint8_t button_index);
 
-        // Sequence mapping functions
         void enableSequenceMapping(bool enable = true);
-        void setActiveSequences(uint8_t* sequences, uint8_t count);
+        void setActiveSequences(uint8_t *sequences, uint8_t count);
         void setActiveSequences(uint8_t count, ...);
-        void reorderActiveSequences(uint8_t* new_order, uint8_t count);
+        void reorderActiveSequences(uint8_t *new_order, uint8_t count);
         void printSequenceMapping();
         String getActiveMappingString();
-        
-        // Helper macro untuk mudah penggunaan
-        #define SET_ACTIVE_SEQUENCES(channel, ...) \
+
+#define SET_ACTIVE_SEQUENCES(channel, ...) \
             do { \
                 uint8_t sequences[] = {__VA_ARGS__}; \
                 channel.setActiveSequences(sequences, sizeof(sequences)/sizeof(sequences[0])); \
             } while(0)
 
-        // Web Server functions
-        void enableWebServer(const char* device_name = "AutoLight", bool auto_task = true);
-        void enableWebServerManual(const char* device_name = "AutoLight");
-        WebManager* getWebManager() { return web_manager_; }
+        void enableWebServer(const char *device_name = "AutoLight", bool auto_task = true);
+        void enableWebServerManual(const char *device_name = "AutoLight");
 
-        // Legacy method
+        WebManager *getWebManager() { return web_manager_; }
+
         void changeMode();
         void changeModeApp(uint32_t num);
         volatile bool isChangeMode();
-        volatile bool isOn(); // Check if the system is on
+        volatile bool isOn();
 
         void runAutoLight(void (*_callbackRun)(uint32_t sequence) = nullptr);
 
@@ -128,32 +117,34 @@ namespace AutoLight {
         bool isReady();
         void debug();
 
-        // task sequence for each mode
-        void taskSequence2();
-        void taskSequence3();
-        void taskSequence4();
-        void taskSequence5();
-        void taskSequence6();
-        void taskSequence7();
-        void taskSequence8();
-        void taskSequence9();
-        void taskSequence10();
-        void taskSequence11();
-        void taskSequence12();
-        void taskSequence13();
-        void taskSequence14();
-        void taskSequence15();
+        bool getLEDState(uint8_t led_index);
+
+        uint8_t getTotalLEDs() { return config_data_ptr_ ? config_data_ptr_->header.channel_ : 0; }
+
+        void taskSequence2BlinkAll();
+        void taskSequence3FillTwoPoint();
+        void taskSequence4FillRight();
+        void taskSequence5FillIn();
+        void taskSequence6BlinkOneByOne();
+        void taskSequence7BlinkTwoFill();
+        void taskSequence8SnakeAndReverse();
+        void taskSequence9Random();
+        void taskSequence10Wave();
+        void taskSequence11Complex();
+        void taskSequence12PatternMatrix();
+        void taskSequence13BlinkPattern();
+        void taskSequence14AdvancedPattern();
+        void taskSequence15AllSequences();
 
     private:
         bool addIoExpander(IOExpander *_io_expander);
         bool beginIoExpander();
 
-        // operation
         int findMax(int num, ...);
-        int shiftArrayAccordingToOrder(const int patterns[][8], int patternSize, uint8_t* mainArray, int mainArraySize, int* arr, int& lastIndex, int targetIndex, bool reverse = false);
-        int shiftArrayAccordingToPosition(int* mainArray, int mainArraySize, int* arr, int& lastIndex, int targetIndex);
-        void resetArray(int* mainArray, int& arrSize, int& arrLastIndex);
-        void splitArrayDynamically(int* mainArray, int mainArraySize);
+        int shiftArrayAccordingToOrder(const int patterns[][8], int patternSize, uint8_t *mainArray, int mainArraySize, int *arr, int &lastIndex, int targetIndex, bool reverse = false);
+        int shiftArrayAccordingToPosition(int *mainArray, int mainArraySize, int *arr, int &lastIndex, int targetIndex);
+        void resetArray(int *mainArray, int &arrSize, int &arrLastIndex);
+        void splitArrayDynamically(int *mainArray, int mainArraySize);
 
         void setTaskSequenceFunction();
 
@@ -175,11 +166,9 @@ namespace AutoLight {
         ButtonConfig button_config_;
         button_mode_t current_button_mode_;
         SequenceMapper sequence_mapper_;
-        
-        // Web Manager
-        WebManager* web_manager_;
 
-        // Internal mapping functions
+        WebManager *web_manager_;
+
         uint8_t mapApiIndexToActualSequence(uint8_t api_index);
         uint8_t mapActualSequenceToApiIndex(uint8_t actual_sequence);
         bool isApiIndexValid(uint8_t api_index);
@@ -187,4 +176,4 @@ namespace AutoLight {
     };
 }
 
-#endif // BASE_CHANNEL_H
+#endif

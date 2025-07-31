@@ -1,11 +1,3 @@
-/*
- *  Task.cpp
- *
- *  Kastara Electronics Embedded Development
- *  Created on: 2023. 4. 3
- */
-
-// Task.cpp - Implementation file
 #include "Task.h"
 
 #if defined(ESP32)
@@ -22,7 +14,6 @@ namespace AutoLight {
     }
 
     TaskHandle::~TaskHandle() {
-        // Task cleanup handled by FreeRTOS
     }
 
     void TaskHandle::initialize(void (*_callback)()) {
@@ -31,23 +22,23 @@ namespace AutoLight {
         }
     }
 
-    TaskHandle_t* TaskHandle::createTask(uint32_t _stack_depth, void (*_task_callback)(void *pvParameter), const char *_task_name) {
-        TaskHandle_t* task_handle = new TaskHandle_t;
-        
+    TaskHandle_t *TaskHandle::createTask(uint32_t _stack_depth, void (*_task_callback)(void *pvParameter), const char *_task_name) {
+        TaskHandle_t *task_handle = new TaskHandle_t;
+
         BaseType_t result = xTaskCreate(
-            _task_callback,
-            _task_name ? _task_name : task_name_,
-            _stack_depth,
-            nullptr,
-            ux_priority_,
-            task_handle
+                _task_callback,
+                _task_name ? _task_name : task_name_,
+                _stack_depth,
+                nullptr,
+                ux_priority_,
+                task_handle
         );
-        
+
         if (result != pdPASS) {
             delete task_handle;
             return nullptr;
         }
-        
+
         task_index_++;
         return task_handle;
     }

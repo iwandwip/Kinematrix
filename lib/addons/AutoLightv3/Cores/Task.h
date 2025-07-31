@@ -1,10 +1,3 @@
-/*
- *  Task.h
- *
- *  Kastara Electronics Embedded Development
- *  Created on: 2023. 4. 3
- */
-
 #pragma once
 #ifndef TASK_H
 #define TASK_H
@@ -25,7 +18,7 @@ namespace AutoLight {
         ~TaskHandle();
 
         void initialize(void (*_callback)() = nullptr);
-        TaskHandle_t* createTask(uint32_t _stack_depth, void (*_task_callback)(void *pvParameter), const char *_task_name = "task");
+        TaskHandle_t *createTask(uint32_t _stack_depth, void (*_task_callback)(void *pvParameter), const char *_task_name = "task");
         void deleteTask(TaskHandle_t _task);
         void delay(uint32_t _time = 20);
 
@@ -43,4 +36,4 @@ namespace AutoLight {
 
 #endif
 
-#endif // TASK_H
+#endif

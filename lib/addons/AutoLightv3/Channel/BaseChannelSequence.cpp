@@ -8,7 +8,7 @@
 #include "BaseChannel.h"
 
 namespace AutoLight {
-    void BaseChannel::taskSequence2() {
+    void BaseChannel::taskSequence2BlinkAll() {
 //        Serial.println("BaseChannel::taskSequence1() start");
         // blink ////////////////////////////////////////
         {
@@ -104,7 +104,7 @@ namespace AutoLight {
 //        Serial.println("BaseChannel::taskSequence1() end");
     }
 
-    void BaseChannel::taskSequence3() {
+    void BaseChannel::taskSequence3FillTwoPoint() {
 //        Serial.println("BaseChannel::taskSequence2() start");
         // fill 2 point ////////////////////////////////////////
         {
@@ -145,7 +145,7 @@ namespace AutoLight {
 //        Serial.println("BaseChannel::taskSequence2() end");
     }
 
-    void BaseChannel::taskSequence4() {
+    void BaseChannel::taskSequence4FillRight() {
 //        Serial.println("BaseChannel::taskSequence3() start");
         // fill right ////////////////////////////////////////
         {
@@ -167,7 +167,7 @@ namespace AutoLight {
 //        Serial.println("BaseChannel::taskSequence3() end");
     }
 
-    void BaseChannel::taskSequence5() {
+    void BaseChannel::taskSequence5FillIn() {
 //        Serial.println("BaseChannel::taskSequence4() start");
         // fill in ////////////////////////////////////////
         {
@@ -208,7 +208,7 @@ namespace AutoLight {
 //        Serial.println("BaseChannel::taskSequence4() end");
     }
 
-    void BaseChannel::taskSequence6() {
+    void BaseChannel::taskSequence6BlinkOneByOne() {
 //        Serial.println("BaseChannel::taskSequence5() start");
         // blink 1 by 1 ////////////////////////////////////////
 //        {
@@ -319,7 +319,7 @@ namespace AutoLight {
         }
     }
 
-    void BaseChannel::taskSequence7() {
+    void BaseChannel::taskSequence7BlinkTwoFill() {
 //        Serial.println("BaseChannel::taskSequence6() start");
         // blink 2 fill ////////////////////////////////////////
         {
@@ -343,7 +343,7 @@ namespace AutoLight {
 //        Serial.println("BaseChannel::taskSequence6() end");
     }
 
-    void BaseChannel::taskSequence8() {
+    void BaseChannel::taskSequence8SnakeAndReverse() {
 //        Serial.println("BaseChannel::taskSequence7() start");
         // snake and snake reverse ////////////////////////////////////////
         {
@@ -372,7 +372,7 @@ namespace AutoLight {
 //        Serial.println("BaseChannel::taskSequence7() end");
     }
 
-    void BaseChannel::taskSequence9() {
+    void BaseChannel::taskSequence9Random() {
 //        Serial.println("BaseChannel::taskSequence8() start");
         auto setRandomLed = [&](int value) -> void {
             int data[config_data_ptr_->header.pin_size_];
@@ -398,10 +398,10 @@ namespace AutoLight {
 //        Serial.println("BaseChannel::taskSequence8() end");
     }
 
-    void BaseChannel::taskSequence10() {
+    void BaseChannel::taskSequence10Wave() {
 //        Serial.println("BaseChannel::taskSequence9() start");
         if ((config_data_ptr_->header.pin_size_ / 2) % 2 == 1) {
-            taskSequence7();
+            taskSequence7BlinkTwoFill();
         } else {
             auto setWaveLed = [&](int value) -> void {
                 for (int i = 0; i < (config_data_ptr_->header.pin_size_ / 2); ++i) {
@@ -443,7 +443,7 @@ namespace AutoLight {
 
     }
 
-    void BaseChannel::taskSequence11() {
+    void BaseChannel::taskSequence11Complex() {
         for (int j = 0; j < 2; j++) {
             for (int i = 0; i < config_data_ptr_->header.pin_size_ / 2 + 2; i++) {
                 if (i < config_data_ptr_->header.pin_size_ / 2) set(config_data_ptr_->header.pin_ptr_[i], HIGH);
@@ -563,7 +563,7 @@ namespace AutoLight {
         }
     }
 
-    void BaseChannel::taskSequence12() {
+    void BaseChannel::taskSequence12PatternMatrix() {
         if (config_data_ptr_->header.pin_size_ < 8) return;
         const int patternMode[9][8] = {
                 {3, 4, 4, 1, 1, 4, 4, 3},  // For size 24
@@ -957,7 +957,7 @@ namespace AutoLight {
         }
     }
 
-    void BaseChannel::taskSequence13() {
+    void BaseChannel::taskSequence13BlinkPattern() {
         if (config_data_ptr_->header.pin_size_ < 8) return;
 
         const int patternMode[9][8] = {
@@ -1308,7 +1308,7 @@ namespace AutoLight {
         }
     }
 
-    void BaseChannel::taskSequence14() {
+    void BaseChannel::taskSequence14AdvancedPattern() {
         const int size = config_data_ptr_->header.pin_size_;
         if (config_data_ptr_->header.pin_size_ < 8) return;
 
@@ -1723,19 +1723,19 @@ namespace AutoLight {
         }
     }
 
-    void BaseChannel::taskSequence15() {
-        taskSequence2();
-        taskSequence3();
-        taskSequence4();
-        taskSequence5();
-        taskSequence6();
-        taskSequence7();
-        taskSequence8();
-        taskSequence9();
-        taskSequence10();
-        taskSequence11();
-        taskSequence12();
-        taskSequence13();
-        taskSequence14();
+    void BaseChannel::taskSequence15AllSequences() {
+        taskSequence2BlinkAll();
+        taskSequence3FillTwoPoint();
+        taskSequence4FillRight();
+        taskSequence5FillIn();
+        taskSequence6BlinkOneByOne();
+        taskSequence7BlinkTwoFill();
+        taskSequence8SnakeAndReverse();
+        taskSequence9Random();
+        taskSequence10Wave();
+        taskSequence11Complex();
+        taskSequence12PatternMatrix();
+        taskSequence13BlinkPattern();
+        taskSequence14AdvancedPattern();
     }
 }

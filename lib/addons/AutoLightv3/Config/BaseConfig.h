@@ -1,10 +1,3 @@
-/*
- *  BaseConfig.h
- *
- *  Kastara Electronics Embedded Development
- *  Created on: 2023. 4. 3
- */
-
 #pragma once
 #ifndef BASE_CONFIG_H
 #define BASE_CONFIG_H
@@ -12,6 +5,7 @@
 #include "Arduino.h"
 #include "ConfigData.h"
 #include "Wire.h"
+#include "../Common/VirtualPCF.h"
 
 namespace AutoLight {
     using namespace Constants;
@@ -55,8 +49,8 @@ namespace AutoLight {
         void setDynamicConfig(uint8_t total_channels, uint8_t num_pcf);
         void setDynamicConfig(uint8_t total_channels, uint8_t num_pcf, distribution_strategy_t strategy);
         void setDynamicDistribution(uint8_t total_channels, uint8_t num_pcf, ...);
-        void setDynamicWithAddresses(uint8_t total_channels, uint8_t num_pcf, uint8_t* addresses, uint8_t* channels_per_pcf);
-        void setCustomDistribution(PCFDistribution* pcf_array, uint8_t pcf_count);
+        void setDynamicWithAddresses(uint8_t total_channels, uint8_t num_pcf, uint8_t *addresses, uint8_t *channels_per_pcf);
+        void setCustomDistribution(PCFDistribution *pcf_array, uint8_t pcf_count);
 
         ConfigData *getConfigData();
         BaseConfig *getConfig();
@@ -64,7 +58,7 @@ namespace AutoLight {
 
         uint8_t *getPinList();
         uint8_t getOptimalPCFCount(uint8_t channels);
-        DynamicConfigData* getCurrentDistribution();
+        DynamicConfigData *getCurrentDistribution();
         bool validateDistribution();
         void printDistribution();
 
@@ -94,4 +88,4 @@ namespace AutoLight {
 }
 
 
-#endif // BASE_CONFIG_H
+#endif

@@ -1,10 +1,3 @@
-/*
- *  Index.h
- *
- *  Kastara Electronics Embedded Development
- *  Created on: 2023. 4. 3
- */
-
 #pragma once
 #ifndef INDEX_H
 #define INDEX_H
@@ -19,6 +12,8 @@
 #include "Channel/Indicator.h"
 #include "Channel/Indicator.cpp"
 #include "Common/Constants.h"
+#include "Common/VirtualPCF.h"
+#include "Common/VirtualPCF.cpp"
 #include "Config/ConfigData.h"
 #include "Config/BaseConfig.h"
 #include "Config/BaseConfig.cpp"
@@ -28,7 +23,9 @@
 #include "Web/WebManager.cpp"
 #include "ButtonInterrupt.h"
 #include "ButtonInterrupt.cpp"
+#include "Visualization/LEDMatrixVisualizer.h"
+#include "Visualization/LEDMatrixVisualizer.cpp"
 
 #endif
 
-#endif // INDEX_H
+#endif

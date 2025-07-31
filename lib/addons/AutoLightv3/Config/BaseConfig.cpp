@@ -1,11 +1,3 @@
-/*
- *  BaseConfig.cpp
- *
- *  Kastara Electronics Embedded Development
- *  Created on: 2023. 4. 3
- */
-
-// BaseConfig.cpp - Implementation file
 #include "BaseConfig.h"
 
 namespace AutoLight {
@@ -27,7 +19,6 @@ namespace AutoLight {
                       .version_ = {},
                       .channel_ = {}
               }} {
-        // initialize version and channel table
         for (int i = 0; i < Constants::MAXNUM_VERSION; ++i) {
             config_data_.table.version_[i] = (Constants::MAXNUM_VERSION - 1) - i;
             config_data_.table.channel_[i] = (i + 1) * 2;
@@ -41,12 +32,10 @@ namespace AutoLight {
     }
 
     BaseConfig::~BaseConfig() {
-        // Clean up allocated memory safely
         cleanup();
     }
 
     void BaseConfig::initialize() {
-        // scanning I2C
         if (is_unit_test_) {
             i2c_scanner_.beginTransmission();
             i2c_scanner_.scanI2CAddress();
@@ -64,16 +53,15 @@ namespace AutoLight {
                 break;
             case I2C_CONFIG:
                 config_data_.header.pin_size_ = config_data_.header.channel_;
-                
-                // Clean up existing allocation before creating new one
+
                 if (config_data_.header.pin_ptr_) {
                     delete[] config_data_.header.pin_ptr_;
                     config_data_.header.pin_ptr_ = nullptr;
                 }
-                
+
                 config_data_.header.pin_ptr_ = new uint8_t[config_data_.header.pin_size_];
                 resources_allocated_ = true;
-                
+
                 for (uint8_t i = 0; i < config_data_.header.pin_size_; ++i) {
                     if (is_custom_sequence_) config_data_.header.pin_ptr_[i] = config_data_.header.pin_sequence_[i] - 1;
                     else config_data_.header.pin_ptr_[i] = i;
@@ -88,14 +76,13 @@ namespace AutoLight {
         }
         int read_value = 0;
         for (int i = 0; i < Constants::MAXNUM_CHANNEL_PIN; i++) {
-            read_value = (read_value << 1) | digitalRead(config_data_.table.address_pin_[i]); // int read_value = (value_pin[0] << 4) | (value_pin[1] << 3) | (value_pin[2] << 2) | (value_pin[3] << 1) | value_pin[4];
+            read_value = (read_value << 1) | digitalRead(config_data_.table.address_pin_[i]);
         }
         for (int i = 0; i < Constants::MAXNUM_VERSION; i++) {
             if (read_value == config_data_.table.version_[i]) {
                 config_data_.header.channel_ = config_data_.table.channel_[i];
             }
         }
-        // calculate the io size
         config_data_.header.io_size_ = 0;
         for (int i = 0; i <= 64; i += 8) {
             if (config_data_.header.channel_ > i && !(config_data_.header.channel_ % 2)) {
@@ -118,7 +105,6 @@ namespace AutoLight {
     void BaseConfig::setChannel(uint8_t _channel) {
         config_data_.header.channel_ = _channel;
 
-        // calculate the io size
         config_data_.header.io_size_ = 0;
         for (int i = 0; i <= 64; i += 8) {
             if (config_data_.header.channel_ > i && !(config_data_.header.channel_ % 2)) {
@@ -147,16 +133,15 @@ namespace AutoLight {
         va_list args;
         va_start(args, _ch_sequence_size);
         is_custom_sequence_ = true;
-        
-        // Clean up existing allocation before creating new one
+
         if (config_data_.header.pin_sequence_) {
             delete[] config_data_.header.pin_sequence_;
             config_data_.header.pin_sequence_ = nullptr;
         }
-        
+
         config_data_.header.pin_sequence_ = new uint8_t[_ch_sequence_size];
         resources_allocated_ = true;
-        
+
         for (int i = 0; i < _ch_sequence_size; i++) {
             config_data_.header.pin_sequence_[i] = static_cast<uint8_t>(va_arg(args, int));
         }
@@ -294,7 +279,7 @@ namespace AutoLight {
 
         generateDefaultAddresses(num_pcf);
 
-        switch(strategy) {
+        switch (strategy) {
             case DISTRIBUTE_BALANCED:
                 calculateBalancedDistribution(total_channels, num_pcf);
                 break;
@@ -336,7 +321,7 @@ namespace AutoLight {
         applyDynamicConfig();
     }
 
-    void BaseConfig::setDynamicWithAddresses(uint8_t total_channels, uint8_t num_pcf, uint8_t* addresses, uint8_t* channels_per_pcf) {
+    void BaseConfig::setDynamicWithAddresses(uint8_t total_channels, uint8_t num_pcf, uint8_t *addresses, uint8_t *channels_per_pcf) {
         dynamic_config_.total_channels = total_channels;
         dynamic_config_.pcf_count = num_pcf;
         dynamic_config_.strategy = DISTRIBUTE_CUSTOM;
@@ -355,7 +340,7 @@ namespace AutoLight {
         applyDynamicConfig();
     }
 
-    void BaseConfig::setCustomDistribution(PCFDistribution* pcf_array, uint8_t pcf_count) {
+    void BaseConfig::setCustomDistribution(PCFDistribution *pcf_array, uint8_t pcf_count) {
         dynamic_config_.pcf_count = pcf_count;
         dynamic_config_.strategy = DISTRIBUTE_CUSTOM;
         dynamic_config_.total_channels = 0;
@@ -380,7 +365,7 @@ namespace AutoLight {
         return (channels + 7) / 8;
     }
 
-    DynamicConfigData* BaseConfig::getCurrentDistribution() {
+    DynamicConfigData *BaseConfig::getCurrentDistribution() {
         return &dynamic_config_;
     }
 
@@ -398,13 +383,17 @@ namespace AutoLight {
 
     void BaseConfig::printDistribution() {
         Serial.println(F("=== Dynamic PCF Distribution ==="));
-        Serial.print(F("Total Channels: ")); Serial.println(dynamic_config_.total_channels);
-        Serial.print(F("Total PCFs: ")); Serial.println(dynamic_config_.pcf_count);
+        Serial.print(F("Total Channels: "));
+        Serial.println(dynamic_config_.total_channels);
+        Serial.print(F("Total PCFs: "));
+        Serial.println(dynamic_config_.pcf_count);
 
         for (int i = 0; i < dynamic_config_.pcf_count; i++) {
             if (dynamic_config_.pcf_list[i].is_active) {
-                Serial.print(F("PCF")); Serial.print(i+1);
-                Serial.print(F(" (0x")); Serial.print(dynamic_config_.pcf_list[i].address, HEX);
+                Serial.print(F("PCF"));
+                Serial.print(i + 1);
+                Serial.print(F(" (0x"));
+                Serial.print(dynamic_config_.pcf_list[i].address, HEX);
                 Serial.print(F("): Channels "));
                 Serial.print(dynamic_config_.pcf_list[i].start_channel);
                 Serial.print(F("-"));
@@ -422,7 +411,7 @@ namespace AutoLight {
         uint8_t base_channels = total_channels / num_pcf;
         uint8_t extra_channels = total_channels % num_pcf;
 
-        uint8_t current_channel = 0;  // Use 0-based indexing for consistency
+        uint8_t current_channel = 0;
         for (int i = 0; i < num_pcf; i++) {
             dynamic_config_.pcf_list[i].used_pins = base_channels + (i < extra_channels ? 1 : 0);
             dynamic_config_.pcf_list[i].start_channel = current_channel;
@@ -434,14 +423,11 @@ namespace AutoLight {
     }
 
     void BaseConfig::calculateOptimizedDistribution(uint8_t total_channels, uint8_t num_pcf) {
-        // Optimized: Use minimum number of PCFs needed
-        uint8_t needed_pcfs = (total_channels + 7) / 8;  // Ceiling division
-        needed_pcfs = (needed_pcfs > num_pcf) ? num_pcf : needed_pcfs;          // Don't exceed available
-        
-        // Distribute channels across minimum needed PCFs
+        uint8_t needed_pcfs = (total_channels + 7) / 8;
+        needed_pcfs = (needed_pcfs > num_pcf) ? num_pcf : needed_pcfs;
+
         calculateBalancedDistribution(total_channels, needed_pcfs);
-        
-        // Mark unused PCFs as inactive
+
         for (int i = needed_pcfs; i < num_pcf; i++) {
             dynamic_config_.pcf_list[i].is_active = false;
             dynamic_config_.pcf_list[i].used_pins = 0;
@@ -449,9 +435,8 @@ namespace AutoLight {
     }
 
     void BaseConfig::calculateSequentialDistribution(uint8_t total_channels, uint8_t num_pcf) {
-        // Sequential: Fill PCFs one by one with 8 channels each
         uint8_t remaining = total_channels;
-        uint8_t current_channel = 0;  // Use 0-based indexing for consistency
+        uint8_t current_channel = 0;
 
         for (int i = 0; i < num_pcf; i++) {
             if (remaining > 0) {
@@ -465,7 +450,6 @@ namespace AutoLight {
                 current_channel += channels_for_this_pcf;
                 remaining -= channels_for_this_pcf;
             } else {
-                // Mark unused PCFs as inactive
                 dynamic_config_.pcf_list[i].is_active = false;
                 dynamic_config_.pcf_list[i].used_pins = 0;
             }
@@ -485,7 +469,6 @@ namespace AutoLight {
         config_data_.header.channel_ = dynamic_config_.total_channels;
         config_data_.header.io_size_ = dynamic_config_.pcf_count;
 
-        // Clean up existing allocations
         if (config_data_.header.pin_ptr_) {
             delete[] config_data_.header.pin_ptr_;
             config_data_.header.pin_ptr_ = nullptr;
@@ -532,8 +515,8 @@ namespace AutoLight {
         Serial.println("| START SCANNING I2C");
         Serial.println("==============================");
 
-        Wire.begin();
-        Serial.println("| WIRE BEGIN");
+        VirtualPCFManager::begin();
+        Serial.println("| I2C BEGIN (Virtual PCF Support)");
     }
 
     void I2CScanner::scanI2CAddress() {
@@ -542,19 +525,16 @@ namespace AutoLight {
         Serial.println("| Scanning...");
         n_devices_ = 0;
         for (address = 1; address < Constants::MAXNUM_I2C_SLAVE_ADDRESS; address++) {
-            Wire.beginTransmission(address);
-            error = Wire.endTransmission();
+            VirtualPCFManager::beginTransmission(address);
+            error = VirtualPCFManager::endTransmission();
             if (error == 0) {
-                // Serial.print("| I2C device found at address [HEX] 0x");
-                // if (address < 16)
-                //     Serial.print("0");
-                // Serial.print(address, HEX);
-
-                // Serial.print("| [DEC] ");
-                // Serial.print(address);
-                // Serial.println("  !");
-                n_address_[n_devices_] = address;
-                n_devices_++;
+                if (n_devices_ < 8) {
+                    n_address_[n_devices_] = address;
+                    n_devices_++;
+                } else {
+                    Serial.println("| WARNING: More than 8 I2C devices found, ignoring extras");
+                    break;
+                }
             } else if (error == 4) {
                 Serial.print("| Unknown error at address 0x");
                 if (address < 16)
@@ -602,18 +582,16 @@ namespace AutoLight {
     }
 
     bool BaseConfig::validateConfiguration() {
-        // Check basic constraints
         if (dynamic_config_.total_channels == 0) {
             Serial.println("ERROR: Zero channels configured");
             return false;
         }
-        
+
         if (dynamic_config_.pcf_count == 0) {
             Serial.println("ERROR: No PCFs configured");
             return false;
         }
-        
-        // Check I2C address ranges
+
         for (int i = 0; i < dynamic_config_.pcf_count; i++) {
             if (dynamic_config_.pcf_list[i].is_active) {
                 uint8_t addr = dynamic_config_.pcf_list[i].address;
@@ -623,8 +601,7 @@ namespace AutoLight {
                 }
             }
         }
-        
-        // Check channel mapping
+
         return validateDistribution();
     }
 }

@@ -1,10 +1,3 @@
-/*
- *  ButtonInterrupt.h
- *
- *  Kastara Electronics Embedded Development
- *  Created on: 2023. 4. 3
- */
-
 #ifndef BUTTON_INTERRUPT_H
 #define BUTTON_INTERRUPT_H
 
@@ -48,4 +41,4 @@ namespace AutoLight {
 }
 
 
-#endif // BUTTON_INTERRUPT_H
+#endif
