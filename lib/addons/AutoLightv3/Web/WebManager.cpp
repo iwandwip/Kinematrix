@@ -7,8 +7,15 @@
  */
 
 // WebManager.cpp - Implementation file
-// Included by WebManager.h - do not include WebManager.h here to avoid circular dependency
+#include "WebManager.h"
 #include "../Config/ConfigData.h"
+#include "../Channel/BaseChannel.h"
+#include "../Config/BaseConfig.h"
+
+#if defined(ESP32)
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#endif
 
 namespace AutoLight {
 

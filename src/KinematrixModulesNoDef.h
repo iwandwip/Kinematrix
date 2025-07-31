@@ -46,6 +46,10 @@
 #include "../lib/modules/communication/wired/serial/swap-serial.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_SERIAL_CERIA
+#include "../lib/modules/communication/wired/serial/ceria-serial.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_SERIAL_SPI
 #include "../lib/modules/communication/wired/spi/spi-serial.h"
 #endif
@@ -98,6 +102,14 @@
 
 #ifdef ENABLE_MODULE_NODEF_PID_CONTROLLER
 #include "../lib/modules/control/PIDController.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_STANDARD_SCALER
+#include "../lib/modules/control/StandardScaler.h"
+#endif
+
+#ifdef ENABLE_MODULE_NODEF_TRAIN_TEST_SPLIT
+#include "../lib/modules/control/TrainTestSplit.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_SERIAL_DEBUGGER

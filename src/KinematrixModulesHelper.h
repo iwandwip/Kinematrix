@@ -57,6 +57,11 @@
 #include "../lib/modules/communication/wired/serial/swap-serial.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_HELPER_SERIAL_CERIA
+#include "../lib/modules/communication/wired/serial/ceria-serial.h"
+#include "../lib/modules/communication/wired/serial/ceria-serial.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_HELPER_SERIAL_SPI
 #include "../lib/modules/communication/wired/spi/spi-serial.h"
 #include "../lib/modules/communication/wired/spi/spi-serial.cpp"
@@ -124,6 +129,16 @@
 #ifdef ENABLE_MODULE_HELPER_PID_CONTROLLER
 #include "../lib/modules/control/PIDController.h"
 #include "../lib/modules/control/PIDController.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_HELPER_STANDARD_SCALER
+#include "../lib/modules/control/StandardScaler.h"
+#include "../lib/modules/control/StandardScaler.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_HELPER_TRAIN_TEST_SPLIT
+#include "../lib/modules/control/TrainTestSplit.h"
+#include "../lib/modules/control/TrainTestSplit.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_SERIAL_DEBUGGER
@@ -319,10 +334,12 @@
 
 #ifdef ENABLE_MODULE_HELPER_DYNAMIC_TYPE_MOVING_AVERAGE_FILTER
 #include "../lib/modules/filter/DynamicTypeMovingAverageFilter.h"
+#include "../lib/modules/filter/DynamicTypeMovingAverageFilter.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_DYNAMIC_TYPE_EXPONENTIAL_MOVING_AVERAGE_FILTER
 #include "../lib/modules/filter/DynamicTypeExponentialMovingAverageFilter.h"
+#include "../lib/modules/filter/DynamicTypeExponentialMovingAverageFilter.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_LOW_PASS_FILTER
@@ -337,6 +354,7 @@
 
 #ifdef ENABLE_MODULE_HELPER_DYNAMIC_TYPE_HIGH_PASS_FILTER
 #include "../lib/modules/filter/DynamicTypeHighPassFilter.h"
+#include "../lib/modules/filter/DynamicTypeHighPassFilter.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_MEDIAN_FILTER
@@ -346,6 +364,7 @@
 
 #ifdef ENABLE_MODULE_HELPER_DYNAMIC_TYPE_MEDIAN_FILTER
 #include "../lib/modules/filter/DynamicTypeMedianFilter.h"
+#include "../lib/modules/filter/DynamicTypeMedianFilter.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_KALMAN_FILTER
@@ -360,6 +379,7 @@
 
 #ifdef ENABLE_MODULE_HELPER_DYNAMIC_TYPE_COMPLEMENTARY_FILTER
 #include "../lib/modules/filter/DynamicTypeComplementaryFilter.h"
+#include "../lib/modules/filter/DynamicTypeComplementaryFilter.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_BAND_STOP_FILTER
@@ -369,6 +389,7 @@
 
 #ifdef ENABLE_MODULE_HELPER_DYNAMIC_TYPE_BAND_STOP_FILTER
 #include "../lib/modules/filter/DynamicTypeBandStopFilter.h"
+#include "../lib/modules/filter/DynamicTypeBandStopFilter.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_HELPER_DIGITAL_INPUT

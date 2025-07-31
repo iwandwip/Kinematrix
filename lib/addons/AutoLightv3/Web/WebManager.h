@@ -6,6 +6,7 @@
  *  Created on: 2024. 7. 30
  */
 
+#pragma once
 #ifndef WEB_MANAGER_H
 #define WEB_MANAGER_H
 
@@ -20,12 +21,14 @@
 #include "SD.h"
 #include "SPI.h"
 #include "Preferences.h"
+#include "../Config/ConfigData.h"  // For Credentials struct
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 namespace AutoLight {
     
     class BaseChannel; // Forward declaration
     class BaseConfig;  // Forward declaration
-    struct Credentials; // Forward declaration
 
 
     class WebManager {
@@ -75,8 +78,6 @@ namespace AutoLight {
     };
 }
 
-// Include implementation
-#include "WebManager.cpp"
 
 #endif
 

@@ -6,7 +6,7 @@
  */
 
 // Indicator.cpp - Implementation file
-// Included by Indicator.h - do not include Indicator.h here to avoid circular dependency
+#include "Indicator.h"
 
 #if defined(ESP32)
 

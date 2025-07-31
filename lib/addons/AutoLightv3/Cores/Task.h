@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#pragma once
 #ifndef TASK_H
 #define TASK_H
 
@@ -12,6 +13,8 @@
 
 #include "Arduino.h"
 #include "../Common/Constants.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 namespace AutoLight {
     using namespace Constants;
@@ -37,8 +40,6 @@ namespace AutoLight {
     };
 }
 
-// Include implementation
-#include "Task.cpp"
 
 #endif
 

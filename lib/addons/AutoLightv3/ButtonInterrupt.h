@@ -47,7 +47,5 @@ namespace AutoLight {
     };
 }
 
-// Include implementation
-#include "ButtonInterrupt.cpp"
 
 #endif // BUTTON_INTERRUPT_H

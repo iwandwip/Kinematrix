@@ -5,6 +5,7 @@
  *  Created on: 2023. 4. 3
  */
 
+#pragma once
 #ifndef BASE_CONFIG_H
 #define BASE_CONFIG_H
 
@@ -92,7 +93,5 @@ namespace AutoLight {
     };
 }
 
-// Include implementation
-#include "BaseConfig.cpp"
 
 #endif // BASE_CONFIG_H

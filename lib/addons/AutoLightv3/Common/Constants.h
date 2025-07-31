@@ -6,6 +6,7 @@
  *  Professional constants organization - single source of truth
  */
 
+#pragma once
 #ifndef AUTOLIGHT_CONSTANTS_H
 #define AUTOLIGHT_CONSTANTS_H
 

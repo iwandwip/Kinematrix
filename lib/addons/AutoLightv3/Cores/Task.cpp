@@ -6,9 +6,12 @@
  */
 
 // Task.cpp - Implementation file
-// Included by Task.h - do not include Task.h here to avoid circular dependency
+#include "Task.h"
 
 #if defined(ESP32)
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 namespace AutoLight {
     TaskHandle::TaskHandle() {

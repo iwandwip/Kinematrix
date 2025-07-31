@@ -187,8 +187,4 @@ namespace AutoLight {
     };
 }
 
-// Include implementations
-#include "BaseChannel.cpp"
-#include "BaseChannelSequence.cpp"
-
 #endif // BASE_CHANNEL_H

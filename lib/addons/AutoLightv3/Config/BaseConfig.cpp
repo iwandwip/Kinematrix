@@ -6,7 +6,7 @@
  */
 
 // BaseConfig.cpp - Implementation file
-// Included by BaseConfig.h - do not include BaseConfig.h here to avoid circular dependency
+#include "BaseConfig.h"
 
 namespace AutoLight {
     BaseConfig::BaseConfig(bool _enable_unit_test)

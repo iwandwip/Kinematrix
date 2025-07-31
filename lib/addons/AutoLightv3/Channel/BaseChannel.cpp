@@ -6,8 +6,7 @@
  *  Modified for 4 button support
  */
 
-// BaseChannel.cpp - Implementation file
-// Included by BaseChannel.h - do not include BaseChannel.h here to avoid circular dependency
+#include "BaseChannel.h"
 #include "../Web/WebManager.h"
 
 namespace AutoLight {

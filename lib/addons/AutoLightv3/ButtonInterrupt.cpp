@@ -7,7 +7,7 @@
  */
 
 // ButtonInterrupt.cpp - Implementation file
-// Included by ButtonInterrupt.h - do not include ButtonInterrupt.h here to avoid circular dependency
+#include "ButtonInterrupt.h"
 
 namespace AutoLight {
     ButtonInterrupt::ButtonInterrupt(bool _enable_unit_test)
