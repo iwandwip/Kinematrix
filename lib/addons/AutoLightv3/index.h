@@ -25,6 +25,8 @@
 #include "ButtonInterrupt.cpp"
 #include "Visualization/LEDMatrixVisualizer.h"
 #include "Visualization/LEDMatrixVisualizer.cpp"
+#include "SerialCommander.h"
+#include "SerialCommander.cpp"
 
 #endif
 

@@ -14,6 +14,10 @@ namespace AutoLight {
         for (int i = 0; i < 4; i++) {
             button_config_.custom_handlers[i] = nullptr;
         }
+        
+        credential_mode_ = READ_WRITE;
+        credential_ssid_ = "";
+        credential_password_ = "";
 
         initializeDefaultMapping();
 
@@ -240,8 +244,11 @@ namespace AutoLight {
 
         if (!channel_data_.is_on_) {
             uint8_t first_api_index = 0;
-            if (sequence_mapper_.active_sequences[0] == 0 && sequence_mapper_.total_active > 1) {
-                first_api_index = 1;
+            for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
+                if (sequence_mapper_.active_sequences[i] != 0) {
+                    first_api_index = i;
+                    break;
+                }
             }
             changeModeApp(first_api_index);
         } else {
@@ -253,19 +260,9 @@ namespace AutoLight {
 
             uint8_t next_api_index = current_api_index + 1;
             if (next_api_index >= sequence_mapper_.total_active) {
-                for (uint8_t i = 0; i < sequence_mapper_.total_active; i++) {
-                    if (sequence_mapper_.active_sequences[i] == 0) {
-                        changeModeApp(i);
-                        return;
-                    }
-                }
-                channel_data_.is_on_ = false;
-                channel_data_.sequence_index_ = 0;
-                channel_data_.is_mode_changed_ = true;
-                temp_mode_ = total_mode_[0];
-            } else {
-                changeModeApp(next_api_index);
+                next_api_index = 0;
             }
+            changeModeApp(next_api_index);
         }
     }
 
@@ -378,15 +375,8 @@ namespace AutoLight {
         channel_data_.is_mode_changed_apps_ = true;
         channel_data_.sequence_index_apps_ = api_index;
 
-        if (actual_sequence == 0) {
-            channel_data_.is_on_ = false;
-            if (channel_data_.sequence_index_ > 0) {
-                channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
-            }
-        } else {
-            channel_data_.is_on_ = true;
-            channel_data_.last_active_sequence_ = actual_sequence;
-        }
+        channel_data_.is_on_ = true;
+        channel_data_.last_active_sequence_ = actual_sequence;
 
         Serial.printf("[MAPPING] API index %d \u2192 Actual sequence %d\n", api_index, actual_sequence);
     }
@@ -947,6 +937,12 @@ namespace AutoLight {
         return result;
     }
 
+    void BaseChannel::setCredentialMode(CredentialMode mode, const String& ssid, const String& password) {
+        credential_mode_ = mode;
+        credential_ssid_ = ssid;
+        credential_password_ = password;
+    }
+
     void BaseChannel::enableWebServer(const char *device_name, bool auto_task) {
         if (web_manager_ == nullptr) {
             BaseConfig *config = nullptr;
@@ -960,6 +956,9 @@ namespace AutoLight {
             if (config != nullptr) {
                 web_manager_->setConfigOwnership(true);
             }
+            
+            web_manager_->setCredentialConfig(credential_mode_, credential_ssid_, credential_password_);
+            
             web_manager_->enableWebServer(device_name, auto_task);
         }
     }

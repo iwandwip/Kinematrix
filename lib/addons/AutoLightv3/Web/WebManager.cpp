@@ -13,6 +13,9 @@ namespace AutoLight {
     WebManager::WebManager(BaseChannel *led, BaseConfig *config)
             : led_(led), config_(config), owns_config_(false), server_(80), api_(8000),
               auto_task_(true), is_running_(false), web_task_handle_(NULL) {
+        credential_mode_ = READ_WRITE;
+        credential_ssid_ = "";
+        credential_password_ = "";
     }
 
     WebManager::~WebManager() {
@@ -68,8 +71,14 @@ namespace AutoLight {
         }
     }
 
+    void WebManager::setCredentialConfig(CredentialMode mode, const String& ssid, const String& password) {
+        credential_mode_ = mode;
+        credential_ssid_ = ssid;
+        credential_password_ = password;
+    }
+
     void WebManager::initializeServers() {
-        initCredentials();
+        initCredentials(credential_mode_, credential_ssid_, credential_password_);
         initSDCard();
         initWiFi();
         setupRoutes();
@@ -96,14 +105,27 @@ namespace AutoLight {
         Serial.println("==============================");
     }
 
-    void WebManager::initCredentials() {
-        auto writeCredentials = [this]() -> void {
+    void WebManager::initCredentials(CredentialMode mode, const String& ssid, const String& password) {
+        auto writeCredentials = [this](const String& override_ssid = "", const String& override_password = "") -> void {
             Serial.println("==============================");
             Serial.println("| [WRITE] credentials");
             preferences_.begin("credentials", false);
             preferences_.putString("serial", device_name_);
-            preferences_.putString("ssid", "SSID-" + device_name_);
-            preferences_.putString("password", "");
+            
+            if (!override_ssid.isEmpty()) {
+                preferences_.putString("ssid", override_ssid);
+                Serial.println("| Using override SSID: " + override_ssid);
+            } else {
+                preferences_.putString("ssid", "SSID-" + device_name_);
+            }
+            
+            if (!override_password.isEmpty()) {
+                preferences_.putString("password", override_password);
+                Serial.println("| Using override password");
+            } else {
+                preferences_.putString("password", "");
+            }
+            
             preferences_.end();
         };
 
@@ -126,8 +148,50 @@ namespace AutoLight {
             Serial.println(credentials_.serial);
         };
 
-        writeCredentials();
-        readCredentials();
+        auto overrideCredentials = [this](const String& override_ssid, const String& override_password) -> void {
+            Serial.println("==============================");
+            Serial.println("| [OVERRIDE] credentials");
+            credentials_.serial = device_name_;
+            credentials_.ssid = override_ssid.isEmpty() ? "SSID-" + device_name_ : override_ssid;
+            credentials_.password = override_password;
+            
+            Serial.print("| override.ssid                : ");
+            Serial.println(credentials_.ssid);
+            Serial.print("| override.password            : ");
+            Serial.println(credentials_.password);
+            Serial.print("| override.serial              : ");
+            Serial.println(credentials_.serial);
+            Serial.println("==============================");
+        };
+
+        switch (mode) {
+            case READ_ONLY:
+                Serial.println("| MODE: READ_ONLY");
+                readCredentials();
+                break;
+                
+            case WRITE_ONLY:
+                Serial.println("| MODE: WRITE_ONLY");
+                writeCredentials(ssid, password);
+                break;
+                
+            case READ_WRITE:
+                Serial.println("| MODE: READ_WRITE");
+                writeCredentials(ssid, password);
+                readCredentials();
+                break;
+                
+            case OVERRIDE:
+                Serial.println("| MODE: OVERRIDE");
+                overrideCredentials(ssid, password);
+                break;
+                
+            default:
+                Serial.println("| MODE: DEFAULT (READ_WRITE)");
+                writeCredentials();
+                readCredentials();
+                break;
+        }
     }
 
     void WebManager::initWiFi() {

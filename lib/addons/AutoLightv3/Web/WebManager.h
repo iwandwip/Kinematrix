@@ -23,7 +23,6 @@ namespace AutoLight {
 
     class BaseConfig;
 
-
     class WebManager {
     public:
         WebManager(BaseChannel *led, BaseConfig *config);
@@ -38,7 +37,10 @@ namespace AutoLight {
 
         void initWiFi();
         void initSDCard();
-        void initCredentials();
+        void setCredentialConfig(CredentialMode mode, const String& ssid = "", const String& password = "");
+        void initCredentials(CredentialMode mode = READ_WRITE, 
+                            const String& ssid = "", 
+                            const String& password = "");
         void setupRoutes();
 
         bool isRunning() const { return is_running_; }
@@ -61,6 +63,10 @@ namespace AutoLight {
         bool auto_task_;
         bool is_running_;
         TaskHandle_t web_task_handle_;
+        
+        CredentialMode credential_mode_;
+        String credential_ssid_;
+        String credential_password_;
 
         void initializeServers();
         void setDefaultHeaders();
