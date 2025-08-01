@@ -10,6 +10,8 @@ SerialCommander::SerialCommander() :
     strcpy(ap_config_.ssid, "");
     strcpy(ap_config_.password, "");
     ap_config_.is_loaded_from_preferences = false;
+    current_mode_ = SERIAL_READ_ONLY;
+    activation_timeout_ = 0;
 }
 
 void SerialCommander::init(BaseChannel* led, BaseConfig* config, LEDMatrixVisualizer* viz, ButtonInterrupt* button) {
@@ -75,6 +77,8 @@ void SerialCommander::startAccessPoint() {
 }
 
 void SerialCommander::process() {
+    checkTimeout();
+    
     if (!Serial.available()) return;
     
     String input = Serial.readStringUntil('\n');
@@ -86,13 +90,30 @@ void SerialCommander::process() {
     String cmd = (space > 0) ? input.substring(0, space) : input;
     String args = (space > 0) ? input.substring(space + 1) : "";
     
-    if (cmd == "wifi") wifi(args);
-    else if (cmd == "led") led_control(args);
-    else if (cmd == "seq") sequence(args);
-    else if (cmd == "pcf") pcf_manage(args);
-    else if (cmd == "viz") visualize(args);
-    else if (cmd == "btn") button(args);
+    if (cmd == "activate") activate(args);
+    else if (cmd == "deactivate") deactivate(args);
     else if (cmd == "help") help(args);
+    else if (cmd == "wifi") {
+        if (isCommandAllowed("wifi")) wifi(args);
+    }
+    else if (cmd == "led") {
+        if (isCommandAllowed("led")) led_control(args);
+    }
+    else if (cmd == "seq") {
+        if (isCommandAllowed("seq")) sequence(args);
+    }
+    else if (cmd == "pcf") {
+        if (isCommandAllowed("pcf")) pcf_manage(args);
+    }
+    else if (cmd == "viz") {
+        if (isCommandAllowed("viz")) visualize(args);
+    }
+    else if (cmd == "btn") {
+        if (isCommandAllowed("btn")) button(args);
+    }
+    else if (cmd == "serial") {
+        if (isCommandAllowed("serial")) serial_manage(args);
+    }
     else Serial.println("❌ Unknown command. Type 'help'");
 }
 
@@ -130,11 +151,7 @@ void SerialCommander::wifi(String args) {
             return;
         }
         
-        Preferences prefs;
-        prefs.begin("ap_config", false);
-        prefs.putString("ssid", new_ssid);
-        prefs.putString("password", new_pass);
-        prefs.end();
+        ConfigManager::getInstance().updateCredentials(new_ssid, new_pass);
         
         strcpy(ap_config_.ssid, new_ssid.c_str());
         strcpy(ap_config_.password, new_pass.c_str());
@@ -164,18 +181,16 @@ void SerialCommander::led_control(String args) {
     }
     
     if (args.startsWith("test all")) {
-        Serial.printf("🔧 Testing all %d channels...\n", led_->getTotalLEDs());
+        if (!isCommandAllowed("led test")) return;
         for (uint8_t i = 0; i < led_->getTotalLEDs(); i++) {
             testChannel(i);
         }
-        Serial.println("✅ All channels tested!");
     }
     else if (args.startsWith("test ")) {
+        if (!isCommandAllowed("led test")) return;
         uint8_t ch = args.substring(5).toInt();
         if (ch < led_->getTotalLEDs()) {
             testChannel(ch);
-        } else {
-            Serial.printf("❌ Invalid channel: %d (valid: 0-%d)\n", ch, led_->getTotalLEDs() - 1);
         }
     }
     else if (args.endsWith(" on")) {
@@ -374,55 +389,132 @@ void SerialCommander::button(String args) {
     }
 }
 
+void SerialCommander::serial_manage(String args) {
+    if (args.startsWith("set ")) {
+        String serial_input = args.substring(4);
+        String new_serial;
+        
+        int first_quote = serial_input.indexOf('"');
+        int second_quote = serial_input.indexOf('"', first_quote + 1);
+        
+        if (first_quote != -1 && second_quote != -1) {
+            new_serial = serial_input.substring(first_quote + 1, second_quote);
+        } else {
+            new_serial = serial_input;
+            new_serial.trim();
+        }
+        
+        if (new_serial.length() == 0) {
+            Serial.println("❌ Serial number cannot be empty");
+            return;
+        }
+        
+        if (new_serial.length() > 32) {
+            Serial.println("❌ Serial number too long (max 32 characters)");
+            return;
+        }
+        
+        ConfigManager::getInstance().updateSerial(new_serial);
+        Serial.printf("✓ Serial number updated: %s\n", new_serial.c_str());
+    }
+    else if (args == "" || args == "show") {
+        auto creds = ConfigManager::getInstance().getCredentials();
+        Serial.printf("Current serial number: %s\n", creds.serial.c_str());
+    }
+    else {
+        Serial.println("Usage: serial, serial set \"string\"");
+    }
+}
+
 void SerialCommander::help(String args) {
     Serial.println("🎛️  AutoLight V3 SerialCommander Help");
-    Serial.println("=====================================\n");
+    Serial.println("=====================================");
     
-    Serial.println("📶 WiFi AP Commands:");
-    Serial.println("  wifi                    - Show current AP status");
-    Serial.println("  wifi set \"ssid\" \"pass\" - Set new AP credentials");  
-    Serial.println("  wifi restart           - Restart AP with current settings");
-    Serial.println("  wifi reset             - Reset to default settings");
-    Serial.println("  wifi clients           - Show connected clients\n");
+    const char* mode_names[] = {"DISABLED", "READ_ONLY", "SAFE_CONTROL", "FULL_ACCESS"};
+    Serial.printf("Current Mode: %s\n", mode_names[current_mode_]);
+    if (current_mode_ > SERIAL_READ_ONLY && activation_timeout_ > 0) {
+        uint32_t remaining = (TIMEOUT_MS - (millis() - activation_timeout_)) / 1000;
+        Serial.printf("Auto-deactivate in: %d seconds\n", remaining);
+    }
     
-    Serial.println("💡 LED Channel Commands:");
-    Serial.println("  led test <ch>          - Test specific channel (0-11)");
-    Serial.println("  led test all           - Test all channels sequentially");
-    Serial.println("  led <ch> on            - Turn on specific channel");
-    Serial.println("  led <ch> off           - Turn off specific channel");
-    Serial.println("  led status             - Show all channel states\n");
+    auto creds = ConfigManager::getInstance().getCredentials();
+    Serial.printf("WiFi SSID: %s\n", creds.ssid.c_str());
+    Serial.printf("WiFi Password: %s\n", creds.password.length() > 0 ? "****" : "(open)");
+    Serial.printf("Serial Number: %s\n", creds.serial.c_str());
+    Serial.println();
     
-    Serial.println("🌈 Sequence Commands:");
-    Serial.println("  seq <mode>             - Set sequence mode (0-15)");
-    Serial.println("  seq next               - Go to next sequence");
-    Serial.println("  seq prev               - Go to previous sequence");
-    Serial.println("  seq list               - List all available sequences");
-    Serial.println("  seq speed <ms>         - Set sequence speed (10-2000ms)\n");
+    Serial.println("🔐 Activation Commands:");
+    Serial.println("  activate safe          - Enable LED/sequence control");
+    Serial.println("  activate full          - Enable all commands (including tests)");
+    Serial.println("  deactivate             - Disable control commands");
+    Serial.println("  help                   - Show this help\n");
     
-    Serial.println("🔌 PCF8574 I2C Commands:");
-    Serial.println("  pcf scan               - Scan I2C bus for PCF8574 devices");
-    Serial.println("  pcf test <addr>        - Test specific PCF (e.g., 0x20)");
-    Serial.println("  pcf status             - Show all PCF states");
-    Serial.println("  pcf reset <addr>       - Reset PCF (all pins OFF)\n");
+    if (current_mode_ >= SERIAL_READ_ONLY) {
+        Serial.println("📶 WiFi AP Commands:");
+        Serial.println("  wifi                    - Show current AP status");
+        Serial.println("  wifi set \"ssid\" \"pass\" - Set new AP credentials");  
+        Serial.println("  wifi restart           - Restart AP with current settings");
+        Serial.println("  wifi reset             - Reset to default settings");
+        Serial.println("  wifi clients           - Show connected clients\n");
+        
+        Serial.println("🔢 Serial Number Commands:");
+        Serial.println("  serial                 - Show current serial number");
+        Serial.println("  serial set \"string\"    - Set device serial number (e.g., serial set \"ALS024041\")\n");
+    }
     
-    Serial.println("👁️  Visualization Commands:");
-    Serial.println("  viz on                 - Enable LED matrix visualization");
-    Serial.println("  viz off                - Disable visualization");
-    Serial.println("  viz refresh            - Force visualization update");
-    Serial.println("  viz layout <r> <c>     - Change matrix layout\n");
+    if (current_mode_ >= SERIAL_SAFE_CONTROL) {
+        Serial.println("💡 LED Channel Commands:");
+        Serial.println("  led <ch> on            - Turn on specific channel");
+        Serial.println("  led <ch> off           - Turn off specific channel");
+        Serial.println("  led status             - Show all channel states\n");
+        
+        Serial.println("🌈 Sequence Commands:");
+        Serial.println("  seq <mode>             - Set sequence mode (0-15)");
+        Serial.println("  seq next               - Go to next sequence");
+        Serial.println("  seq prev               - Go to previous sequence");
+        Serial.println("  seq list               - List all available sequences");
+        Serial.println("  seq speed <ms>         - Set sequence speed (10-2000ms)\n");
+        
+        Serial.println("👁️  Visualization Commands:");
+        Serial.println("  viz on                 - Enable LED matrix visualization");
+        Serial.println("  viz off                - Disable visualization");
+        Serial.println("  viz refresh            - Force visualization update");
+        Serial.println("  viz layout <r> <c>     - Change matrix layout\n");
+        
+        Serial.println("🔘 Button Commands:");
+        Serial.println("  btn <id>               - Simulate button press (0-3)");
+        Serial.println("  btn mode 1button       - Single button cycling mode");
+        Serial.println("  btn mode 2button       - Two button mode");
+        Serial.println("  btn mode 3button       - Three button mode");
+        Serial.println("  btn mode 4button       - Four button mode\n");
+    }
     
-    Serial.println("🔘 Button Commands:");
-    Serial.println("  btn <id>               - Simulate button press (0-3)");
-    Serial.println("  btn mode 1button       - Single button cycling mode");
-    Serial.println("  btn mode 2button       - Two button mode");
-    Serial.println("  btn mode 3button       - Three button mode");
-    Serial.println("  btn mode 4button       - Four button mode\n");
+    if (current_mode_ >= SERIAL_FULL_ACCESS) {
+        Serial.println("⚠️  Hardware Test Commands:");
+        Serial.println("  led test <ch>          - Test specific channel (0-11)");
+        Serial.println("  led test all           - Test all channels sequentially\n");
+        
+        Serial.println("🔌 PCF8574 I2C Commands:");
+        Serial.println("  pcf scan               - Scan I2C bus for PCF8574 devices");
+        Serial.println("  pcf test <addr>        - Test specific PCF (e.g., 0x20)");
+        Serial.println("  pcf status             - Show all PCF states");
+        Serial.println("  pcf reset <addr>       - Reset PCF (all pins OFF)\n");
+    }
+    
+    if (current_mode_ == SERIAL_READ_ONLY) {
+        Serial.println("ℹ️  Use 'activate safe' to enable LED control commands");
+        Serial.println("ℹ️  Use 'activate full' to enable hardware test commands\n");
+    }
     
     Serial.println("💡 Examples:");
-    Serial.println("  led test 5             - Test channel 5");
-    Serial.println("  seq 3                  - Set chase pattern");
+    if (current_mode_ >= SERIAL_SAFE_CONTROL) {
+        Serial.println("  seq 3                  - Set chase pattern");
+        Serial.println("  viz layout 2 6         - 2x6 matrix layout");
+    }
+    if (current_mode_ >= SERIAL_FULL_ACCESS) {
+        Serial.println("  led test 5             - Test channel 5");
+    }
     Serial.println("  wifi set \"MyAP\" \"\"     - Create open AP");
-    Serial.println("  viz layout 2 6         - 2x6 matrix layout");
     Serial.println("=====================================");
 }
 
@@ -596,6 +688,59 @@ uint8_t SerialCommander::readFromI2C(uint8_t address) {
         return Wire.read();
     }
     return 0xFF;
+}
+
+void SerialCommander::setMode(SerialMode mode) {
+    current_mode_ = mode;
+    if (mode > SERIAL_READ_ONLY) {
+        activation_timeout_ = millis();
+    }
+}
+
+SerialMode SerialCommander::getMode() const {
+    return current_mode_;
+}
+
+bool SerialCommander::isCommandAllowed(const String& command_type) {
+    if (command_type == "help" || command_type == "activate" || command_type == "deactivate") {
+        return true;
+    }
+    if (current_mode_ == SERIAL_DISABLED) {
+        return false;
+    }
+    if (command_type == "wifi" || command_type == "viz" || command_type == "seq list" || command_type == "serial") {
+        return current_mode_ >= SERIAL_READ_ONLY;
+    }
+    if (command_type == "led" || command_type == "seq" || command_type == "btn") {
+        return current_mode_ >= SERIAL_SAFE_CONTROL;
+    }
+    if (command_type == "pcf" || command_type == "led test") {
+        return current_mode_ >= SERIAL_FULL_ACCESS;
+    }
+    return false;
+}
+
+void SerialCommander::activate(String args) {
+    args.trim();
+    if (args == "safe") {
+        setMode(SERIAL_SAFE_CONTROL);
+    } else if (args == "full") {
+        setMode(SERIAL_FULL_ACCESS);
+    } else {
+        current_mode_ = SERIAL_READ_ONLY;
+    }
+}
+
+void SerialCommander::deactivate(String args) {
+    setMode(SERIAL_READ_ONLY);
+}
+
+void SerialCommander::checkTimeout() {
+    if (current_mode_ > SERIAL_READ_ONLY && activation_timeout_ > 0) {
+        if (millis() - activation_timeout_ > TIMEOUT_MS) {
+            setMode(SERIAL_READ_ONLY);
+        }
+    }
 }
 
 }

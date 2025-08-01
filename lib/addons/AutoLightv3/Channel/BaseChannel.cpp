@@ -15,9 +15,6 @@ namespace AutoLight {
             button_config_.custom_handlers[i] = nullptr;
         }
         
-        credential_mode_ = READ_WRITE;
-        credential_ssid_ = "";
-        credential_password_ = "";
 
         initializeDefaultMapping();
 
@@ -446,9 +443,6 @@ namespace AutoLight {
     }
 
     void BaseChannel::setStateHigh(int index, ...) {
-        for (int i = 0; i < config_data_ptr_->header.pin_size_; i++) {
-            set(config_data_ptr_->header.pin_ptr_[i], LOW);
-        }
         va_list args;
         va_start(args, index);
         int currentIndex = index;
@@ -460,9 +454,6 @@ namespace AutoLight {
     }
 
     void BaseChannel::setStateLow(int index, ...) {
-        for (int i = 0; i < config_data_ptr_->header.pin_size_; i++) {
-            set(config_data_ptr_->header.pin_ptr_[i], LOW);
-        }
         va_list args;
         va_start(args, index);
         int currentIndex = index;
@@ -937,13 +928,21 @@ namespace AutoLight {
         return result;
     }
 
-    void BaseChannel::setCredentialMode(CredentialMode mode, const String& ssid, const String& password) {
-        credential_mode_ = mode;
-        credential_ssid_ = ssid;
-        credential_password_ = password;
-    }
 
-    void BaseChannel::enableWebServer(const char *device_name, bool auto_task) {
+    void BaseChannel::enableWebServer(bool auto_task) {
+        ConfigManager& config_mgr = ConfigManager::getInstance();
+        
+        if (!config_mgr.loadFromPreferences()) {
+            config_mgr.initializeDefaults();
+        }
+        
+        config_mgr.setChangeCallback([]() {
+            auto creds = ConfigManager::getInstance().getCredentials();
+            WiFi.softAPdisconnect();
+            delay(100);
+            WiFi.softAP(creds.ssid.c_str(), creds.password.c_str());
+        });
+        
         if (web_manager_ == nullptr) {
             BaseConfig *config = nullptr;
             if (config_data_ptr_ != nullptr) {
@@ -957,13 +956,12 @@ namespace AutoLight {
                 web_manager_->setConfigOwnership(true);
             }
             
-            web_manager_->setCredentialConfig(credential_mode_, credential_ssid_, credential_password_);
-            
-            web_manager_->enableWebServer(device_name, auto_task);
+            auto creds = config_mgr.getCredentials();
+            web_manager_->enableWebServer(auto_task);
         }
     }
 
-    void BaseChannel::enableWebServerManual(const char *device_name) {
-        enableWebServer(device_name, false);
+    void BaseChannel::enableWebServerManual() {
+        enableWebServer(false);
     }
 }

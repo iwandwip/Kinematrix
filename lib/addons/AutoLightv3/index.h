@@ -17,6 +17,8 @@
 #include "Config/ConfigData.h"
 #include "Config/BaseConfig.h"
 #include "Config/BaseConfig.cpp"
+#include "Config/ConfigManager.h"
+#include "Config/ConfigManager.cpp"
 #include "Cores/Task.h"
 #include "Cores/Task.cpp"
 #include "Web/WebManager.h"

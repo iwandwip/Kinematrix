@@ -3,6 +3,7 @@
 
 #include "Channel/BaseChannel.h"
 #include "Config/BaseConfig.h"
+#include "Config/ConfigManager.h"
 #include "Visualization/LEDMatrixVisualizer.h"
 #include "ButtonInterrupt.h"
 #include <Preferences.h>
@@ -11,12 +12,22 @@
 
 namespace AutoLight {
 
+typedef enum {
+    SERIAL_DISABLED = 0,
+    SERIAL_READ_ONLY = 1,
+    SERIAL_SAFE_CONTROL = 2,
+    SERIAL_FULL_ACCESS = 3
+} SerialMode;
+
 class SerialCommander {
 private:
     BaseChannel* led_;
     BaseConfig* config_;
     LEDMatrixVisualizer* viz_;
     ButtonInterrupt* button_;
+    SerialMode current_mode_;
+    uint32_t activation_timeout_;
+    static const uint32_t TIMEOUT_MS = 300000;
     
     struct WiFiAPConfig {
         char ssid[32];
@@ -57,7 +68,15 @@ public:
     void pcf_manage(String args);
     void visualize(String args);
     void button(String args);
+    void serial_manage(String args);
     void help(String args);
+    
+    void setMode(SerialMode mode);
+    SerialMode getMode() const;
+    bool isCommandAllowed(const String& command_type);
+    void activate(String args);
+    void deactivate(String args);
+    void checkTimeout();
 };
 
 }

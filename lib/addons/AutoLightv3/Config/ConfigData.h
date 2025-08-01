@@ -29,12 +29,6 @@ namespace AutoLight {
         BUTTON_MODE_CUSTOM = 99
     } button_mode_t;
 
-    typedef enum {
-        READ_ONLY = 0,
-        WRITE_ONLY = 1,
-        READ_WRITE = 2,
-        OVERRIDE = 3
-    } CredentialMode;
 
     struct PCFDistribution {
         uint8_t address;

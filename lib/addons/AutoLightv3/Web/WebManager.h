@@ -14,6 +14,7 @@
 #include "SPI.h"
 #include "Preferences.h"
 #include "../Config/ConfigData.h"
+#include "../Config/ConfigManager.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -28,8 +29,8 @@ namespace AutoLight {
         WebManager(BaseChannel *led, BaseConfig *config);
         virtual ~WebManager();
 
-        void enableWebServer(const char *device_name, bool auto_task = true);
-        void enableWebServerManual(const char *device_name);
+        void enableWebServer(bool auto_task = true);
+        void enableWebServerManual();
 
         static void webServerTaskWrapper(void *param);
         void webServerTask();
@@ -37,10 +38,7 @@ namespace AutoLight {
 
         void initWiFi();
         void initSDCard();
-        void setCredentialConfig(CredentialMode mode, const String& ssid = "", const String& password = "");
-        void initCredentials(CredentialMode mode = READ_WRITE, 
-                            const String& ssid = "", 
-                            const String& password = "");
+        void initCredentials();
         void setupRoutes();
 
         bool isRunning() const { return is_running_; }
@@ -64,9 +62,6 @@ namespace AutoLight {
         bool is_running_;
         TaskHandle_t web_task_handle_;
         
-        CredentialMode credential_mode_;
-        String credential_ssid_;
-        String credential_password_;
 
         void initializeServers();
         void setDefaultHeaders();

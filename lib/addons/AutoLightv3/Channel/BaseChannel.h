@@ -18,6 +18,7 @@
 
 #include "../Common/Constants.h"
 #include "../Config/BaseConfig.h"
+#include "../Config/ConfigManager.h"
 #include "../ButtonInterrupt.h"
 #include "../Cores/Task.h"
 #include "../Web/WebManager.h"
@@ -93,9 +94,8 @@ namespace AutoLight {
                 channel.setActiveSequences(sequences, sizeof(sequences)/sizeof(sequences[0])); \
             } while(0)
 
-        void setCredentialMode(CredentialMode mode, const String& ssid = "", const String& password = "");
-        void enableWebServer(const char *device_name = "AutoLight", bool auto_task = true);
-        void enableWebServerManual(const char *device_name = "AutoLight");
+        void enableWebServer(bool auto_task = true);
+        void enableWebServerManual();
 
         WebManager *getWebManager() { return web_manager_; }
 
@@ -171,9 +171,6 @@ namespace AutoLight {
 
         WebManager *web_manager_;
         
-        CredentialMode credential_mode_;
-        String credential_ssid_;
-        String credential_password_;
 
         uint8_t mapApiIndexToActualSequence(uint8_t api_index);
         uint8_t mapActualSequenceToApiIndex(uint8_t actual_sequence);

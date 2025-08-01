@@ -13,9 +13,6 @@ namespace AutoLight {
     WebManager::WebManager(BaseChannel *led, BaseConfig *config)
             : led_(led), config_(config), owns_config_(false), server_(80), api_(8000),
               auto_task_(true), is_running_(false), web_task_handle_(NULL) {
-        credential_mode_ = READ_WRITE;
-        credential_ssid_ = "";
-        credential_password_ = "";
     }
 
     WebManager::~WebManager() {
@@ -29,8 +26,9 @@ namespace AutoLight {
         }
     }
 
-    void WebManager::enableWebServer(const char *device_name, bool auto_task) {
-        device_name_ = String(device_name);
+    void WebManager::enableWebServer(bool auto_task) {
+        auto creds = ConfigManager::getInstance().getCredentials();
+        device_name_ = creds.ssid;
         auto_task_ = auto_task;
 
         if (auto_task) {
@@ -48,8 +46,8 @@ namespace AutoLight {
         }
     }
 
-    void WebManager::enableWebServerManual(const char *device_name) {
-        enableWebServer(device_name, false);
+    void WebManager::enableWebServerManual() {
+        enableWebServer(false);
     }
 
     void WebManager::webServerTaskWrapper(void *param) {
@@ -71,14 +69,9 @@ namespace AutoLight {
         }
     }
 
-    void WebManager::setCredentialConfig(CredentialMode mode, const String& ssid, const String& password) {
-        credential_mode_ = mode;
-        credential_ssid_ = ssid;
-        credential_password_ = password;
-    }
 
     void WebManager::initializeServers() {
-        initCredentials(credential_mode_, credential_ssid_, credential_password_);
+        initCredentials();
         initSDCard();
         initWiFi();
         setupRoutes();
@@ -105,93 +98,9 @@ namespace AutoLight {
         Serial.println("==============================");
     }
 
-    void WebManager::initCredentials(CredentialMode mode, const String& ssid, const String& password) {
-        auto writeCredentials = [this](const String& override_ssid = "", const String& override_password = "") -> void {
-            Serial.println("==============================");
-            Serial.println("| [WRITE] credentials");
-            preferences_.begin("credentials", false);
-            preferences_.putString("serial", device_name_);
-            
-            if (!override_ssid.isEmpty()) {
-                preferences_.putString("ssid", override_ssid);
-                Serial.println("| Using override SSID: " + override_ssid);
-            } else {
-                preferences_.putString("ssid", "SSID-" + device_name_);
-            }
-            
-            if (!override_password.isEmpty()) {
-                preferences_.putString("password", override_password);
-                Serial.println("| Using override password");
-            } else {
-                preferences_.putString("password", "");
-            }
-            
-            preferences_.end();
-        };
-
-        auto readCredentials = [this]() -> void {
-            Serial.println("==============================");
-            Serial.println("| [READ] credentials");
-            Serial.println("==============================");
-
-            preferences_.begin("credentials", false);
-            credentials_.serial = preferences_.getString("serial", "");
-            credentials_.ssid = preferences_.getString("ssid", "");
-            credentials_.password = preferences_.getString("password", "");
-            preferences_.end();
-
-            Serial.print("| credentials.ssid             : ");
-            Serial.println(credentials_.ssid);
-            Serial.print("| credentials.password         : ");
-            Serial.println(credentials_.password);
-            Serial.print("| credentials.serial           : ");
-            Serial.println(credentials_.serial);
-        };
-
-        auto overrideCredentials = [this](const String& override_ssid, const String& override_password) -> void {
-            Serial.println("==============================");
-            Serial.println("| [OVERRIDE] credentials");
-            credentials_.serial = device_name_;
-            credentials_.ssid = override_ssid.isEmpty() ? "SSID-" + device_name_ : override_ssid;
-            credentials_.password = override_password;
-            
-            Serial.print("| override.ssid                : ");
-            Serial.println(credentials_.ssid);
-            Serial.print("| override.password            : ");
-            Serial.println(credentials_.password);
-            Serial.print("| override.serial              : ");
-            Serial.println(credentials_.serial);
-            Serial.println("==============================");
-        };
-
-        switch (mode) {
-            case READ_ONLY:
-                Serial.println("| MODE: READ_ONLY");
-                readCredentials();
-                break;
-                
-            case WRITE_ONLY:
-                Serial.println("| MODE: WRITE_ONLY");
-                writeCredentials(ssid, password);
-                break;
-                
-            case READ_WRITE:
-                Serial.println("| MODE: READ_WRITE");
-                writeCredentials(ssid, password);
-                readCredentials();
-                break;
-                
-            case OVERRIDE:
-                Serial.println("| MODE: OVERRIDE");
-                overrideCredentials(ssid, password);
-                break;
-                
-            default:
-                Serial.println("| MODE: DEFAULT (READ_WRITE)");
-                writeCredentials();
-                readCredentials();
-                break;
-        }
+    void WebManager::initCredentials() {
+        auto creds = ConfigManager::getInstance().getCredentials();
+        credentials_ = creds;
     }
 
     void WebManager::initWiFi() {
@@ -232,7 +141,8 @@ namespace AutoLight {
         });
 
         api_.on("/api/v1/data/get/device/name", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            request->send(200, "text/plain", credentials_.ssid);
+            auto creds = ConfigManager::getInstance().getCredentials();
+            request->send(200, "text/plain", creds.ssid);
         });
 
         api_.on("/api/v1/data/get/device/ch", HTTP_GET, [this](AsyncWebServerRequest *request) {
@@ -240,29 +150,20 @@ namespace AutoLight {
         });
 
         api_.on("/api/v1/data/get/device/serial", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            preferences_.begin("credentials", false);
-            credentials_.serial = preferences_.getString("serial", "");
-            request->send(200, "text/plain", credentials_.serial);
-            preferences_.end();
+            auto creds = ConfigManager::getInstance().getCredentials();
+            request->send(200, "text/plain", creds.serial);
         });
 
         api_.on("/api/v1/data/set/device/name", HTTP_GET, [this](AsyncWebServerRequest *request) {
             if (request->hasArg("value")) {
                 String deviceName = request->arg("value");
 
-                credentials_.ssid = deviceName;
-                credentials_.password = "";
+                ConfigManager::getInstance().updateCredentials(deviceName, "");
+                
+                auto creds = ConfigManager::getInstance().getCredentials();
+                credentials_ = creds;
 
-                preferences_.begin("credentials", false);
-                preferences_.putString("ssid", credentials_.ssid);
-                preferences_.putString("password", credentials_.password);
-                preferences_.end();
-
-                request->send(200, "text/plain", "Berhasil Set device : " + credentials_.ssid);
-
-                WiFi.mode(WIFI_OFF);
-                delay(200);
-                WiFi.softAP(credentials_.ssid, credentials_.password);
+                request->send(200, "text/plain", "Berhasil Set device : " + creds.ssid);
             } else {
                 request->send(400, "text/plain", "Parameter 'value' is missing");
             }
