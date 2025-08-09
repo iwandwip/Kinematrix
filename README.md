@@ -1,4 +1,4 @@
-# Kinematrix Beta v0.0.27
+# Kinematrix Beta v0.0.28
 
 **🚀 Simplify Your Arduino Projects with Advanced Modular Framework**
 
@@ -9,13 +9,13 @@ Kinematrix is a comprehensive, modular Arduino library framework designed to dra
 ## ✨ Key Features
 
 ### 🧩 **Modular Architecture**
-- **168+ Available Modules** - Include only what you need
+- **156+ Available Modules** - Include only what you need
 - **Conditional Compilation** - Optimize memory usage (50KB - 500KB+)
 - **Platform Agnostic** - ESP32, ESP8266, Arduino AVR support
 
 ### 🔬 **Advanced Sensor Framework**
 - **Dual Framework Support** - Legacy V1 and Modern V2 sensor systems
-- **40+ Sensor Types** - Environmental, motion, power, gas, and more
+- **78+ Sensor Types** - Environmental, motion, power, gas, and more
 - **Real-time Filtering** - Moving Average, Kalman, Median, Exponential
 - **Smart Alerts** - Threshold monitoring with custom callbacks
 - **Interactive Calibration** - EEPROM persistence with serial interface
@@ -184,7 +184,7 @@ void loop() {
 
 ## 📦 Available Modules
 
-### 🔧 **Core Modules (168+ total)**
+### 🔧 **Core Modules (156+ total)**
 
 #### Communication (15 modules)
 ```cpp
@@ -232,7 +232,7 @@ void loop() {
 ```
 
 ### 📄 **Complete Module List**
-For the complete list of all 168+ available modules, see [Module Reference](#module-reference) below or check `lib/enable.h`.
+For the complete list of all 156+ available modules, see [Module Reference](#module-reference) below or check `lib/enable.h`.
 
 ---
 
@@ -309,17 +309,17 @@ KinematrixBeta/
 │   └── KinematrixSensor.h       # Sensor framework
 │
 ├── lib/
-│   ├── enable.h                 # Module enable definitions (168+ modules)
-│   ├── modules/                 # Core functionality (168+ modules)
+│   ├── enable.h                 # Module enable definitions (156+ modules)
+│   ├── modules/                 # Core functionality (156+ modules)
 │   │   ├── communication/       # Wired/wireless protocols
 │   │   ├── control/            # PID, ML, fuzzy logic
 │   │   ├── display/            # LCD/OLED menu systems
 │   │   ├── wifi/               # WiFi & cloud services
 │   │   └── ...                 # 10+ other categories
 │   │
-│   ├── sensors/                # Sensor implementations
-│   │   ├── SensorModuleV1/     # Legacy framework (40+ sensors)
-│   │   └── SensorModuleV2/     # Modern framework (advanced features)
+│   ├── sensors/                # Sensor implementations  
+│   │   ├── SensorModuleV1/     # Legacy framework (42 sensors)
+│   │   └── SensorModuleV2/     # Modern framework (14 sensors + advanced features)
 │   │
 │   └── addons/                 # Complete application systems
 │       └── AutoLight/          # Lighting control systems
@@ -476,9 +476,9 @@ lib_deps =
 </details>
 
 <details>
-<summary><strong>All 168+ Modules</strong></summary>
+<summary><strong>All 156+ Modules</strong></summary>
 
-See `lib/enable.h` for the complete list of all 168+ available modules organized by category.
+See `lib/enable.h` for the complete list of all 156+ available modules organized by category.
 
 </details>
 
