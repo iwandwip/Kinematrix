@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "/mnt/d/User/source/caktin_ws/KinematrixLibraries/Libraries/TinyGPSPlus",
+      "/mnt/d/User/source/caktin_ws/KinematrixLibraries/Libraries/Adafruit_INA219",
+      "/mnt/d/User/source/caktin_ws/KinematrixLibraries/Libraries/PCF8574_library",
+      "/mnt/d/User/source/caktin_ws/KinematrixLibraries/Libraries/RTClib",
+      "/mnt/d/User/source/caktin_ws/KinematrixBeta/lib/modules/io"
+    ]
+  }
+}

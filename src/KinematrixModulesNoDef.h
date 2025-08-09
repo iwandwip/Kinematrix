@@ -46,16 +46,12 @@
 #include "../lib/modules/communication/wired/serial/swap-serial.h"
 #endif
 
-#ifdef ENABLE_MODULE_NODEF_SERIAL_CERIA
-#include "../lib/modules/communication/wired/serial/ceria-serial.h"
+#ifdef ENABLE_MODULE_NODEF_DOT_MATRIX
+#include "../lib/modules/communication/wired/spi/dot-matrix.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_SERIAL_SPI
 #include "../lib/modules/communication/wired/spi/spi-serial.h"
-#endif
-
-#ifdef ENABLE_MODULE_NODEF_DOT_MATRIX
-#include "../lib/modules/communication/wired/spi/dot-matrix.h"
 #endif
 
 #ifdef ENABLE_MODULE_NODEF_LORA_COM

@@ -59,19 +59,14 @@
 #include "../lib/modules/communication/wired/serial/swap-serial.cpp"
 #endif
 
-#ifdef ENABLE_MODULE_SERIAL_CERIA
-#include "../lib/modules/communication/wired/serial/ceria-serial.h"
-#include "../lib/modules/communication/wired/serial/ceria-serial.cpp"
+#ifdef ENABLE_MODULE_DOT_MATRIX
+#include "../lib/modules/communication/wired/spi/dot-matrix.h"
+#include "../lib/modules/communication/wired/spi/dot-matrix.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_SERIAL_SPI
 #include "../lib/modules/communication/wired/spi/spi-serial.h"
 #include "../lib/modules/communication/wired/spi/spi-serial.cpp"
-#endif
-
-#ifdef ENABLE_MODULE_DOT_MATRIX
-#include "../lib/modules/communication/wired/spi/dot-matrix.h"
-#include "../lib/modules/communication/wired/spi/dot-matrix.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_LORA_COM

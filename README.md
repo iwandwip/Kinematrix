@@ -1,4 +1,4 @@
-# Kinematrix Beta v0.0.26
+# Kinematrix Beta v0.0.27
 
 **🚀 Simplify Your Arduino Projects with Advanced Modular Framework**
 
@@ -9,7 +9,7 @@ Kinematrix is a comprehensive, modular Arduino library framework designed to dra
 ## ✨ Key Features
 
 ### 🧩 **Modular Architecture**
-- **168 Available Modules** - Include only what you need
+- **168+ Available Modules** - Include only what you need
 - **Conditional Compilation** - Optimize memory usage (50KB - 500KB+)
 - **Platform Agnostic** - ESP32, ESP8266, Arduino AVR support
 
@@ -184,7 +184,7 @@ void loop() {
 
 ## 📦 Available Modules
 
-### 🔧 **Core Modules (168 total)**
+### 🔧 **Core Modules (168+ total)**
 
 #### Communication (15 modules)
 ```cpp
@@ -232,7 +232,7 @@ void loop() {
 ```
 
 ### 📄 **Complete Module List**
-For the complete list of all 168 available modules, see [Module Reference](#module-reference) below or check `lib/enable.h`.
+For the complete list of all 168+ available modules, see [Module Reference](#module-reference) below or check `lib/enable.h`.
 
 ---
 
@@ -309,8 +309,8 @@ KinematrixBeta/
 │   └── KinematrixSensor.h       # Sensor framework
 │
 ├── lib/
-│   ├── enable.h                 # Module enable definitions (168 modules)
-│   ├── modules/                 # Core functionality (168 modules)
+│   ├── enable.h                 # Module enable definitions (168+ modules)
+│   ├── modules/                 # Core functionality (168+ modules)
 │   │   ├── communication/       # Wired/wireless protocols
 │   │   ├── control/            # PID, ML, fuzzy logic
 │   │   ├── display/            # LCD/OLED menu systems
@@ -324,7 +324,7 @@ KinematrixBeta/
 │   └── addons/                 # Complete application systems
 │       └── AutoLight/          # Lighting control systems
 │
-├── example/                    # 700+ example files
+├── example/                    # 254 example files
 │   ├── modules/               # Module-specific examples
 │   │   ├── control/          # PID, ML, fuzzy examples
 │   │   ├── wifi/             # IoT & cloud examples
@@ -476,9 +476,9 @@ lib_deps =
 </details>
 
 <details>
-<summary><strong>All 168 Modules</strong></summary>
+<summary><strong>All 168+ Modules</strong></summary>
 
-See `lib/enable.h` for the complete list of all available modules organized by category.
+See `lib/enable.h` for the complete list of all 168+ available modules organized by category.
 
 </details>
 

@@ -1,0 +1,3 @@
+- When creating, updating, or deleting code, do not add docstrings or comments to keep the code clean.
+- jika mau membuat wrapper class, baca WRAPPER_CREATION_GUIDE.md dulu untuk referensi
+- main.ino itu adalah main entry point

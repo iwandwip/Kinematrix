@@ -2,7 +2,7 @@
 #define BASE_CHANNEL_H
 
 #include "Arduino.h"
-#include <cstdarg>
+#include <stdarg.h>
 
 #ifndef ENABLE_MODULE_NODEF_IO_EXPANDER
 #define ENABLE_MODULE_NODEF_IO_EXPANDER
@@ -27,6 +27,7 @@ namespace AutoLight {
     using namespace Constants;
 
     class WebManager;
+    class PatternHelper;
 
     void taskCallback();
 
@@ -49,6 +50,7 @@ namespace AutoLight {
     };
 
     class BaseChannel {
+        friend class PatternHelper;
     public:
         BaseChannel(bool _enable_unit_test = false);
         virtual ~BaseChannel();
@@ -137,6 +139,7 @@ namespace AutoLight {
         void taskSequence13BlinkPattern();
         void taskSequence14AdvancedPattern();
         void taskSequence15AllSequences();
+        void taskSequencePatternEngineTest();
 
     private:
         bool addIoExpander(IOExpander *_io_expander);

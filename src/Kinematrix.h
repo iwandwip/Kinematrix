@@ -11,6 +11,8 @@
 
 #include "Arduino.h"
 
+#include "KinematrixDevelopment.h"
+
 #include "KinematrixModules.h"
 #include "KinematrixModulesHelper.h"
 #include "KinematrixModulesNoDef.h"
