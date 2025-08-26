@@ -341,6 +341,10 @@
 #include "../lib/modules/io/seven-segment-74hc595.h"
 #endif
 
+#ifdef ENABLE_MODULE_NODEF_SEVEN_SEGMENT_RAW
+#include "../lib/modules/io/seven-segment-raw.h"
+#endif
+
 #ifdef ENABLE_MODULE_NODEF_FREE_RTOS_HANDLER
 #include "../lib/modules/task/FreeRTOSHandler.h"
 #endif

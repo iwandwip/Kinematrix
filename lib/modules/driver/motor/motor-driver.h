@@ -19,16 +19,19 @@ namespace BTS7960 {
         int pwmChannelRight;
 #endif
     public:
+        MotorDriver(int L_PWM);
         MotorDriver(int L_PWM, int R_PWM);
         MotorDriver(int EN, int L_PWM, int R_PWM);
         MotorDriver(int L_EN, int R_EN, int L_PWM, int R_PWM);
 
 #if defined(ESP32)
-        void setup(int freq = 30000, int chLeft = 0, int chRight = 1, int resolution = 8);
+        void setup(int chLeft, int freq = 30000, int resolution = 8);
+        void setup(int chLeft, int chRight, int freq = 30000, int resolution = 8);
 #endif
         void enable();
         void disable();
 
+        void run(int pwm);
         void turnLeft(int pwm);
         void turnRight(int pwm);
         void stop();

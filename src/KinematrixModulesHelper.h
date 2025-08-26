@@ -432,6 +432,11 @@
 #include "../lib/modules/io/seven-segment-74hc595.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_HELPER_SEVEN_SEGMENT_RAW
+#include "../lib/modules/io/seven-segment-raw.h"
+#include "../lib/modules/io/seven-segment-raw.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_HELPER_FREE_RTOS_HANDLER
 #include "../lib/modules/task/FreeRTOSHandler.h"
 #include "../lib/modules/task/FreeRTOSHandler.cpp"

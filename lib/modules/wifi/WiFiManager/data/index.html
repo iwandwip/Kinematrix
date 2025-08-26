@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WiFi Manager</h1>
+            <p>ESP32 Network Configuration</p>
+        </div>
+
+        <div class="status-card" id="statusCard">
+            <div class="status-icon" id="statusIcon">📶</div>
+            <div class="status-text">
+                <div id="statusMessage">Initializing...</div>
+                <div id="statusDetails"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Available Networks</h2>
+            <button class="btn btn-secondary" onclick="scanNetworks()">🔄 Scan Networks</button>
+            <div id="networkList" class="network-list">
+                <div class="loading">Scanning networks...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>WiFi Configuration</h2>
+            <form id="wifiForm">
+                <div class="form-group">
+                    <label for="s">Network Name (SSID):</label>
+                    <input type="text" id="s" name="s" maxlength="32" autocorrect="off" autocapitalize="none" required>
+                </div>
+
+                <div class="form-group" id="password-group">
+                    <label for="p">Password:</label>
+                    <input type="password" id="p" name="p" maxlength="64" minlength="8" 
+                           placeholder="Minimum 8 characters" autocomplete="current-password">
+                    <div id="password-error" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <input type="checkbox" id="showpass" onchange="togglePassword()">
+                    <label for="showpass">Show Password</label>
+                </div>
+
+                <details class="advanced-settings">
+                    <summary>⚙️ Advanced Settings</summary>
+                    <div class="form-group">
+                        <label for="ip">Static IP Address:</label>
+                        <input type="text" id="ip" name="ip" placeholder="192.168.1.100">
+                    </div>
+                    <div class="form-group">
+                        <label for="gateway">Gateway:</label>
+                        <input type="text" id="gateway" name="gateway" placeholder="192.168.1.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="subnet">Subnet Mask:</label>
+                        <input type="text" id="subnet" name="subnet" placeholder="255.255.255.0">
+                    </div>
+                </details>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Connect</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetConfig()">Reset WiFi</button>
+                    <button type="button" class="btn btn-danger" onclick="resetAll()">Reset All</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div id="modal-icon" class="modal-icon">✅</div>
+                <h3 id="modal-title" class="modal-title">Success</h3>
+            </div>
+            <div id="modal-content" class="modal-content"></div>
+            <div id="countdown-container" class="countdown" style="display: none;">
+                <div>Device will restart in:</div>
+                <span id="countdown-timer" class="countdown-timer">3</span>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let statusInterval;
+        let countdownInterval;
+
+        function showModal(type, title, content, showCountdown = false, countdownSeconds = 0, ssid = '') {
+            const overlay = document.getElementById('modal-overlay');
+            const icon = document.getElementById('modal-icon');
+            const titleElement = document.getElementById('modal-title');
+            const contentElement = document.getElementById('modal-content');
+            const countdownContainer = document.getElementById('countdown-container');
+
+            // Set icon and title based on type
+            icon.className = 'modal-icon';
+            switch(type) {
+                case 'success':
+                    icon.textContent = '✅';
+                    icon.classList.add('success');
+                    break;
+                case 'warning':
+                    icon.textContent = '⚠️';
+                    icon.classList.add('warning');
+                    break;
+                case 'error':
+                    icon.textContent = '❌';
+                    icon.classList.add('error');
+                    break;
+            }
+
+            titleElement.textContent = title;
+            
+            if (type === 'success' && ssid && showCountdown) {
+                contentElement.innerHTML = `
+                    <p>Device is connecting to: <strong>${ssid}</strong></p>
+                    <div class="modal-steps">
+                        <h4>Next Steps:</h4>
+                        <ol>
+                            <li>Connect your device to WiFi: <strong>${ssid}</strong></li>
+                            <li>Access: <code>http://wifimanager.local/</code></li>
+                            <li>If mDNS doesn't work, find the new IP address</li>
+                        </ol>
+                    </div>
+                `;
+            } else {
+                contentElement.innerHTML = content;
+            }
+
+            // Show countdown if needed
+            if (showCountdown && countdownSeconds > 0) {
+                countdownContainer.style.display = 'block';
+                startCountdown(countdownSeconds);
+            } else {
+                countdownContainer.style.display = 'none';
+            }
+
+            // Show modal
+            overlay.classList.add('active');
+        }
+
+        function hideModal() {
+            const overlay = document.getElementById('modal-overlay');
+            overlay.classList.remove('active');
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+        }
+
+        function startCountdown(seconds) {
+            const timerElement = document.getElementById('countdown-timer');
+            const progressElement = document.getElementById('progress-fill');
+            const totalSeconds = seconds;
+            let remaining = seconds;
+
+            timerElement.textContent = remaining;
+            progressElement.style.width = '100%';
+
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            countdownInterval = setInterval(() => {
+                remaining--;
+                timerElement.textContent = remaining;
+                
+                const progressPercent = (remaining / totalSeconds) * 100;
+                progressElement.style.width = progressPercent + '%';
+
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    hideModal();
+                }
+            }, 1000);
+        }
+
+        // Close modal when clicking overlay
+        document.getElementById('modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideModal();
+            }
+        });
+
+        // Password validation functions
+        function validatePassword(password) {
+            const minLength = 8;
+            const errors = [];
+            
+            if (password.length === 0) {
+                return { valid: false, errors: [], strength: 'none' };
+            }
+            
+            if (password.length < minLength) {
+                errors.push(`Password must be at least ${minLength} characters`);
+            }
+            
+            // Calculate password strength
+            let strength = 'weak';
+            let score = 0;
+            
+            if (password.length >= 8) score++;
+            if (password.length >= 12) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+            
+            if (score >= 5) strength = 'strong';
+            else if (score >= 4) strength = 'good';
+            else if (score >= 3) strength = 'fair';
+            else strength = 'weak';
+            
+            return {
+                valid: errors.length === 0,
+                errors: errors,
+                strength: strength
+            };
+        }
+
+        function updatePasswordValidation(password) {
+            const passwordGroup = document.getElementById('password-group');
+            const passwordError = document.getElementById('password-error');
+            const validation = validatePassword(password);
+            
+            // Remove existing classes
+            passwordGroup.classList.remove('error', 'success');
+            
+            if (password.length === 0) {
+                // No validation for empty field
+                passwordError.classList.remove('show');
+                setTimeout(() => {
+                    passwordError.textContent = '';
+                }, 200);
+                return true;
+            } else if (validation.valid) {
+                passwordGroup.classList.add('success');
+                passwordError.classList.remove('show');
+                setTimeout(() => {
+                    passwordError.textContent = '';
+                }, 200);
+                return true;
+            } else {
+                passwordGroup.classList.add('error');
+                passwordError.textContent = validation.errors[0];
+                passwordError.classList.add('show');
+                return false;
+            }
+        }
+
+        function validateForm() {
+            const ssid = document.getElementById('s').value.trim();
+            const password = document.getElementById('p').value;
+            
+            // SSID validation
+            if (!ssid) {
+                showModal('error', 'SSID Required', 'Please enter a network name (SSID).');
+                return false;
+            }
+            
+            // Password validation (only if password is provided)
+            if (password.length > 0) {
+                const passwordValid = updatePasswordValidation(password);
+                if (!passwordValid) {
+                    showModal('error', 'Invalid Password', 'Password must be at least 8 characters long.');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Add validation for password field on blur (when field loses focus)
+        document.getElementById('p').addEventListener('blur', function(e) {
+            const password = e.target.value;
+            updatePasswordValidation(password);
+        });
+
+        // Add validation for SSID field
+        document.getElementById('s').addEventListener('input', function(e) {
+            const ssidGroup = e.target.closest('.form-group');
+            if (e.target.value.trim()) {
+                ssidGroup.classList.remove('error');
+                ssidGroup.classList.add('success');
+            } else {
+                ssidGroup.classList.remove('success', 'error');
+            }
+        });
+
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusIcon = document.getElementById('statusIcon');
+                    const statusMessage = document.getElementById('statusMessage');
+                    const statusDetails = document.getElementById('statusDetails');
+                    const statusCard = document.getElementById('statusCard');
+
+                    if (data.connected) {
+                        statusIcon.textContent = '✅';
+                        statusMessage.textContent = 'Connected';
+                        statusDetails.innerHTML = `SSID: ${data.ssid}<br>IP: ${data.ip}<br>Signal: ${data.quality}%`;
+                        statusCard.className = 'status-card connected';
+                    } else if (data.configMode) {
+                        statusIcon.textContent = '⚙️';
+                        statusMessage.textContent = 'Configuration Mode';
+                        statusDetails.textContent = 'Please configure WiFi settings';
+                        statusCard.className = 'status-card config';
+                    } else {
+                        statusIcon.textContent = '❌';
+                        statusMessage.textContent = 'Disconnected';
+                        statusDetails.textContent = 'Not connected to any network';
+                        statusCard.className = 'status-card disconnected';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('statusIcon').textContent = '⚠️';
+                    document.getElementById('statusMessage').textContent = 'Device Transitioning';
+                    document.getElementById('statusDetails').innerHTML = 'Device may be connecting to new WiFi network.<br>Try accessing: <a href="http://wifimanager.local/" target="_blank">http://wifimanager.local/</a>';
+                });
+        }
+
+        let scanPollInterval = null;
+
+        function scanNetworks(forceRefresh = false) {
+            const networkList = document.getElementById('networkList');
+            const scanButton = document.querySelector('button[onclick="scanNetworks()"]');
+            
+            clearTimeout(scanPollInterval);
+            
+            if (!forceRefresh) {
+                networkList.innerHTML = '<div class="loading">🔄 Scanning networks...</div>';
+                scanButton.disabled = true;
+                scanButton.textContent = '🔄 Scanning...';
+            }
+            
+            const url = forceRefresh ? '/scan?refresh=1' : '/scan';
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.scanning) {
+                        scanPollInterval = setTimeout(() => scanNetworks(false), 1500);
+                        return;
+                    }
+                    
+                    clearTimeout(scanPollInterval);
+                    scanButton.disabled = false;
+                    scanButton.textContent = '🔄 Scan Networks';
+                    
+                    displayNetworks(data);
+                })
+                .catch(() => {
+                    clearTimeout(scanPollInterval);
+                    const networkList = document.getElementById('networkList');
+                    const scanButton = document.querySelector('button[onclick="scanNetworks()"]');
+                    
+                    networkList.innerHTML = '<div class="error">Failed to scan networks</div>';
+                    scanButton.disabled = false;
+                    scanButton.textContent = '🔄 Scan Networks';
+                });
+        }
+
+        function displayNetworks(data) {
+            const networkList = document.getElementById('networkList');
+            networkList.innerHTML = '';
+            
+            if (data.networks && data.networks.length > 0) {
+                data.networks.forEach(network => {
+                    const networkItem = document.createElement('div');
+                    networkItem.className = 'network-item';
+                    
+                    const lockClass = network.encryption === 'open' ? '' : 'l';
+                    const qualityIndex = Math.min(4, Math.max(0, Math.ceil(network.quality / 25)));
+                    const qualityClass = 'q-' + qualityIndex;
+                    
+                    networkItem.innerHTML = `
+                        <div>
+                            <a href="#p" onclick="c(this)" data-ssid="${network.ssid}">${network.ssid}</a>
+                            <div class="q ${lockClass} ${qualityClass}" role="img" aria-label="${network.quality}%" title="${network.quality}%"></div>
+                        </div>
+                    `;
+
+                    networkList.appendChild(networkItem);
+                });
+            } else {
+                networkList.innerHTML = '<div class="no-networks">No networks found. <a href="#" onclick="scanNetworks(true)">Refresh</a> to scan again.</div>';
+            }
+        }
+
+
+        function c(l) {
+            document.getElementById('s').value = l.getAttribute('data-ssid') || l.innerText || l.textContent;
+            p = l.nextElementSibling.classList.contains('l');
+            document.getElementById('p').disabled = !p;
+            if(p) document.getElementById('p').focus();
+            
+            document.querySelectorAll('.network-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            l.closest('.network-item').classList.add('selected');
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('p');
+            const checkbox = document.getElementById('showpass');
+            passwordInput.type = checkbox.checked ? 'text' : 'password';
+        }
+
+        function resetConfig() {
+            showModal('warning', 'Reset WiFi Configuration', 
+                'This will clear stored WiFi credentials but keep other settings.<br><br>Continue with WiFi reset?');
+            
+            // Add confirm button functionality
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML += `
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <button onclick="performResetConfig()" style="background: var(--red-500); color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; margin-right: 0.5rem; cursor: pointer;">Confirm Reset</button>
+                    <button onclick="hideModal()" style="background: var(--zinc-600); color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; cursor: pointer;">Cancel</button>
+                </div>
+            `;
+        }
+
+        function performResetConfig() {
+            fetch('/reset', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    showModal('success', 'WiFi Reset Complete', data.message);
+                })
+                .catch(() => {
+                    showModal('error', 'Reset Failed', 'WiFi reset failed. Please try again.');
+                });
+        }
+
+        function resetAll() {
+            showModal('warning', 'Complete System Reset', 
+                'This will erase ALL settings and restart the device.<br><br><strong>Device will restart automatically after reset.</strong><br><br>Continue with complete reset?');
+            
+            // Add confirm button functionality
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML += `
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <button onclick="performResetAll()" style="background: var(--red-500); color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; margin-right: 0.5rem; cursor: pointer;">Confirm Reset All</button>
+                    <button onclick="hideModal()" style="background: var(--zinc-600); color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; cursor: pointer;">Cancel</button>
+                </div>
+            `;
+        }
+
+        function performResetAll() {
+            fetch('/resetall', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    showModal('success', 'Complete Reset', data.message);
+                })
+                .catch(() => {
+                    showModal('error', 'Reset Failed', 'Complete reset failed. Please try again.');
+                });
+        }
+
+        document.getElementById('wifiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate form before submitting
+            if (!validateForm()) {
+                return;
+            }
+            
+            const formData = new FormData(this);
+            const button = document.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            const ssidValue = document.getElementById('s').value;
+            
+            button.textContent = 'Connecting...';
+            button.disabled = true;
+
+            fetch('/connect', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const countdownSeconds = Math.floor((data.restart_delay || 3000) / 1000);
+                    showModal('success', 'Configuration Saved!', '', true, countdownSeconds, ssidValue);
+                } else {
+                    showModal('error', 'Configuration Error', data.message);
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            })
+            .catch(() => {
+                showModal('error', 'Connection Failed', 'Unable to save configuration. Please check your connection and try again.');
+                button.textContent = originalText;
+                button.disabled = false;
+            });
+        });
+
+        updateStatus();
+        scanNetworks();
+        statusInterval = setInterval(updateStatus, 5000);
+    </script>
+</body>
+</html>

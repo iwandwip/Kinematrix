@@ -1,6 +1,10 @@
 #include "motor-driver.h"
 
 namespace BTS7960 {
+    MotorDriver::MotorDriver(int L_PWM)
+            : MotorDriver(NC, NC, L_PWM, NC) {
+    }
+
     MotorDriver::MotorDriver(int L_PWM, int R_PWM)
             : MotorDriver(NC, NC, L_PWM, R_PWM) {
     }
@@ -15,11 +19,11 @@ namespace BTS7960 {
         enableLeft = L_EN;
         enableRight = R_EN;
 #if defined(ESP32)
-        pinMode(pwmLeft, OUTPUT);
-        pinMode(pwmRight, OUTPUT);
+        if (pwmLeft != NC) pinMode(pwmLeft, OUTPUT);
+        if (pwmRight != NC) pinMode(pwmRight, OUTPUT);
 #else
-        pinMode(pwmLeft, OUTPUT);
-        pinMode(pwmRight, OUTPUT);
+        if (pwmLeft != NC) pinMode(pwmLeft, OUTPUT);
+        if (pwmRight != NC) pinMode(pwmRight, OUTPUT);
 #endif
         if (enableLeft != NC) {
             pinMode(enableLeft, OUTPUT);
@@ -31,34 +35,54 @@ namespace BTS7960 {
 
 #if defined(ESP32)
 
-    void MotorDriver::setup(int freq, int chLeft, int chRight, int resolution) {
+    void MotorDriver::setup(int chLeft, int freq, int resolution) {
+        pwmChannelLeft = chLeft;
+        if (pwmLeft != NC) {
+            ledcSetup(pwmChannelLeft, freq, resolution);
+            ledcAttachPin(pwmLeft, pwmChannelLeft);
+        }
+    }
+
+    void MotorDriver::setup(int chLeft, int chRight, int freq, int resolution) {
         pwmChannelLeft = chLeft;
         pwmChannelRight = chRight;
-        ledcSetup(pwmChannelLeft, freq, resolution);
-        ledcSetup(pwmChannelRight, freq, resolution);
-        ledcAttachPin(pwmLeft, pwmChannelLeft);
-        ledcAttachPin(pwmRight, pwmChannelRight);
+        if (pwmLeft != NC) {
+            ledcSetup(pwmChannelLeft, freq, resolution);
+            ledcAttachPin(pwmLeft, pwmChannelLeft);
+        }
+        if (pwmRight != NC) {
+            ledcSetup(pwmChannelRight, freq, resolution);
+            ledcAttachPin(pwmRight, pwmChannelRight);
+        }
     }
 
 #endif
 
+    void MotorDriver::run(int pwm) {
+#if defined(ESP32)
+        if (pwmLeft != NC) ledcWrite(pwmChannelLeft, pwm);
+#else
+        if (pwmLeft != NC) analogWrite(pwmLeft, pwm);
+#endif
+    }
+
     void MotorDriver::turnLeft(int pwm) {
 #if defined(ESP32)
-        ledcWrite(pwmChannelLeft, pwm);
-        ledcWrite(pwmChannelRight, 0);
+        if (pwmLeft != NC) ledcWrite(pwmChannelLeft, pwm);
+        if (pwmRight != NC) ledcWrite(pwmChannelRight, 0);
 #else
-        analogWrite(pwmLeft, pwm);
-        analogWrite(pwmRight, 0);
+        if (pwmLeft != NC) analogWrite(pwmLeft, pwm);
+        if (pwmRight != NC) analogWrite(pwmRight, 0);
 #endif
     }
 
     void MotorDriver::turnRight(int pwm) {
 #if defined(ESP32)
-        ledcWrite(pwmChannelLeft, 0);
-        ledcWrite(pwmChannelRight, pwm);
+        if (pwmLeft != NC) ledcWrite(pwmChannelLeft, 0);
+        if (pwmRight != NC) ledcWrite(pwmChannelRight, pwm);
 #else
-        analogWrite(pwmLeft, 0);
-        analogWrite(pwmRight, pwm);
+        if (pwmLeft != NC) analogWrite(pwmLeft, 0);
+        if (pwmRight != NC) analogWrite(pwmRight, pwm);
 #endif
     }
 
@@ -82,11 +106,11 @@ namespace BTS7960 {
 
     void MotorDriver::stop() {
 #if defined(ESP32)
-        ledcWrite(pwmChannelLeft, 0);
-        ledcWrite(pwmChannelRight, 0);
+        if (pwmLeft != NC) ledcWrite(pwmChannelLeft, 0);
+        if (pwmRight != NC) ledcWrite(pwmChannelRight, 0);
 #else
-        analogWrite(pwmLeft, 0);
-        analogWrite(pwmRight, 0);
+        if (pwmLeft != NC) analogWrite(pwmLeft, 0);
+        if (pwmRight != NC) analogWrite(pwmRight, 0);
 #endif
     }
 }

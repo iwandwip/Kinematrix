@@ -268,6 +268,11 @@
 #include "../lib/modules/wifi/WiFiModule.cpp"
 #endif
 
+#ifdef ENABLE_MODULE_WIFI_MANAGER
+#include "../lib/modules/wifi/WiFiManager/WiFiManager.h"
+#include "../lib/modules/wifi/WiFiManager/WiFiManager.cpp"
+#endif
+
 #ifdef ENABLE_MODULE_LCD_MENU
 #include "../lib/modules/display/LiquidCrystal_I2C.h"
 #include "../lib/modules/display/LiquidCrystal_I2C.cpp"
@@ -432,6 +437,11 @@
 #ifdef ENABLE_MODULE_SEVEN_SEGMENT_74HC595
 #include "../lib/modules/io/seven-segment-74hc595.h"
 #include "../lib/modules/io/seven-segment-74hc595.cpp"
+#endif
+
+#ifdef ENABLE_MODULE_SEVEN_SEGMENT_RAW
+#include "../lib/modules/io/seven-segment-raw.h"
+#include "../lib/modules/io/seven-segment-raw.cpp"
 #endif
 
 #ifdef ENABLE_MODULE_FREE_RTOS_HANDLER

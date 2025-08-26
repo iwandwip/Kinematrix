@@ -41,6 +41,8 @@ GravityTDS::GravityTDS() {
     this->adcRange = 1024.0;
     this->kValueAddress = 8;
     this->kValue = 1.0;
+    this->calibrationMode = false;
+    this->calibrationTarget = 0.0;
 }
 
 GravityTDS::~GravityTDS() {
@@ -261,4 +263,72 @@ float TDSSens::getValueTDSSens() const {
 
 void TDSSens::setPins(uint8_t _pin) {
     sensorPin = _pin;
+}
+
+void GravityTDS::setCalibrationValue(float targetPPM) {
+    this->calibrationTarget = targetPPM;
+}
+
+void GravityTDS::enterCalibrationMode() {
+    this->calibrationMode = true;
+    Serial.println();
+    Serial.println(F(">>>Enter Programmatic Calibration Mode<<<"));
+    Serial.print(F(">>>Target Value: "));
+    Serial.print(this->calibrationTarget);
+    Serial.println(F(" ppm<<<"));
+}
+
+void GravityTDS::exitCalibrationMode() {
+    this->calibrationMode = false;
+    Serial.println(F(">>>Exit Calibration Mode<<<"));
+}
+
+bool GravityTDS::performCalibration(float targetPPM) {
+    if (targetPPM <= 0 || targetPPM > 2000) {
+        Serial.println(F(">>>Invalid target PPM. Range: 0-2000<<<"));
+        return false;
+    }
+    
+    this->update();
+    
+    float rawECsolution = targetPPM / TdsFactor;
+    rawECsolution = rawECsolution * (1.0 + 0.02 * (this->temperature - 25.0));
+    
+    float KValueTemp = rawECsolution / (133.42 * this->voltage * this->voltage * this->voltage - 
+                                       255.86 * this->voltage * this->voltage + 857.39 * this->voltage);
+    
+    if ((rawECsolution > 0) && (rawECsolution < 2000) && (KValueTemp > 0.25) && (KValueTemp < 4.0)) {
+        this->kValue = KValueTemp;
+        EEPROM_write(this->kValueAddress, this->kValue);
+        
+        Serial.println();
+        Serial.print(F(">>>Calibration Successful, K: "));
+        Serial.print(KValueTemp);
+        Serial.println(F("<<<"));
+        
+#if defined(ESP32)
+        EEPROM.commit();
+#endif
+        return true;
+    } else {
+        Serial.println();
+        Serial.println(F(">>>Calibration Failed - Invalid K-value range<<<"));
+        Serial.print(F("KValue calculated: "));
+        Serial.println(KValueTemp);
+        return false;
+    }
+}
+
+void GravityTDS::setKValue(float k) {
+    if (k > 0.25 && k < 4.0) {
+        this->kValue = k;
+        EEPROM_write(this->kValueAddress, this->kValue);
+#if defined(ESP32)
+        EEPROM.commit();
+#endif
+        Serial.print(F(">>>K-Value set to: "));
+        Serial.println(k);
+    } else {
+        Serial.println(F(">>>Invalid K-Value. Range: 0.25-4.0<<<"));
+    }
 }

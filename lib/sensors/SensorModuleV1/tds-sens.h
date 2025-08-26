@@ -48,6 +48,12 @@ public:
     float getKvalue();
     float getTdsValue();
     float getEcValue();
+    
+    void setCalibrationValue(float targetPPM);
+    void enterCalibrationMode();
+    void exitCalibrationMode();
+    bool performCalibration(float targetPPM);
+    void setKValue(float k);
 
 private:
     int pin;
@@ -69,6 +75,9 @@ private:
     boolean cmdSerialDataAvailable();
     byte cmdParse();
     void ecCalibration(byte mode);
+    
+    bool calibrationMode;
+    float calibrationTarget;
 };
 
 #endif
