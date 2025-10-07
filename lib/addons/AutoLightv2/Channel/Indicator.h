@@ -12,14 +12,14 @@
 
 #include "Arduino.h"
 
-#ifndef ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
-#define ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
+#ifndef ENABLE_MODULE_NODEF_DIGITAL_OUTPUT
+#define ENABLE_MODULE_NODEF_DIGITAL_OUTPUT
 #endif
-#ifndef ENABLE_MODULE_HELPER_TIMER_TASK
-#define ENABLE_MODULE_HELPER_TIMER_TASK
+#ifndef ENABLE_MODULE_NODEF_TIMER_TASK
+#define ENABLE_MODULE_NODEF_TIMER_TASK
 #endif
 
-#include "KinematrixModulesHelper.h"
+#include "KinematrixModulesNoDef.h"
 
 namespace AutoLight {
     const int MAXNUM_INDICATOR = 4;

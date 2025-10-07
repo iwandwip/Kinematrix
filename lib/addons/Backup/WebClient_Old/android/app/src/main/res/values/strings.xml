@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kotak Tisu</string>
+    <string name="title_activity_main">Kotak Tisu</string>
+    <string name="package_name">com.als.v.dua.nol.workalogi</string>
+    <string name="custom_url_scheme">com.als.v.dua.nol.workalogi</string>
+</resources>

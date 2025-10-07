@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "AutoLight App",
+    "slug": "autolight-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "autolight",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "assets/icon.png",
+      "assets/adaptive-icon.png", 
+      "assets/splash-icon.png",
+      "assets/favicon.png"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.mcclawsher.autolightapp"
+    },
+    "web": {
+      "favicon": "./assets/icon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {}
+    }
+  }
+}

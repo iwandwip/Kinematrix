@@ -3,6 +3,7 @@
  *
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
+ *  Modified for 4 button support
  */
 
 #pragma once
@@ -12,17 +13,17 @@
 
 #include "Arduino.h"
 
-#ifndef ENABLE_MODULE_HELPER_IO_EXPANDER
-#define ENABLE_MODULE_HELPER_IO_EXPANDER
+#ifndef ENABLE_MODULE_NODEF_IO_EXPANDER
+#define ENABLE_MODULE_NODEF_IO_EXPANDER
 #endif
-#ifndef ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
-#define ENABLE_MODULE_HELPER_DIGITAL_OUTPUT
+#ifndef ENABLE_MODULE_NODEF_DIGITAL_OUTPUT
+#define ENABLE_MODULE_NODEF_DIGITAL_OUTPUT
 #endif
-#ifndef ENABLE_MODULE_HELPER_TIMER_TASK
-#define ENABLE_MODULE_HELPER_TIMER_TASK
+#ifndef ENABLE_MODULE_NODEF_TIMER_TASK
+#define ENABLE_MODULE_NODEF_TIMER_TASK
 #endif
 
-#include "KinematrixModulesHelper.h"
+#include "KinematrixModulesNoDef.h"
 
 #include "../Config/BaseConfig.h"
 #include "../ButtonInterrupt.h"
@@ -44,9 +45,11 @@ namespace AutoLight {
         volatile uint32_t delay_time_;
         volatile uint32_t sequence_index_;
         volatile uint32_t sequence_index_apps_;
+        volatile uint32_t last_active_sequence_; // To store the last active mode
         volatile bool is_reverse_;
         volatile bool is_mode_changed_;
         volatile bool is_mode_changed_apps_;
+        volatile bool is_on_; // To track if the system is on or off
     };
 
     class ExpanderIo {
@@ -76,10 +79,26 @@ namespace AutoLight {
         volatile uint32_t getDelayTime();
         ChannelData getChannelData();
 
-        void runAutoLight(void (*_callbackRun)(uint32_t sequence) = nullptr);
+        // New button functions
+        void nextMode();     // For button 0
+        void previousMode(); // For button 1
+        void onMode();       // For button 2
+        void offMode();      // For button 3
+
+        void singleButtonCycle();
+        void toggleOnOff();
+        void smartButtonPress(uint8_t button_index);
+        void setButtonMode(button_mode_t mode);
+        void setButtonConfig(ButtonConfig* config);
+        void executeButtonAction(uint8_t button_index);
+
+        // Legacy method
         void changeMode();
         void changeModeApp(uint32_t num);
         volatile bool isChangeMode();
+        volatile bool isOn(); // Check if the system is on
+
+        void runAutoLight(void (*_callbackRun)(uint32_t sequence) = nullptr);
 
         void setStateHigh(int index, ...);
         void setStateLow(int index, ...);
@@ -138,6 +157,8 @@ namespace AutoLight {
 
         ConfigData *config_data_ptr_;
         ButtonInterrupt *button_interrupt_ptr_;
+        ButtonConfig button_config_;
+        button_mode_t current_button_mode_;
     };
 }
 

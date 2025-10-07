@@ -28,7 +28,7 @@ const uint8_t SevenSegmentRaw::digitPatterns[18] = {
         0b00000010   // 17: Dash (G segment only)
 };
 
-SevenSegmentRaw* SevenSegmentRaw::instance = nullptr;
+SevenSegmentRaw *SevenSegmentRaw::instance = nullptr;
 
 SevenSegmentRaw::SevenSegmentRaw(uint8_t segA, uint8_t segB, uint8_t segC, uint8_t segD,
                                  uint8_t segE, uint8_t segF, uint8_t segG, uint8_t segDP,
@@ -37,7 +37,7 @@ SevenSegmentRaw::SevenSegmentRaw(uint8_t segA, uint8_t segB, uint8_t segC, uint8
     // Bounds checking
     if (numDigits == 0) numDigits = 1;
     if (numDigits > MAX_DIGITS) numDigits = MAX_DIGITS;
-    
+
     this->numDigits = numDigits;
     this->segmentActiveHigh = segmentActiveHigh;
     this->digitActiveHigh = digitActiveHigh;
@@ -48,13 +48,13 @@ SevenSegmentRaw::SevenSegmentRaw(uint8_t segA, uint8_t segB, uint8_t segC, uint8
     this->timingMode = TIMING_MILLIS;
     this->dpPosition = 255;
     this->decimals = 0;
-    
+
     // Initialize instance variables
     this->currentNumber = 0;
     this->currentHexNumber = 0;
     this->currentFloat = 0.0;
     this->currentDecimals = 0;
-    memset(this->currentText, 0, sizeof(this->currentText))
+    memset(this->currentText, 0, sizeof(this->currentText));
 
     segmentPins = new uint8_t[8];
     segmentPins[0] = segA;
@@ -71,7 +71,7 @@ SevenSegmentRaw::SevenSegmentRaw(uint8_t segA, uint8_t segB, uint8_t segC, uint8
         this->digitPins[i] = digitPins[i];
         this->displayBuffer[i] = PATTERN_BLANK;
     }
-    
+
     instance = this;
 }
 
@@ -119,15 +119,15 @@ void SevenSegmentRaw::clearAll() {
 // Timing Mode Methods
 void SevenSegmentRaw::setTimingMode(TimingMode mode) {
     if (timingMode == mode) return;
-    
+
     // Disable Timer1 if currently active
     if (timingMode == TIMING_TIMER1) {
         Timer1.detachInterrupt();
         Timer1.stop();
     }
-    
+
     timingMode = mode;
-    
+
     // Enable Timer1 if switching to Timer1 mode
     if (mode == TIMING_TIMER1) {
         updateTimer();
@@ -157,27 +157,27 @@ void SevenSegmentRaw::refreshDisplayISR() {
     selectDigit(currentDigit);
     uint8_t pattern = displayBuffer[currentDigit];
     uint8_t segmentData;
-    
+
     if (pattern < 18) {
         segmentData = digitPatterns[pattern];
     } else {
         segmentData = digitPatterns[PATTERN_DASH];
     }
-    
+
     // Add decimal point if needed (Timer1 mode support)
     if (currentDigit == dpPosition && decimals > 0) {
         segmentData |= DECIMAL_POINT_BIT;
     }
-    
+
     setSegment(segmentData);
     currentDigit = (currentDigit + 1) % numDigits;
 }
 
 void SevenSegmentRaw::handleRefresh() {
     if (numDigits == 0) return; // Prevent division by zero
-    
+
     switch (timingMode) {
-        case TIMING_DELAY:
+        case TIMING_DELAY: {
             // Blocking delay mode - display each digit with delay
             for (uint8_t i = 0; i < numDigits; i++) {
                 selectDigit(i);
@@ -190,8 +190,9 @@ void SevenSegmentRaw::handleRefresh() {
                 clearAll();
             }
             break;
-            
-        case TIMING_MILLIS:
+        }
+
+        case TIMING_MILLIS: {
             // Non-blocking millis mode
             uint32_t interval = (100 - brightness) / numDigits;
             if (interval == 0) interval = 1; // Prevent zero interval
@@ -200,7 +201,8 @@ void SevenSegmentRaw::handleRefresh() {
                 lastRefresh = millis();
             }
             break;
-            
+        }
+
         case TIMING_TIMER1:
             // Timer1 handles refresh automatically in ISR
             break;
@@ -255,13 +257,10 @@ void SevenSegmentRaw::displayNumber(int32_t number) {
                 if (pos > 0) digits[pos - 1] = PATTERN_DASH;
             }
         }
-        
-        // Update display buffer
-        noInterrupts();
+
         for (uint8_t i = 0; i < numDigits; i++) {
             displayBuffer[i] = digits[i];
         }
-        interrupts();
     }
 
     handleRefresh();
@@ -272,7 +271,7 @@ void SevenSegmentRaw::displayFloat(float number, uint8_t decimals) {
     if (number != currentFloat || decimals != currentDecimals) {
         currentFloat = number;
         currentDecimals = decimals;
-        
+
         bool negative = number < 0;
         if (negative) number = -number;
 
@@ -288,14 +287,12 @@ void SevenSegmentRaw::displayFloat(float number, uint8_t decimals) {
             intNumber /= 10;
         }
 
-        // Store decimal position for Timer1 mode
-        noInterrupts();
+        // Store decimal position for Timer1 mod
         this->dpPosition = numDigits - 1 - decimals;
         this->decimals = decimals;
         for (uint8_t i = 0; i < numDigits; i++) {
             displayBuffer[i] = digits[i];
         }
-        interrupts();
     }
 
     // Handle refresh for all timing modes (decimal point now works in Timer1 too)
@@ -311,13 +308,10 @@ void SevenSegmentRaw::displayHex(uint16_t number) {
             digits[numDigits - 1 - i] = number & 0x0F;
             number >>= 4;
         }
-        
-        // Update display buffer
-        noInterrupts();
+
         for (uint8_t i = 0; i < numDigits; i++) {
             displayBuffer[i] = digits[i];
         }
-        interrupts();
     }
 
     handleRefresh();
@@ -348,13 +342,10 @@ void SevenSegmentRaw::displayText(const char *text) {
                 digits[i] = PATTERN_BLANK;
             }
         }
-        
-        // Update display buffer
-        noInterrupts();
+
         for (uint8_t i = 0; i < numDigits; i++) {
             displayBuffer[i] = digits[i];
         }
-        interrupts();
     }
 
     handleRefresh();
@@ -368,21 +359,19 @@ void SevenSegmentRaw::setBrightness(uint8_t level) {
 }
 
 void SevenSegmentRaw::clear() {
-    noInterrupts();
     for (uint8_t i = 0; i < numDigits; i++) {
         displayBuffer[i] = PATTERN_BLANK;
     }
     dpPosition = 255;
     decimals = 0;
-    interrupts();
-    
+
     // Reset instance variables
     currentNumber = 0;
     currentHexNumber = 0;
     currentFloat = 0.0;
     currentDecimals = 0;
     memset(currentText, 0, sizeof(currentText));
-    
+
     if (timingMode != TIMING_TIMER1) {
         clearAll();
     }

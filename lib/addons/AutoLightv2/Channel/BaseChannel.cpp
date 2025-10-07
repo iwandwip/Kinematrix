@@ -3,6 +3,7 @@
  *
  *  Kastara Electronics Embedded Development
  *  Created on: 2023. 4. 3
+ *  Modified for 4 button support
  */
 
 #include "BaseChannel.h"
@@ -10,11 +11,21 @@
 namespace AutoLight {
     BaseChannel::BaseChannel(bool _enable_unit_test)
             : is_unit_test_(_enable_unit_test) {
+        channel_data_.is_on_ = false;
+        channel_data_.last_active_sequence_ = 1;
+        current_button_mode_ = BUTTON_MODE_4BUTTON;
+        button_config_.button_count = 4;
+        button_config_.mode = BUTTON_MODE_4BUTTON;
+        button_config_.auto_cycle_enabled = false;
+        button_config_.auto_cycle_timeout = 30000;
+        for (int i = 0; i < 4; i++) {
+            button_config_.custom_handlers[i] = nullptr;
+        }
         setTaskSequenceFunction();
     }
 
     BaseChannel::~BaseChannel() {
-        free(this);
+        // Removed free(this) to prevent potential issues
     }
 
     bool BaseChannel::initialize() {
@@ -71,13 +82,185 @@ namespace AutoLight {
         return channel_data_;
     }
 
+    // Legacy method - kept for compatibility
     void BaseChannel::changeMode() {
         channel_data_.is_mode_changed_ = true;
+    }
+
+    // New button functions
+    void BaseChannel::nextMode() {
+        if (!channel_data_.is_on_) return; // Only work when a system is on
+
+        channel_data_.is_mode_changed_ = true;
+        channel_data_.sequence_index_++; // Will be properly handled in runAutoLight
+
+        if (channel_data_.sequence_index_ > (total_task_sequence_)) {
+            channel_data_.sequence_index_ = 1; // Cycle back to mode 1 (skip off mode)
+        }
+    }
+
+    void BaseChannel::previousMode() {
+        if (!channel_data_.is_on_) return; // Only work when a system is on
+
+        channel_data_.is_mode_changed_ = true;
+
+        if (channel_data_.sequence_index_ <= 1) {
+            channel_data_.sequence_index_ = total_task_sequence_; // Cycle to the highest mode
+        } else {
+            channel_data_.sequence_index_--;
+        }
+    }
+
+    void BaseChannel::onMode() {
+        if (channel_data_.is_on_) return; // Already on, do nothing
+
+        channel_data_.is_on_ = true;
+        channel_data_.is_mode_changed_ = true;
+
+        // Restore the last active sequence
+        if (channel_data_.last_active_sequence_ < 1) {
+            channel_data_.sequence_index_ = 1; // Default to mode 1 if no last active mode
+        } else {
+            channel_data_.sequence_index_ = channel_data_.last_active_sequence_;
+        }
+    }
+
+    void BaseChannel::offMode() {
+        if (!channel_data_.is_on_) return; // Already off, do nothing
+
+        // Store the current sequence for later restoration
+        if (channel_data_.sequence_index_ > 0) {
+            channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
+        }
+
+        channel_data_.is_on_ = false;
+        channel_data_.is_mode_changed_ = true;
+        channel_data_.sequence_index_ = 0; // Mode 0 is off
+    }
+
+    volatile bool BaseChannel::isOn() {
+        return channel_data_.is_on_;
+    }
+
+    void BaseChannel::singleButtonCycle() {
+        channel_data_.is_mode_changed_ = true;
+        
+        if (!channel_data_.is_on_) {
+            channel_data_.sequence_index_ = 1;
+            channel_data_.is_on_ = true;
+        } else {
+            channel_data_.sequence_index_++;
+            
+            if (channel_data_.sequence_index_ > total_task_sequence_) {
+                channel_data_.sequence_index_ = 0;
+                channel_data_.is_on_ = false;
+            } else {
+                channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
+            }
+        }
+        
+        temp_mode_ = total_mode_[channel_data_.sequence_index_];
+    }
+
+    void BaseChannel::toggleOnOff() {
+        if (channel_data_.is_on_) {
+            offMode();
+        } else {
+            onMode();
+        }
+    }
+
+    void BaseChannel::setButtonMode(button_mode_t mode) {
+        current_button_mode_ = mode;
+        button_config_.mode = mode;
+        
+        switch(mode) {
+            case BUTTON_MODE_1BUTTON:
+                button_config_.button_count = 1;
+                break;
+            case BUTTON_MODE_2BUTTON:
+                button_config_.button_count = 2;
+                break;
+            case BUTTON_MODE_3BUTTON:
+                button_config_.button_count = 3;
+                break;
+            case BUTTON_MODE_4BUTTON:
+            default:
+                button_config_.button_count = 4;
+                break;
+        }
+    }
+
+    void BaseChannel::setButtonConfig(ButtonConfig* config) {
+        button_config_ = *config;
+        current_button_mode_ = config->mode;
+    }
+
+    void BaseChannel::smartButtonPress(uint8_t button_index) {
+        switch(current_button_mode_) {
+            case BUTTON_MODE_1BUTTON:
+                singleButtonCycle();
+                break;
+                
+            case BUTTON_MODE_2BUTTON:
+                if (button_index == 0) {
+                    toggleOnOff();
+                } else {
+                    if (channel_data_.is_on_) nextMode();
+                }
+                break;
+                
+            case BUTTON_MODE_3BUTTON:
+                if (button_index == 0) {
+                    onMode();
+                } else if (button_index == 1) {
+                    offMode();
+                } else {
+                    if (channel_data_.is_on_) nextMode();
+                }
+                break;
+                
+            case BUTTON_MODE_4BUTTON:
+                if (button_index == 0) {
+                    onMode();
+                } else if (button_index == 1) {
+                    offMode();
+                } else if (button_index == 2) {
+                    if (channel_data_.is_on_) nextMode();
+                } else if (button_index == 3) {
+                    if (channel_data_.is_on_) previousMode();
+                }
+                break;
+                
+            case BUTTON_MODE_CUSTOM:
+                if (button_config_.custom_handlers[button_index]) {
+                    button_config_.custom_handlers[button_index]();
+                }
+                break;
+        }
+    }
+
+    void BaseChannel::executeButtonAction(uint8_t button_index) {
+        if (button_index >= button_config_.button_count) return;
+        smartButtonPress(button_index);
     }
 
     void BaseChannel::changeModeApp(uint32_t num) {
         channel_data_.is_mode_changed_apps_ = true;
         channel_data_.sequence_index_apps_ = num;
+
+        // If turning on via app
+        if (num > 0 && !channel_data_.is_on_) {
+            channel_data_.is_on_ = true;
+        }
+            // If turning off via app
+        else if (num == 0 && channel_data_.is_on_) {
+            channel_data_.is_on_ = false;
+            // Store the current sequence for later restoration if not already going to off mode
+            if (channel_data_.sequence_index_ > 0) {
+                channel_data_.last_active_sequence_ = channel_data_.sequence_index_;
+            }
+        }
     }
 
     volatile bool BaseChannel::isChangeMode() {
@@ -88,16 +271,23 @@ namespace AutoLight {
         if (isChangeMode()) {
             forceOff();
 
-            channel_data_.sequence_index_++;
+            // This will be handled by the specific mode functions now
+            // Don't auto-increment when coming from on/off methods
+            /*channel_data_.sequence_index_++;
             if (channel_data_.sequence_index_ > (total_task_sequence_)) {
                 channel_data_.sequence_index_ = 0;
-            }
+            }*/
+
             if (channel_data_.is_mode_changed_apps_) {
                 if (channel_data_.sequence_index_apps_ > total_task_sequence_) {
                     channel_data_.sequence_index_apps_ = total_task_sequence_;
                 }
                 channel_data_.sequence_index_ = channel_data_.sequence_index_apps_;
+
+                // Update on/off state based on the selected mode
+                channel_data_.is_on_ = (channel_data_.sequence_index_ > 0);
             }
+
             if (_callbackRun != nullptr) {
                 _callbackRun(channel_data_.sequence_index_);
             }
@@ -122,13 +312,21 @@ namespace AutoLight {
                 Serial.print(total_task_sequence_);
                 Serial.println();
 
+                Serial.print("| is_on_                       : ");
+                Serial.print("| ");
+                Serial.print(channel_data_.is_on_ ? "true" : "false");
+                Serial.println();
+
+                Serial.print("| last_active_sequence_        : ");
+                Serial.print("| ");
+                Serial.print(channel_data_.last_active_sequence_);
+                Serial.println();
+
                 Serial.println("| END DEBUG BUTTON INTERRUPT");
                 Serial.println("==============================");
             }
-
         }
         (this->*temp_mode_)();
-
     }
 
     void BaseChannel::setStateHigh(int index, ...) {
@@ -444,6 +642,16 @@ namespace AutoLight {
         Serial.print("| is_reverse_                  : ");
         Serial.print("| ");
         Serial.print(channel_data_.is_reverse_);
+        Serial.println();
+
+        Serial.print("| is_on_                       : ");
+        Serial.print("| ");
+        Serial.print(channel_data_.is_on_ ? "true" : "false");
+        Serial.println();
+
+        Serial.print("| last_active_sequence_        : ");
+        Serial.print("| ");
+        Serial.print(channel_data_.last_active_sequence_);
         Serial.println();
 
         Serial.print("| config_data_ptr_             : ");

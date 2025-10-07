@@ -1,0 +1,914 @@
+╭───────────────────────────────────────────────────────────────────────╮
+│ ✻ Welcome to Claude Code!                                             │
+│                                                                       │
+│   /help for help, /status for your current setup                      │
+│                                                                       │
+│   cwd: /home/iwandwp/catkin_ws/KinematrixBeta/lib/addons/AutoLightv3  │
+╰───────────────────────────────────────────────────────────────────────╯
+
+> /clear 
+  ⎿  (no content)
+
+> pelajari tentang claude code hooks
+
+● I'll help you learn about Claude Code hooks. Let me fetch the latest
+  information from the Claude Code documentation.
+
+● Fetch(https://docs.claude.com/en/docs/claude-code/claude_code_docs_map.md
+       )
+  ⎿  Received 27.5KB (200 OK)
+
+● Let me get more specific information about Claude Code hooks
+  configuration and examples.
+
+● Fetch(https://docs.claude.com/en/docs/claude-code/hooks)
+  ⎿  Received 2MB (200 OK)
+
+● Based on the documentation, here's a comprehensive overview of Claude
+   Code hooks:
+
+  ★ Insight ─────────────────────────────────────
+  - Hooks are event-driven scripts that customize Claude Code behavior
+  - They provide security boundaries and workflow automation
+  capabilities
+  - Hook responses can dynamically control tool execution and add
+  context
+  ─────────────────────────────────────────────────
+
+  What are Claude Code Hooks?
+
+  Claude Code hooks are event-driven configuration scripts that allow
+  you to customize and control Claude Code's behavior at specific
+  interaction points. They act as middleware between user requests and
+  tool execution, providing security, validation, and workflow
+  customization.
+
+  Hook Types and Events
+
+  Available Hook Events
+
+  1. PreToolUse - Before any tool is executed
+  2. PostToolUse - After a tool completes successfully
+  3. UserPromptSubmit - When user submits a prompt
+  4. SessionStart - At the beginning of a session
+  5. SessionEnd - When a session terminates
+  6. Notification - For system notifications
+  7. Stop - When stopping execution
+  8. SubagentStop - When a subagent stops
+  9. PreCompact - Before conversation compacting
+
+  Hook Output Types
+
+  - Simple Exit Code: Script returns 0 (allow) or non-zero (block)
+  - Advanced JSON Output: Dynamic responses with context and control
+
+  Configuration Structure
+
+  Hooks are configured in ~/.claude/settings.json:
+
+  {
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/path/to/validation-script.sh"
+            }
+          ]
+        }
+      ],
+      "UserPromptSubmit": [
+        {
+          "matcher": "*",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "python3 /path/to/prompt-processor.py"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Common Use Cases
+
+  1. Command Validation
+
+  #!/bin/bash
+  # validate-bash.sh
+  COMMAND="$1"
+  if [[ "$COMMAND" == *"rm -rf"* ]]; then
+    echo "Dangerous command blocked"
+    exit 1
+  fi
+  exit 0
+
+  2. Context Enhancement
+
+  #!/usr/bin/env python3
+  # enhance-prompt.py
+  import json
+  import sys
+
+  # Read hook data
+  hook_data = json.loads(sys.argv[1])
+  prompt = hook_data.get('prompt', '')
+
+  # Add project context
+  enhanced_context = {
+      "action": "allow",
+      "context": f"Project: AutoLight V3\nCurrent task: {prompt}"
+  }
+
+  print(json.dumps(enhanced_context))
+
+  3. Tool Usage Control
+
+  {
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Write",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "echo 'File write requested' && exit 0"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Advanced Hook Features
+
+  Matcher Patterns
+
+  - * - Matches all tools/events
+  - "Bash" - Specific tool name
+  - "Bash:git *" - Command pattern matching
+  - Regular expressions for complex patterns
+
+  JSON Response Format
+
+  {
+    "action": "allow|block|modify",
+    "context": "Additional context for Claude",
+    "message": "User-visible feedback",
+    "modifications": {
+      "prompt": "Modified prompt text"
+    }
+  }
+
+  Security Considerations
+
+  Best Practices
+
+  - Use absolute paths for hook scripts
+  - Validate all inputs to prevent injection
+  - Limit hook permissions - don't run as root
+  - Log hook activity for auditing
+  - Test hooks thoroughly before deployment
+
+  Example Secure Hook
+
+  #!/bin/bash
+  # secure-validation.sh
+  set -euo pipefail  # Strict error handling
+
+  readonly COMMAND="$1"
+  readonly LOG_FILE="/var/log/claude-hooks.log"
+
+  # Log the command
+  echo "$(date): Command requested: $COMMAND" >> "$LOG_FILE"
+
+  # Validate against whitelist
+  if grep -q "^$COMMAND$" /etc/claude/allowed-commands.txt; then
+      exit 0
+  else
+      echo "Command not in whitelist" >&2
+      exit 1
+  fi
+
+  Practical Examples
+
+  Development Workflow Hook
+
+  {
+    "hooks": {
+      "PreToolUse": [
+        {
+          "matcher": "Bash:git commit*",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/scripts/pre-commit-validation.sh"
+            }
+          ]
+        }
+      ],
+      "PostToolUse": [
+        {
+          "matcher": "Write",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/scripts/format-code.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Project-Specific Context
+
+  #!/usr/bin/env python3
+  # project-context.py
+  import json
+  import os
+  import sys
+
+  def add_project_context():
+      # Read current directory and project files
+      cwd = os.getcwd()
+
+      context = {
+          "action": "allow",
+          "context": f"""
+  Current project: {os.path.basename(cwd)}
+  Working directory: {cwd}
+  Available configs: {list_config_files()}
+          """.strip()
+      }
+
+      print(json.dumps(context))
+
+  def list_config_files():
+      config_files = []
+      for file in os.listdir('.'):
+          if file.endswith(('.json', '.yaml', '.toml', '.ini')):
+              config_files.append(file)
+      return config_files
+
+  if __name__ == "__main__":
+      add_project_context()
+
+  Hook Integration with Your Workflow
+
+  For your AutoLight V3 project, you could create hooks for:
+
+  1. Build Validation: Ensure python3 ./index.py runs before commits
+  2. Code Formatting: Auto-format C++ files after edits
+  3. Documentation Updates: Auto-update CLAUDE.md when significant
+  changes occur
+  4. API Testing: Validate API endpoints after server changes
+
+  Claude Code hooks provide powerful workflow automation and security
+  controls, making them excellent for maintaining code quality and
+  development standards in complex projects like your AutoLight V3
+  system.
+
+> nah begini kalau misal gini, aku ingin setelah selesai 1 promt, atau 1 
+  pesan selesai, aku ingin claude code itu menjalankan perintah ini 
+
+
+  qwen -p << 'EOF' --yolo
+  Tolong lakukan proses Git otomatis berikut langkah demi langkah (jika 
+  terjadi error atau konflik, batalkan dan tampilkan pesan):
+
+  1. Jalankan `git status` dan tampilkan hasilnya.  
+  2. Jika `git status` menunjukkan ada unmerged files atau konflik, 
+  hentikan proses dan tampilkan pesan error.  
+  3. Jalankan `git add .` untuk menambahkan semua file yang berubah ke 
+  staging area.  
+  4. Jalankan `git diff --staged` dan tampilkan hasilnya (stdout & 
+  stderr).  
+  5. Berdasarkan perubahan staged, buat satu atau beberapa commit 
+  menggunakan format **Conventional Commits**:
+     * Jenis perubahan: `feat`, `fix`, `docs`, `style`, `refactor`, 
+  `test`, atau `chore`.  
+     * Deskripsi singkat yang jelas dan ringkas.  
+     * Contoh: `git commit -m "fix: perbaiki bug validasi pada form 
+  registrasi"`.  
+     * Jika ada beberapa jenis perubahan, buat commit terpisah untuk tiap
+   jenis dan tampilkan setiap commit message yang digunakan.  
+  6. Setelah commit selesai tanpa error, jalankan `git push` dan 
+  tampilkan hasilnya.
+
+  ⚡ Jangan melanjutkan ke `git commit` atau `git push` jika terjadi 
+  error di langkah sebelumnya.
+  EOF
+
+
+
+  itu jadi biar setelah pesan selesai, menjalankan itu
+
+● ★ Insight ─────────────────────────────────────
+  - Hooks PostToolUse akan menjalankan setelah tool selesai dieksekusi
+  - UserPromptSubmit lebih tepat untuk eksekusi setelah pesan lengkap
+  selesai
+  - Script qwen akan otomatis melakukan git workflow dengan
+  conventional commits
+  ─────────────────────────────────────────────────
+
+  Untuk menjalankan perintah qwen secara otomatis setelah setiap
+  pesan/prompt selesai, kamu perlu mengkonfigurasi Claude Code hooks.
+  Berdasarkan kebutuhan kamu, hook yang tepat adalah UserPromptSubmit
+  atau PostToolUse.
+
+  Konfigurasi Hook untuk Auto Git Workflow
+
+  1. Buat Script Hook
+
+  Pertama, buat script yang akan menjalankan perintah qwen:
+
+  #!/bin/bash
+  # ~/.claude/scripts/auto-git.sh
+  set -euo pipefail
+
+  echo "🔄 Menjalankan auto-git workflow..."
+
+  qwen -p << 'EOF' --yolo
+  Tolong lakukan proses Git otomatis berikut langkah demi langkah (jika
+   terjadi error atau konflik, batalkan dan tampilkan pesan):
+
+  1. Jalankan `git status` dan tampilkan hasilnya.
+  2. Jika `git status` menunjukkan ada unmerged files atau konflik,
+  hentikan proses dan tampilkan pesan error.
+  3. Jalankan `git add .` untuk menambahkan semua file yang berubah ke
+  staging area.
+  4. Jalankan `git diff --staged` dan tampilkan hasilnya (stdout &
+  stderr).
+  5. Berdasarkan perubahan staged, buat satu atau beberapa commit
+  menggunakan format **Conventional Commits**:
+     * Jenis perubahan: `feat`, `fix`, `docs`, `style`, `refactor`,
+  `test`, atau `chore`.
+     * Deskripsi singkat yang jelas dan ringkas.
+     * Contoh: `git commit -m "fix: perbaiki bug validasi pada form 
+  registrasi"`.
+     * Jika ada beberapa jenis perubahan, buat commit terpisah untuk
+  tiap jenis dan tampilkan setiap commit message yang digunakan.
+  6. Setelah commit selesai tanpa error, jalankan `git push` dan
+  tampilkan hasilnya.
+
+  ⚡ Jangan melanjutkan ke `git commit` atau `git push` jika terjadi
+  error di langkah sebelumnya.
+  EOF
+
+  echo "✅ Auto-git workflow selesai"
+
+  2. Buat Script Executable
+
+  chmod +x ~/.claude/scripts/auto-git.sh
+
+  3. Konfigurasi Hook di Settings
+
+  Edit file ~/.claude/settings.json:
+
+  {
+    "hooks": {
+      "UserPromptSubmit": [
+        {
+          "matcher": "*",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/home/iwandwp/.claude/scripts/auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Alternatif: Hook Setelah Tool Selesai
+
+  Jika kamu ingin menjalankan setelah tool tertentu selesai (misalnya
+  setelah Edit, Write, atau Bash):
+
+  {
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write|MultiEdit",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/home/iwandwp/.claude/scripts/auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Konfigurasi dengan Conditional Logic
+
+  Untuk lebih fleksibel, buat script yang mengecek kondisi terlebih
+  dahulu:
+
+  #!/bin/bash
+  # ~/.claude/scripts/smart-auto-git.sh
+  set -euo pipefail
+
+  # Hanya jalankan jika ada perubahan git
+  if ! git diff --quiet HEAD 2>/dev/null || ! git diff --staged --quiet
+   2>/dev/null; then
+      echo "🔄 Ada perubahan, menjalankan auto-git workflow..."
+
+      qwen -p << 'EOF' --yolo
+  Tolong lakukan proses Git otomatis berikut langkah demi langkah (jika
+   terjadi error atau konflik, batalkan dan tampilkan pesan):
+
+  1. Jalankan `git status` dan tampilkan hasilnya.
+  2. Jika `git status` menunjukkan ada unmerged files atau konflik,
+  hentikan proses dan tampilkan pesan error.
+  3. Jalankan `git add .` untuk menambahkan semua file yang berubah ke
+  staging area.
+  4. Jalankan `git diff --staged` dan tampilkan hasilnya (stdout &
+  stderr).
+  5. Berdasarkan perubahan staged, buat satu atau beberapa commit
+  menggunakan format **Conventional Commits**:
+     * Jenis perubahan: `feat`, `fix`, `docs`, `style`, `refactor`,
+  `test`, atau `chore`.
+     * Deskripsi singkat yang jelas dan ringkas.
+     * Contoh: `git commit -m "fix: perbaiki bug validasi pada form 
+  registrasi"`.
+     * Jika ada beberapa jenis perubahan, buat commit terpisah untuk
+  tiap jenis dan tampilkan setiap commit message yang digunakan.
+  6. Setelah commit selesai tanpa error, jalankan `git push` dan
+  tampilkan hasilnya.
+
+  ⚡ Jangan melanjutkan ke `git commit` atau `git push` jika terjadi
+  error di langkah sebelumnya.
+  EOF
+
+      echo "✅ Auto-git workflow selesai"
+  else
+      echo "ℹ️ Tidak ada perubahan git, skip auto-commit"
+  fi
+
+  Konfigurasi Project-Specific
+
+  Jika hanya ingin berjalan di project tertentu, tambahkan check
+  directory:
+
+  #!/bin/bash
+  # ~/.claude/scripts/project-auto-git.sh
+  set -euo pipefail
+
+  # Hanya jalankan di project AutoLight
+  if [[ "$PWD" == *"AutoLightv3"* ]] || [[ "$PWD" == *"KinematrixBeta"*
+   ]]; then
+      # Jalankan qwen command di sini
+      echo "🔄 Menjalankan auto-git untuk project: $(basename "$PWD")"
+      # ... rest of qwen command
+  else
+      echo "ℹ️ Skip auto-git - bukan di project target"
+  fi
+
+  Testing Hook Configuration
+
+  Untuk test apakah hook sudah berjalan:
+
+  1. Check settings file:
+  cat ~/.claude/settings.json
+
+  2. Test script manually:
+  ~/.claude/scripts/auto-git.sh
+
+  3. Test dengan Claude Code:
+    - Kirim pesan sederhana
+    - Lihat apakah script dijalankan di terminal
+
+  Disable Hook Sementara
+
+  Jika perlu disable sementara, bisa rename key di settings:
+
+  {
+    "hooks": {
+      "_UserPromptSubmit_disabled": [
+        {
+          "matcher": "*",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/home/iwandwp/.claude/scripts/auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Dengan konfigurasi ini, setiap kali kamu selesai mengirim pesan ke
+  Claude Code, script qwen akan otomatis dijalankan untuk melakukan git
+   workflow dengan conventional commits format.
+
+> perbedaan PostToolUse dan UserPromptSubmit itu apa
+
+● ★ Insight ─────────────────────────────────────
+  - PostToolUse berjalan setelah tool (Read, Write, Bash) selesai
+  eksekusi
+  - UserPromptSubmit berjalan ketika user mengirim pesan, sebelum
+  Claude memproses
+  - Timing dan konteks eksekusi sangat berbeda antara keduanya
+  ─────────────────────────────────────────────────
+
+  Perbedaan PostToolUse vs UserPromptSubmit
+
+  PostToolUse
+
+  Kapan: Setelah Claude selesai menggunakan tool (Read, Write, Bash,
+  Edit, dll.)
+
+  User: "Edit file config.json"
+  Claude: [menggunakan Edit tool]
+  Claude: "File berhasil diedit"
+  → PostToolUse hook dijalankan ←
+
+  Karakteristik:
+  - Berjalan setelah aksi selesai
+  - Dipicu oleh tool usage (bukan user message)
+  - Bisa dipicu berkali-kali dalam satu conversation
+  - Context: informasi tentang tool yang baru digunakan
+
+  UserPromptSubmit
+
+  Kapan: Ketika user mengirim pesan, sebelum Claude memproses
+
+  User: "Edit file config.json" ← UserPromptSubmit hook dijalankan
+  Claude: "Saya akan mengedit file..."
+  Claude: [menggunakan Edit tool]
+  Claude: "File berhasil diedit"
+
+  Karakteristik:
+  - Berjalan sebelum Claude memproses
+  - Dipicu oleh user input
+  - Hanya dipicu sekali per user message
+  - Context: user prompt/message content
+
+  Ilustrasi Timeline
+
+  Timeline untuk: "Please edit config.json and run tests"
+
+  UserPromptSubmit Hook
+      ↓
+  User sends message
+      ↓
+  Claude processes request
+      ↓
+  Claude uses Edit tool ──→ PostToolUse Hook (untuk Edit)
+      ↓
+  Claude uses Bash tool ──→ PostToolUse Hook (untuk Bash)
+      ↓
+  Claude sends response
+
+  Contoh Praktis
+
+  UserPromptSubmit Hook
+
+  #!/bin/bash
+  # Berjalan ketika user kirim pesan
+  echo "📨 User mengirim pesan: $1"
+  echo "🕐 Waktu: $(date)"
+
+  # Bisa digunakan untuk:
+  # - Log user activity
+  # - Validate user input
+  # - Add context sebelum processing
+  # - Security checks
+
+  PostToolUse Hook
+
+  #!/bin/bash
+  # Berjalan setelah tool selesai digunakan
+  echo "🔧 Tool selesai digunakan: $TOOL_NAME"
+  echo "📁 File yang diubah: $FILES_MODIFIED"
+
+  # Bisa digunakan untuk:
+  # - Auto-commit setelah file edit
+  # - Run tests setelah code changes
+  # - Backup files
+  # - Notify about changes
+
+  Untuk Use Case Kamu (Auto Git)
+
+  Berdasarkan kebutuhan kamu untuk menjalankan qwen setelah pesan 
+  selesai diproses, ada 2 pilihan:
+
+  Pilihan 1: PostToolUse (Recommended)
+
+  {
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write|MultiEdit",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/home/iwandwp/.claude/scripts/auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Keuntungan:
+  - Hanya jalan ketika ada perubahan file
+  - Lebih efisien (tidak jalan untuk pertanyaan biasa)
+  - Context lebih tepat (tahu file apa yang berubah)
+
+  Pilihan 2: UserPromptSubmit
+
+  {
+    "hooks": {
+      "UserPromptSubmit": [
+        {
+          "matcher": "*",
+          "hooks": [
+            {
+              "type": "command",
+              "command":
+  "/home/iwandwip/.claude/scripts/delayed-auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Keuntungan:
+  - Jalan untuk setiap user message
+  - Bisa tambahkan delay untuk tunggu Claude selesai
+  - Lebih predictable timing
+
+  Script untuk Delayed Execution
+
+  Jika pakai UserPromptSubmit tapi ingin tunggu Claude selesai:
+
+  #!/bin/bash
+  # ~/.claude/scripts/delayed-auto-git.sh
+  set -euo pipefail
+
+  echo "📨 User prompt diterima, tunggu 3 detik..."
+  sleep 3
+
+  # Cek apakah ada perubahan baru
+  if ! git diff --quiet HEAD 2>/dev/null || ! git diff --staged --quiet
+   2>/dev/null; then
+      echo "🔄 Ada perubahan, jalankan qwen..."
+
+      qwen -p << 'EOF' --yolo
+      # Your qwen command here
+  EOF
+  else
+      echo "ℹ️ Tidak ada perubahan git"
+  fi
+
+  Rekomendasi untuk Kamu
+
+  Gunakan PostToolUse karena:
+
+  1. Lebih tepat sasaran - hanya jalan kalau ada file changes
+  2. Lebih efisien - tidak jalan untuk chat biasa
+  3. Context lebih baik - tahu tool apa yang baru digunakan
+  4. Timing lebih tepat - setelah perubahan file selesai
+
+  {
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Edit|Write|MultiEdit|Bash",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "/home/iwandwp/.claude/scripts/auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Ini akan menjalankan qwen setiap kali Claude selesai edit/write file
+  atau run bash command, yang lebih sesuai dengan workflow development
+  kamu.
+
+> kalau misal aku ingin nya itu setelah claude code selesai memrposes 1 
+  pesan itu gimana ya? coba browsing dan cari referensi nya
+
+● ★ Insight ─────────────────────────────────────
+  - Perlu mencari hook event yang berjalan setelah Claude selesai
+  memproses entire conversation turn
+  - Mungkin ada SessionEnd, ResponseComplete, atau event serupa yang
+  belum kita temukan
+  - Dokumentasi hooks mungkin memiliki event yang lebih spesifik untuk
+  use case ini
+  ─────────────────────────────────────────────────
+
+  Mari saya cari informasi lebih detail tentang hook events yang
+  tersedia di Claude Code, khususnya untuk menjalankan sesuatu setelah
+  Claude selesai memproses satu pesan lengkap.
+
+● Web Search("Claude Code hooks events complete message processing
+            ResponseComplete SessionEnd")
+  ⎿  Did 1 search in 24s                                              
+
+● Sekarang mari saya cari informasi lebih spesifik tentang hook "Stop"
+  yang sepertinya adalah event yang kamu butuhkan:
+
+● Fetch(https://docs.claude.com/en/docs/claude-code/hooks)
+  ⎿  Received 2MB (200 OK)
+
+● Mari saya cari informasi lebih detail tentang hook events yang
+  tersedia:
+
+● Fetch(https://github.com/anthropics/claude-code/issues/4318)
+  ⎿  Received 290.8KB (200 OK)
+
+● Perfect! Berdasarkan hasil pencarian, saya menemukan hook yang tepat
+  untuk kebutuhan kamu. Hook "Stop" adalah yang paling sesuai karena
+  berjalan setelah Claude selesai memproses dan merespons satu pesan.
+
+  Hook "Stop" - Solusi untuk Use Case Kamu
+
+  Kapan Hook "Stop" Berjalan:
+  - Setelah Claude selesai memproses dan merespons satu pesan
+  - Tidak berjalan jika user interrupt (Ctrl+C)
+  - Berjalan pada akhir conversation turn yang lengkap
+
+  Timeline Hook "Stop":
+  User: "Edit config.json and test it"
+      ↓
+  Claude: memproses request
+      ↓
+  Claude: menggunakan Edit tool
+      ↓
+  Claude: menggunakan Bash tool
+      ↓
+  Claude: mengirim response lengkap
+      ↓
+  → Stop hook dijalankan ← (TEPAT UNTUK KAMU!)
+
+  Konfigurasi Hook "Stop" untuk Auto Git
+
+  1. Buat Script Auto Git
+
+  #!/bin/bash
+  # ~/.claude/scripts/stop-auto-git.sh
+  set -euo pipefail
+
+  echo "🏁 Claude selesai memproses pesan, checking for git changes..."
+
+  # Cek apakah ada perubahan git
+  if ! git diff --quiet HEAD 2>/dev/null || ! git diff --staged --quiet
+   2>/dev/null; then
+      echo "🔄 Ada perubahan, menjalankan qwen auto-git..."
+
+      qwen -p << 'EOF' --yolo
+  Tolong lakukan proses Git otomatis berikut langkah demi langkah (jika
+   terjadi error atau konflik, batalkan dan tampilkan pesan):
+
+  1. Jalankan `git status` dan tampilkan hasilnya.
+  2. Jika `git status` menunjukkan ada unmerged files atau konflik,
+  hentikan proses dan tampilkan pesan error.
+  3. Jalankan `git add .` untuk menambahkan semua file yang berubah ke
+  staging area.
+  4. Jalankan `git diff --staged` dan tampilkan hasilnya (stdout &
+  stderr).
+  5. Berdasarkan perubahan staged, buat satu atau beberapa commit
+  menggunakan format **Conventional Commits**:
+     * Jenis perubahan: `feat`, `fix`, `docs`, `style`, `refactor`,
+  `test`, atau `chore`.
+     * Deskripsi singkat yang jelas dan ringkas.
+     * Contoh: `git commit -m "fix: perbaiki bug validasi pada form 
+  registrasi"`.
+     * Jika ada beberapa jenis perubahan, buat commit terpisah untuk
+  tiap jenis dan tampilkan setiap commit message yang digunakan.
+  6. Setelah commit selesai tanpa error, jalankan `git push` dan
+  tampilkan hasilnya.
+
+  ⚡ Jangan melanjutkan ke `git commit` atau `git push` jika terjadi
+  error di langkah sebelumnya.
+  EOF
+
+      echo "✅ Auto-git workflow selesai"
+  else
+      echo "ℹ️ Tidak ada perubahan git, skip auto-commit"
+  fi
+
+  2. Make Script Executable
+
+  chmod +x ~/.claude/scripts/stop-auto-git.sh
+
+  3. Konfigurasi Hook di Settings
+
+  Edit file ~/.claude/settings.json:
+
+  {
+    "hooks": {
+      "Stop": [
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command":
+  "/home/iwandwp/.claude/scripts/stop-auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Advanced Configuration dengan Project Check
+
+  Untuk lebih spesifik, buat script yang hanya jalan di project
+  tertentu:
+
+  #!/bin/bash
+  # ~/.claude/scripts/smart-stop-auto-git.sh
+  set -euo pipefail
+
+  # Hanya jalan di project yang diinginkan
+  if [[ "$PWD" == *"KinematrixBeta"* ]] || [[ "$PWD" == *"AutoLightv3"*
+   ]]; then
+      echo "🏁 Claude selesai di project: $(basename "$PWD")"
+
+      # Cek apakah ada perubahan git
+      if ! git diff --quiet HEAD 2>/dev/null || ! git diff --staged
+  --quiet 2>/dev/null; then
+          echo "🔄 Ada perubahan, menjalankan qwen auto-git..."
+
+          # Your qwen command here
+          qwen -p << 'EOF' --yolo
+          # ... same as above
+  EOF
+
+      else
+          echo "ℹ️ Tidak ada perubahan git"
+      fi
+  else
+      echo "ℹ️ Skip auto-git - bukan di target project"
+  fi
+
+  Alternatif: Hook dengan Matcher
+
+  Jika ingin lebih spesifik, kamu bisa kombinasikan dengan matcher:
+
+  {
+    "hooks": {
+      "Stop": [
+        {
+          "matcher": "*",
+          "hooks": [
+            {
+              "type": "command",
+              "command":
+  "/home/iwandwp/.claude/scripts/stop-auto-git.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  Testing Hook
+
+  1. Test script manual:
+  ~/.claude/scripts/stop-auto-git.sh
+
+  2. Test dengan Claude Code:
+    - Kirim pesan yang meminta edit file
+    - Setelah Claude selesai respond, hook harus jalan
+    - Check terminal untuk output hook
+
+  Hook Input Data
+
+  Hook "Stop" menerima JSON input seperti:
+  {
+    "session_id": "abc123",
+    "cwd": "/path/to/current/directory",
+    "hook_event_name": "Stop",
+    "stop_hook_active": true
+  }
+
+  Kamu bisa akses data ini dalam script jika perlu.
+
+  Keuntungan Hook "Stop"
+
+  1. Perfect Timing - Jalan tepat setelah Claude selesai memproses
+  2. Complete Context - Claude sudah selesai semua tools dan response
+  3. Clean Execution - Tidak mengganggu workflow Claude
+  4. Reliable - Selalu jalan kecuali user interrupt
+
+  Hook "Stop" adalah solusi yang paling tepat untuk use case kamu
+  karena berjalan tepat setelah Claude selesai memproses satu pesan
+  lengkap, yang berarti semua file changes sudah selesai dan siap untuk
+   di-commit.

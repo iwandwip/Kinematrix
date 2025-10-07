@@ -50,11 +50,22 @@ namespace AutoLight {
         void setChannelPin(int _ch_pin_size, ...);
         void setAddress(int _address_size, ...);
 
+        void setDynamicConfig(uint8_t total_channels);
+        void setDynamicConfig(uint8_t total_channels, uint8_t num_pcf);
+        void setDynamicConfig(uint8_t total_channels, uint8_t num_pcf, distribution_strategy_t strategy);
+        void setDynamicDistribution(uint8_t total_channels, uint8_t num_pcf, ...);
+        void setDynamicWithAddresses(uint8_t total_channels, uint8_t num_pcf, uint8_t* addresses, uint8_t* channels_per_pcf);
+        void setCustomDistribution(PCFDistribution* pcf_array, uint8_t pcf_count);
+
         ConfigData *getConfigData();
         BaseConfig *getConfig();
         int getConfigIndex();
 
         uint8_t *getPinList();
+        uint8_t getOptimalPCFCount(uint8_t channels);
+        DynamicConfigData* getCurrentDistribution();
+        bool validateDistribution();
+        void printDistribution();
 
         BaseConfig *operator()();
         BaseConfig *operator=(BaseConfig *_other);
@@ -68,6 +79,13 @@ namespace AutoLight {
 
         ConfigData config_data_;
         I2CScanner i2c_scanner_;
+        DynamicConfigData dynamic_config_;
+
+        void calculateBalancedDistribution(uint8_t total_channels, uint8_t num_pcf);
+        void calculateOptimizedDistribution(uint8_t total_channels, uint8_t num_pcf);
+        void calculateSequentialDistribution(uint8_t total_channels, uint8_t num_pcf);
+        void generateDefaultAddresses(uint8_t num_pcf, uint8_t start_addr = 0x20);
+        void applyDynamicConfig();
     };
 }
 
