@@ -1,0 +1,41 @@
+
+> autolight-v3-webclient@0.1.0 build /home/iwandwp/catkin_ws/KinematrixBeta/lib/addons/AutoLightv3/WebClient
+> next build --turbopack
+
+   ▲ Next.js 15.5.2 (Turbopack)
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 109ms
+ ✓ Compiled successfully in 8.4s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/12) ...
+   Generating static pages (3/12) 
+   Generating static pages (6/12) 
+   Generating static pages (9/12) 
+ ✓ Generating static pages (12/12)
+   Finalizing page optimization ...
+   Collecting build traces ...
+   Exporting (0/2) ...
+ ✓ Exporting (2/2)
+
+Route (app)                         Size  First Load JS
+┌ ○ /                            31.8 kB         170 kB
+├ ○ /_not-found                      0 B         117 kB
+├ ○ /developer                   1.86 kB         149 kB
+├ ○ /developer/api-test          1.32 kB         148 kB
+├ ○ /developer/connection        1.32 kB         148 kB
+├ ○ /developer/update              728 B         148 kB
+├ ○ /settings                      201 B         147 kB
+├ ○ /settings/theme              6.44 kB         153 kB
+└ ○ /simulation                   105 kB         243 kB
++ First Load JS shared by all     134 kB
+  ├ chunks/1fad8449fcfdbffb.js   17.2 kB
+  ├ chunks/5f89d88446af84df.js   59.2 kB
+  ├ chunks/f74899790bf86f82.js   13.1 kB
+  ├ chunks/55b9cfd8847a92ad.css  17.3 kB
+  └ other shared chunks (total)  27.3 kB
+
+
+○  (Static)  prerendered as static content
+
